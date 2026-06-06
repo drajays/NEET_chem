@@ -1423,6 +1423,95 @@ function renderMath(text) {
   return parts.join('');
 }
 
+/**
+ * Strip Unicode directional / invisible control characters pasted from
+ * apps like Google Docs or iOS Notes (‭ ‬ ​ etc.).
+ */
+function stripDirMarks(s) {
+  return String(s ?? '').replace(/[​-‏‪-‮﻿]/g, '');
+}
+
+/**
+ * Full-featured explanation renderer.
+ * Handles: $$...$$ display math, $...$ inline math, numbered steps,
+ * bullet points, blank-line paragraph breaks, and line wrapping.
+ */
+function renderExplanation(text) {
+  if (!text) return '';
+  let s = stripDirMarks(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+  if (!s) return '';
+  if (typeof katex === 'undefined') {
+    return `<div class="explanation-body">${escapeHtml(s).replace(/\n/g, '<br>')}</div>`;
+  }
+
+  // 1. Lift out $$...$$ display blocks, replace with placeholders
+  const displayBlocks = [];
+  s = s.replace(/\$\$\s*([\s\S]+?)\s*\$\$/g, (_, latex) => {
+    const n = displayBlocks.length;
+    try {
+      displayBlocks.push(katex.renderToString(latex.trim(), { throwOnError: false, displayMode: true }));
+    } catch (_e) {
+      displayBlocks.push(escapeHtml('$$' + latex.trim() + '$$'));
+    }
+    return `\x00D${n}\x00`;
+  });
+
+  // 2. Process line by line
+  const lines = s.split('\n');
+  const out = [];
+  const bulletBuf = [];
+
+  const flushBullets = () => {
+    if (bulletBuf.length) {
+      out.push(`<ul class="expl-list">${bulletBuf.join('')}</ul>`);
+      bulletBuf.length = 0;
+    }
+  };
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    if (!line) {
+      flushBullets();
+      continue;
+    }
+
+    // Bullet: •, -, *
+    const bullet = line.match(/^[•\-\*]\s+([\s\S]*)/);
+    if (bullet) {
+      bulletBuf.push(`<li>${renderMath(stripDirMarks(bullet[1]))}</li>`);
+      continue;
+    }
+
+    flushBullets();
+
+    // Display math placeholder on its own line
+    if (/^\x00D\d+\x00$/.test(line)) {
+      out.push(line);
+      continue;
+    }
+
+    // Numbered step header: "1. Some title"
+    const step = line.match(/^(\d+)\.\s+([\s\S]*)/);
+    if (step) {
+      out.push(`<p class="expl-step"><strong>${escapeHtml(step[1])}.</strong> ${renderMath(stripDirMarks(step[2]))}</p>`);
+      continue;
+    }
+
+    out.push(`<p>${renderMath(stripDirMarks(line))}</p>`);
+  }
+
+  flushBullets();
+
+  // 3. Restore display math blocks
+  let html = out.join('');
+  displayBlocks.forEach((block, n) => {
+    html = html.split(`\x00D${n}\x00`).join(`<div class="expl-display">${block}</div>`);
+  });
+
+  return `<div class="explanation-body">${html}</div>`;
+}
+
 function makeId() {
   return `q_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -2079,7 +2168,7 @@ function renderBankCard(q) {
           return `<li class="${isCorrect ? 'correct-static' : ''}"><strong>${letter}.</strong> ${bankHighlight(opt)}</li>`;
         }).join('')}
       </ul>
-      ${q.explanation ? `<p class="bank-explanation"><strong>Explanation:</strong> ${bankHighlight(q.explanation)}</p>` : ''}
+      ${q.explanation ? `<div class="bank-explanation"><strong>Explanation:</strong>${renderExplanation(q.explanation)}</div>` : ''}
       ${renderImageHtml(q.explanationImage, 'Explanation image')}
       ${renderWhyWrongHtml(q)}
       ${isAdmin() ? `
@@ -2357,7 +2446,7 @@ function renderPracticeQuestion() {
       ${session.lastFeedback ? `<div class="coach-feedback ${session.lastFeedback.tone}">${escapeHtml(session.lastFeedback.text)}</div>` : ''}
       <div class="answer show">
         <strong>Correct answer:</strong> ${renderMath(current.options[correctIndex])}
-        ${current.explanation ? `<br><strong>Explanation:</strong> ${renderMath(current.explanation)}` : ''}
+        ${current.explanation ? `<div class="answer-explanation"><strong>Explanation:</strong>${renderExplanation(current.explanation)}</div>` : ''}
         ${renderImageHtml(current.explanationImage, 'Explanation image')}
         ${renderWhyWrongHtml(current, displayLetterByCanonical)}
         <button type="button" class="flag-report-btn" data-action="open-flag" ${hasPendingFlagForQuestion(current.id, state.activeStudentId) ? 'disabled' : ''}>

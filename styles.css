@@ -419,6 +419,43 @@ button, input, select, textarea { font: inherit; }
   line-height: 1.55;
 }
 
+/* Explanation rendering */
+.bank-explanation {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.93rem;
+}
+.answer-explanation {
+  margin-top: 10px;
+  font-size: 0.95rem;
+}
+.explanation-body {
+  margin-top: 6px;
+  line-height: 1.75;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.explanation-body p {
+  margin: 4px 0;
+}
+.explanation-body p.expl-step {
+  margin: 10px 0 4px;
+  font-size: 0.97em;
+}
+.explanation-body .expl-list {
+  margin: 4px 0 6px 18px;
+  padding: 0;
+}
+.explanation-body .expl-list li {
+  margin: 3px 0;
+}
+.expl-display {
+  overflow-x: auto;
+  margin: 10px 0;
+  text-align: center;
+}
+
 /* Buttons */
 .primary-btn, .secondary-btn, .danger-btn, .ghost-btn, .text-btn, .icon-btn {
   border-radius: 12px;
