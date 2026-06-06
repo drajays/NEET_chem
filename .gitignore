@@ -7,6 +7,7 @@ node_modules/
 # Large OCR source files (keep locally, not in repo)
 Objective-Biology-for-NEET-Vol-I-Pearson-Education-2019.pdf_by_PaddleOCR-VL-1.6.*
 Objective-Biology-for-NEET2.*
+wileyx27s-objective-chemistry-for-neet-k-singh_compress.pdf_by_PaddleOCR-VL-1.6.*
 
 # Generated Pearson import outputs (run convert_pearson_md.py locally)
 pearson_biology_vol1.json

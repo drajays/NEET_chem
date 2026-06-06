@@ -13,7 +13,7 @@ const DEFAULT_APP_CONFIG = {
   remoteFlagsUrl: '',
   adminPin: '1234',
   autoSyncOnLoad: true,
-  appName: 'NEET Biology MCQ Mastery',
+  appName: 'NEET Chemistry MCQ Mastery',
   students: ['Student 1', 'Student 2', 'Student 3', 'Student 4']
 };
 
@@ -1023,7 +1023,7 @@ async function syncFlagsFromRemote({ silent = false } = {}) {
 function publishFlagsForDevices() {
   if (!requireAdmin('publish flags')) return;
   const payload = {
-    app: getAppConfig().appName || 'NEET Biology MCQ Mastery',
+    app: getAppConfig().appName || 'NEET Chemistry MCQ Mastery',
     version: 1,
     updatedAt: Date.now(),
     items: state.flags.items
@@ -1104,7 +1104,7 @@ async function saveFlagAdminEdit(form) {
     option_d: formData.get('option_d'),
     answer: formData.get('answer'),
     explanation: formData.get('explanation'),
-    subject: formData.get('subject') || 'Biology',
+    subject: formData.get('subject') || 'Chemistry',
     topic: formData.get('topic'),
     subtopic: formData.get('subtopic'),
     tags: formData.get('tags'),
@@ -1351,54 +1351,34 @@ function buildExportEnvelope() {
 
 const sampleQuestions = [
   {
-    question: 'Which enzyme is secreted by the pancreas as trypsinogen and activated in the duodenum?',
-    options: ['Pepsin', 'Trypsin', 'Lipase', 'Amylase'],
-    answer: 'B',
-    explanation: 'Trypsin is secreted as inactive trypsinogen and activated by enterokinase in the duodenum.',
-    subject: 'Biology',
-    topic: 'Human Physiology',
-    subtopic: 'Digestion',
-    tags: ['NCERT', 'Enzymes']
-  },
-  {
-    question: 'Crossing over occurs during which stage of meiosis?',
-    options: ['Leptotene', 'Pachytene', 'Diplotene', 'Metaphase I'],
-    answer: 'B',
-    explanation: 'Crossing over is the exchange of genetic material between non-sister chromatids during pachytene.',
-    subject: 'Biology',
-    topic: 'Cell Biology',
-    subtopic: 'Cell Cycle',
-    tags: ['Important', 'Meiosis']
-  },
-  {
     question: 'What is the hybridisation and geometry of methane (CH₄)?',
     options: ['sp², trigonal planar', 'sp³, tetrahedral', 'sp, linear', 'dsp², square planar'],
     answer: 'B',
     explanation: 'Methane has sp³ hybridisation with tetrahedral geometry and bond angle ~109.5°.',
     subject: 'Chemistry',
-    topic: 'Chemical Bonding',
-    subtopic: 'Hybridisation',
-    tags: ['NCERT', 'Basics']
+    topic: '14. Chemical Bonding and Molecular Structure',
+    subtopic: 'Level I',
+    tags: ['Level I']
   },
   {
-    question: 'The SI unit of power of a lens is:',
-    options: ['Watt', 'Joule', 'Dioptre', 'Candela'],
-    answer: 'C',
-    explanation: 'Power of a lens is the reciprocal of focal length in metres; its SI unit is dioptre.',
-    subject: 'Physics',
-    topic: 'Optics',
-    subtopic: 'Ray Optics',
-    tags: ['Formula', 'Units']
+    question: 'The molarity of pure water is:',
+    options: ['5.55 M', '55.55 M', '2 M', '1/18 M'],
+    answer: 'B',
+    explanation: 'Molarity of pure water = 1000/18 ≈ 55.55 M.',
+    subject: 'Chemistry',
+    topic: '1. Some Basic Concepts of Chemistry',
+    subtopic: 'Level I',
+    tags: ['Level I']
   },
   {
-    question: 'In a Mendelian dihybrid cross, the phenotypic ratio in F2 generation is:',
-    options: ['3:1', '1:2:1', '9:3:3:1', '1:1:1:1'],
-    answer: 'C',
-    explanation: 'Independent assortment of two gene pairs gives a 9:3:3:1 phenotypic ratio.',
-    subject: 'Biology',
-    topic: 'Genetics',
-    subtopic: 'Mendelism',
-    tags: ['PYQ', 'Ratio']
+    question: 'Which of the following has the highest ionisation enthalpy?',
+    options: ['Na', 'Mg', 'Al', 'Si'],
+    answer: 'B',
+    explanation: 'Mg has a stable filled 3s² configuration giving it higher IE than Al.',
+    subject: 'Chemistry',
+    topic: '13. Classification of Elements and Periodicity in Properties',
+    subtopic: 'Level I',
+    tags: ['Level I']
   }
 ];
 

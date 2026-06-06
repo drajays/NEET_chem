@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NEET Biology · MCQ Mastery</title>
+  <title>NEET Chemistry · MCQ Mastery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -13,9 +13,9 @@
   <div class="app-layout">
     <aside class="sidebar" aria-label="Main navigation">
       <div class="sidebar-brand">
-        <span class="brand-glyph">🧬</span>
+        <span class="brand-glyph">⚗️</span>
         <div>
-          <strong>NEET Biology</strong>
+          <strong>NEET Chemistry</strong>
           <small>MCQ Mastery</small>
         </div>
       </div>
@@ -60,7 +60,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <button id="menuToggle" class="icon-btn mobile-only" type="button" aria-label="Menu">☰</button>
-          <p class="topbar-eyebrow">NEET · Biology only</p>
+          <p class="topbar-eyebrow">NEET · Chemistry only</p>
         </div>
         <div class="topbar-actions">
           <button id="globalSearchBtn" class="search-trigger" type="button" aria-label="Search all questions">
@@ -179,7 +179,7 @@
         <!-- Add MCQ -->
         <section id="tab-add" class="view-panel" hidden aria-labelledby="addTitle">
           <h2 id="addTitle">Add MCQ</h2>
-          <p id="formMode" class="muted">Biology question with four options.</p>
+          <p id="formMode" class="muted">Chemistry question with four options.</p>
           <form id="mcqForm" class="mcq-form panel-card">
             <input id="editId" type="hidden" />
             <label class="full-width">Question<textarea id="fQuestion" rows="3" required></textarea></label>
@@ -223,7 +223,7 @@
               </div>
             </fieldset>
             <div class="meta-grid">
-              <label>Subject <input id="fSubject" type="text" list="subjectList" value="Biology" required /></label>
+              <label>Subject <input id="fSubject" type="text" list="subjectList" value="Chemistry" required /></label>
               <label>Chapter <input id="fTopic" type="text" list="topicList" required /></label>
               <label>Section <input id="fSubtopic" type="text" list="subtopicList" placeholder="Practice, PYQ..." /></label>
               <label>Tags <input id="fTags" type="text" /></label>

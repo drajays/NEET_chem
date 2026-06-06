@@ -5,6 +5,6 @@ window.APP_CONFIG = {
   remoteFlagsUrl: 'https://raw.githubusercontent.com/drajays/NEET_pingal/main/flags.json',
   adminPin: '1234',
   autoSyncOnLoad: true,
-  appName: 'NEET Biology MCQ Mastery',
+  appName: 'NEET Chemistry MCQ Mastery',
   students: ['Student 1', 'Student 2', 'Student 3', 'Student 4']
 };

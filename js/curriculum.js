@@ -1,75 +1,54 @@
 /**
- * NEET Biology curriculum — Class XI / XII chapter architecture.
+ * NEET Chemistry curriculum — Class XI / XII chapter architecture.
  * Maps bank `topic` values to a stable syllabus tree; subtopics = question sections.
  */
 (function (global) {
-  const CHAPTER_ALIASES = {
-    'Living World': 'The Living World'
-  };
+  const CHAPTER_ALIASES = {};
 
   const SECTION_TYPES = [
-    { key: 'practice', label: 'Practice MCQs', icon: '📝' },
-    { key: 'assertion', label: 'Assertion & Reason', icon: '⚖️' },
-    { key: 'pyq', label: 'Previous Year (PYQ)', icon: '🎯' },
-    { key: 'ncert', label: 'NCERT Exemplar', icon: '📘' }
+    { key: 'level1', label: 'Level I', icon: '📝' },
+    { key: 'level2', label: 'Level II', icon: '🔬' },
+    { key: 'pyq', label: 'Previous Years NEET', icon: '🎯' }
   ];
 
   const CURRICULUM = [
     {
       id: 'xi',
       label: 'Class XI',
-      subtitle: 'Diversity, plant & animal biology, cell biology, physiology',
+      subtitle: 'Physical & Inorganic Chemistry — Part 1',
       units: [
         {
-          id: 'xi-diversity',
-          label: 'Unit I — Diversity of Living Organisms',
+          id: 'xi-physical',
+          label: 'Physical Chemistry',
           chapters: [
-            'The Living World',
-            'Biological Classification',
-            'Plant Kingdom',
-            'Animal Classification'
+            '1. Some Basic Concepts of Chemistry',
+            '2. Structure of Atom',
+            '3. States of Matter',
+            '4. Thermodynamics',
+            '5. Chemical Equilibrium',
+            '6. Ionic Equilibrium',
+            '7. Redox Reactions'
           ]
         },
         {
-          id: 'xi-morphology',
-          label: 'Unit II — Structural Organisation',
+          id: 'xi-inorganic',
+          label: 'Inorganic Chemistry',
           chapters: [
-            'Plant Morphology',
-            'Anatomy of Flowering Plants',
-            'Structural Organization in Animals'
+            '13. Classification of Elements and Periodicity in Properties',
+            '14. Chemical Bonding and Molecular Structure',
+            '15. Hydrogen',
+            '16. The s-Block Elements',
+            '17. The p-Block Elements'
           ]
         },
         {
-          id: 'xi-cell',
-          label: 'Unit III — Cell Structure & Function',
+          id: 'xi-organic',
+          label: 'Organic Chemistry',
           chapters: [
-            'Cell: The Unit of Life',
-            'Biomolecules',
-            'Cell Cycle and Cell Division'
-          ]
-        },
-        {
-          id: 'xi-plant-physio',
-          label: 'Unit IV — Plant Physiology',
-          chapters: [
-            'Transport in Plants',
-            'Mineral Nutrition',
-            'Photosynthesis in Higher Plants',
-            'Respiration in Plants',
-            'Plant Growth and Development'
-          ]
-        },
-        {
-          id: 'xi-human-physio',
-          label: 'Unit V — Human Physiology',
-          chapters: [
-            'Digestion and Absorption',
-            'Breathing and Exchange of Gases',
-            'Body Fluids and Circulation',
-            'Products and Their Elimination',
-            'Locomotion and Movement',
-            'Neural Control and Co-ordination',
-            'Co-ordination and Integration'
+            '22. Organic Chemistry – Some Basic Principles and Techniques',
+            '23. Aliphatic Hydrocarbons',
+            '24. Aromatic Hydrocarbons',
+            '21. Environmental Chemistry'
           ]
         }
       ]
@@ -77,52 +56,40 @@
     {
       id: 'xii',
       label: 'Class XII',
-      subtitle: 'Reproduction, genetics, evolution, ecology & biotechnology',
+      subtitle: 'Physical, Inorganic & Organic Chemistry — Part 2',
       units: [
         {
-          id: 'xii-reproduction',
-          label: 'Unit VI — Reproduction',
+          id: 'xii-physical',
+          label: 'Physical Chemistry',
           chapters: [
-            'Reproduction in Organisms',
-            'Reproduction in Flowering Plant',
-            'Human Reproduction',
-            'Reproductive Health'
+            '8. Solid State',
+            '9. Solutions',
+            '10. Electrochemistry',
+            '11. Chemical Kinetics',
+            '12. Surface Chemistry'
           ]
         },
         {
-          id: 'xii-genetics',
-          label: 'Unit VII — Genetics & Evolution',
+          id: 'xii-inorganic',
+          label: 'Inorganic Chemistry',
           chapters: [
-            'Principles of Inheritance and Variation',
-            'Molecular Basis of Inheritance',
-            'Evolution'
+            '18. General Principles and Processes of Isolation of Elements',
+            '19. The d- and f-Block Elements',
+            '20. Coordination Compounds'
           ]
         },
         {
-          id: 'xii-biotech',
-          label: 'Unit VIII — Biology & Human Welfare',
+          id: 'xii-organic',
+          label: 'Organic Chemistry',
           chapters: [
-            'Human Health and Disease',
-            'Strategies for Enhancement in Food Production',
-            'Microbes in Human Welfare'
-          ]
-        },
-        {
-          id: 'xii-biotech-adv',
-          label: 'Unit IX — Biotechnology',
-          chapters: [
-            'Biotechnology Principles and Processes',
-            'Biotechnology and Its Application'
-          ]
-        },
-        {
-          id: 'xii-ecology',
-          label: 'Unit X — Ecology',
-          chapters: [
-            'Organisms and Populations',
-            'Ecosystem',
-            'Biodiversity and Conservation',
-            'Environmental Issues'
+            '25. Organic Compounds Containing Halogens',
+            '26. Alcohols, Phenols and Ethers',
+            '27. Aldehydes and Ketones',
+            '28. Carboxylic Acids and its Derivatives',
+            '29. Organic Compounds Containing Nitrogen',
+            '30. Polymers',
+            '31. Biomolecules',
+            '32. Chemistry in Everyday Life'
           ]
         }
       ]
@@ -135,11 +102,10 @@
   }
 
   function normalizeSection(subtopic) {
-    const raw = (subtopic || 'practice').trim().toLowerCase();
-    if (raw.includes('assertion')) return 'assertion';
-    if (raw === 'pyq' || raw.includes('previous')) return 'pyq';
-    if (raw.includes('ncert')) return 'ncert';
-    if (raw === 'practice') return 'practice';
+    const raw = (subtopic || '').trim().toLowerCase();
+    if (raw === 'level i' || raw === 'level 1') return 'level1';
+    if (raw === 'level ii' || raw === 'level 2') return 'level2';
+    if (raw.includes('previous') || raw === 'pyq') return 'pyq';
     return 'other';
   }
 
@@ -199,8 +165,8 @@
           if (otherCount) {
             sections.push({
               key: 'other',
-              label: 'Topic-wise PYQ / Mixed',
-              icon: '🧬',
+              label: 'Mixed',
+              icon: '⚗️',
               count: otherCount,
               questions: bucket.questions.filter(q => normalizeSection(q.subtopic) === 'other')
             });
