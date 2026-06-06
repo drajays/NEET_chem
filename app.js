@@ -2072,13 +2072,13 @@ function renderBankCard(q) {
       </div>
       <p class="question">${bankHighlight(q.question)}</p>
       ${renderImageHtml(q.questionImage, 'Question image')}
-      <ol class="options compact">
+      <ul class="options compact">
         ${q.options.map((opt, i) => {
           const letter = ['A', 'B', 'C', 'D'][i];
           const isCorrect = letter === q.answer;
           return `<li class="${isCorrect ? 'correct-static' : ''}"><strong>${letter}.</strong> ${bankHighlight(opt)}</li>`;
         }).join('')}
-      </ol>
+      </ul>
       ${q.explanation ? `<p class="bank-explanation"><strong>Explanation:</strong> ${bankHighlight(q.explanation)}</p>` : ''}
       ${renderImageHtml(q.explanationImage, 'Explanation image')}
       ${renderWhyWrongHtml(q)}

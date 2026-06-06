@@ -389,6 +389,7 @@ button, input, select, textarea { font: inherit; }
 .practice-meta { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.9rem; }
 
 .options.interactive { display: grid; gap: 10px; margin-top: 16px; }
+.options.compact { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 6px; }
 
 .option-btn {
   display: block;
