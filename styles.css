@@ -391,7 +391,7 @@ button, input, select, textarea { font: inherit; }
 .options.interactive { display: grid; gap: 10px; margin-top: 16px; }
 
 .option-btn {
-  display: flex; gap: 12px; align-items: flex-start;
+  display: block;
   width: 100%; text-align: left;
   padding: 14px 16px;
   border: 1px solid var(--border);
@@ -399,6 +399,9 @@ button, input, select, textarea { font: inherit; }
   background: #fff;
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #f0fdfa; }
@@ -499,7 +502,7 @@ textarea, input[type="text"], input[type="number"], input[type="search"], input[
 .badge.orange { background: #ffedd5; color: #9a3412; }
 
 .mcq-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.question { font-weight: 800; font-size: 1.05rem; line-height: 1.5; margin: 0 0 14px; }
+.question { font-weight: 800; font-size: 1.05rem; line-height: 1.5; margin: 0 0 14px; word-break: break-word; overflow-wrap: break-word; white-space: normal; }
 
 .hidden { display: none !important; }
 .muted { color: var(--muted); }

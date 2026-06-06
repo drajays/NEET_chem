@@ -2349,7 +2349,6 @@ function renderPracticeQuestion() {
         }
         const disabled = session.answered ? 'disabled' : '';
         return `<button type="button" class="${className}" data-option="${canonicalLetter}" ${disabled}>
-          <span class="option-letter">${displayLetter}</span>
           <span>${renderMath(option)}</span>
         </button>`;
       }).join('')}
@@ -2357,7 +2356,7 @@ function renderPracticeQuestion() {
     ${session.answered ? `
       ${session.lastFeedback ? `<div class="coach-feedback ${session.lastFeedback.tone}">${escapeHtml(session.lastFeedback.text)}</div>` : ''}
       <div class="answer show">
-        <strong>Correct answer: ${correctDisplayLetter}.</strong> ${renderMath(current.options[correctIndex])}
+        <strong>Correct answer:</strong> ${renderMath(current.options[correctIndex])}
         ${current.explanation ? `<br><strong>Explanation:</strong> ${renderMath(current.explanation)}` : ''}
         ${renderImageHtml(current.explanationImage, 'Explanation image')}
         ${renderWhyWrongHtml(current, displayLetterByCanonical)}
