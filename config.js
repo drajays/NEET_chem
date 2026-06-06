@@ -6,5 +6,8 @@ window.APP_CONFIG = {
   adminPin: '1234',
   autoSyncOnLoad: true,
   appName: 'NEET Chemistry MCQ Mastery',
-  students: ['Student 1', 'Student 2', 'Student 3', 'Student 4']
+  students: ['Student 1', 'Student 2', 'Student 3', 'Student 4'],
+  githubRepo: 'drajays/NEET_chem',
+  githubBankPath: 'bank.json',
+  githubBranch: 'main'
 };

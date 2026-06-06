@@ -287,6 +287,19 @@
               <button id="publishBankBtn" class="primary-btn" type="button">Download bank.json</button>
             </div>
             <div class="import-card admin-only panel-card" hidden>
+              <h3>GitHub auto-sync</h3>
+              <p class="muted">Edits push to GitHub automatically when a token is saved.</p>
+              <label class="field-label">GitHub PAT
+                <input id="githubTokenInput" type="password" class="text-input" placeholder="ghp_…" autocomplete="off" />
+              </label>
+              <div class="gh-token-btns">
+                <button id="saveGithubTokenBtn" class="secondary-btn small" type="button">Save token</button>
+                <button id="pushBankGithubBtn" class="primary-btn small" type="button">Push now</button>
+                <button id="clearGithubTokenBtn" class="danger-btn small" type="button">Clear token</button>
+              </div>
+              <p id="githubPushStatus" class="muted"></p>
+            </div>
+            <div class="import-card admin-only panel-card" hidden>
               <h3>Backup</h3>
               <button id="exportJsonBtn" class="secondary-btn" type="button">Export JSON</button>
               <button id="exportCsvBtn" class="secondary-btn" type="button">Export CSV</button>

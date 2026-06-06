@@ -156,6 +156,11 @@ const el = {
   adminSubmitBtn: document.getElementById('adminSubmitBtn'),
   adminCancelBtn: document.getElementById('adminCancelBtn'),
   publishBankBtn: document.getElementById('publishBankBtn'),
+  githubTokenInput: document.getElementById('githubTokenInput'),
+  saveGithubTokenBtn: document.getElementById('saveGithubTokenBtn'),
+  pushBankGithubBtn: document.getElementById('pushBankGithubBtn'),
+  clearGithubTokenBtn: document.getElementById('clearGithubTokenBtn'),
+  githubPushStatus: document.getElementById('githubPushStatus'),
   studentSelect: document.getElementById('studentSelect'),
   syncProgressBtn: document.getElementById('syncProgressBtn'),
   practiceUnsolvedOnly: document.getElementById('practiceUnsolvedOnly'),
@@ -244,6 +249,13 @@ function applyRoleUI() {
 
   if (el.syncStatus && !hasRemote) {
     el.syncStatus.textContent = 'Set remoteBankUrl in config.js to sync the same bank on all devices.';
+  }
+
+  if (admin && el.githubPushStatus) {
+    const hasToken = Boolean(getGithubToken());
+    el.githubPushStatus.textContent = hasToken
+      ? 'Token saved — edits will auto-push to GitHub.'
+      : 'No token saved. Enter a GitHub PAT to enable auto-push.';
   }
 
   renderBank();
@@ -1339,6 +1351,84 @@ function publishBankForDevices() {
   }
 }
 
+// ── GitHub auto-sync ──────────────────────────────────────────────────────────
+
+const GITHUB_TOKEN_KEY = 'neet-gh-pat';
+
+function getGithubToken() {
+  try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ''; } catch { return ''; }
+}
+function saveGithubToken(token) {
+  try { localStorage.setItem(GITHUB_TOKEN_KEY, token.trim()); } catch {}
+}
+function clearGithubToken() {
+  try { localStorage.removeItem(GITHUB_TOKEN_KEY); } catch {}
+}
+
+function setGhStatus(msg) {
+  if (el.githubPushStatus) el.githubPushStatus.textContent = msg;
+}
+
+async function getGithubFileSha(token) {
+  const cfg = getAppConfig();
+  const repo = cfg.githubRepo || 'drajays/NEET_chem';
+  const path = cfg.githubBankPath || 'bank.json';
+  const branch = cfg.githubBranch || 'main';
+  const res = await fetch(
+    `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`,
+    { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } }
+  );
+  if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
+  return (await res.json()).sha;
+}
+
+async function pushBankToGitHub({ silent = false } = {}) {
+  const token = getGithubToken();
+  if (!token) {
+    if (!silent) setGhStatus('No GitHub token saved. Enter one in Import/Export → GitHub auto-sync.');
+    return;
+  }
+  const cfg = getAppConfig();
+  const repo = cfg.githubRepo || 'drajays/NEET_chem';
+  const path = cfg.githubBankPath || 'bank.json';
+  const branch = cfg.githubBranch || 'main';
+
+  setGhStatus('Pushing to GitHub…');
+  try {
+    const sha = await getGithubFileSha(token);
+    const payload = buildExportEnvelope();
+    // btoa needs pure Latin-1; encodeURIComponent + unescape handles Unicode
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const res = await fetch(
+      `https://api.github.com/repos/${repo}/contents/${path}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `chore: update ${path} via app (${payload.questionCount} questions)`,
+          content,
+          sha,
+          branch
+        })
+      }
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub API ${res.status}`);
+    }
+    setGhStatus(`Pushed to GitHub ✓ — ${new Date().toLocaleTimeString()}`);
+    if (el.syncStatus) el.syncStatus.textContent = `Bank pushed to GitHub at ${new Date().toLocaleTimeString()}`;
+  } catch (err) {
+    setGhStatus(`Push failed: ${err.message}`);
+  }
+}
+
+// ── End GitHub auto-sync ──────────────────────────────────────────────────────
+
 function buildExportEnvelope() {
   return {
     app: getAppConfig().appName || 'NEET MCQ Practice',
@@ -2309,6 +2399,7 @@ function upsertQuestion(data) {
   }
 
   saveQuestions();
+  pushBankToGitHub({ silent: false });
   refreshUI();
   return true;
 }
@@ -2319,6 +2410,7 @@ function deleteQuestion(id) {
   if (state.editingId === id) state.editingId = null;
   state.questions = state.questions.filter(q => q.id !== id);
   saveQuestions();
+  pushBankToGitHub({ silent: false });
   refreshUI();
 }
 
@@ -3031,6 +3123,27 @@ function bindEvents() {
 
   if (el.publishBankBtn) {
     el.publishBankBtn.addEventListener('click', publishBankForDevices);
+  }
+
+  // GitHub auto-sync buttons
+  if (el.saveGithubTokenBtn) {
+    el.saveGithubTokenBtn.addEventListener('click', () => {
+      const t = el.githubTokenInput?.value?.trim() || '';
+      if (!t) { setGhStatus('Enter a token first.'); return; }
+      saveGithubToken(t);
+      el.githubTokenInput.value = '';
+      setGhStatus('Token saved. Edits will now auto-push to GitHub.');
+    });
+  }
+  if (el.clearGithubTokenBtn) {
+    el.clearGithubTokenBtn.addEventListener('click', () => {
+      clearGithubToken();
+      if (el.githubTokenInput) el.githubTokenInput.value = '';
+      setGhStatus('Token cleared.');
+    });
+  }
+  if (el.pushBankGithubBtn) {
+    el.pushBankGithubBtn.addEventListener('click', () => pushBankToGitHub({ silent: false }));
   }
 
   if (el.studentSelect) {
