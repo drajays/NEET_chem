@@ -2072,7 +2072,7 @@ function renderBankCard(q) {
       </div>
       <p class="question">${bankHighlight(q.question)}</p>
       ${renderImageHtml(q.questionImage, 'Question image')}
-      <ol class="options compact" type="A">
+      <ol class="options compact">
         ${q.options.map((opt, i) => {
           const letter = ['A', 'B', 'C', 'D'][i];
           const isCorrect = letter === q.answer;
