@@ -55,6 +55,7 @@ const state = {
     selectedOption: null
   },
   bankSearch: '',
+  bankRevealMode: (() => { try { return localStorage.getItem('neet-bank-reveal') || 'open'; } catch { return 'open'; } })(),
   search: { query: '', results: [], total: 0, activeIndex: 0, parsed: null },
   editingId: null,
   bankUpdatedAt: null,
@@ -129,6 +130,7 @@ const el = {
   bankSummary: document.getElementById('bankSummary'),
   bankStorageStatus: document.getElementById('bankStorageStatus'),
   bankSearch: document.getElementById('bankSearch'),
+  bankRevealToggle: document.getElementById('bankRevealToggle'),
   bankExportJsonBtn: document.getElementById('bankExportJsonBtn'),
   bankExportCsvBtn: document.getElementById('bankExportCsvBtn'),
   bankFilterSubjects: document.getElementById('bankFilterSubjects'),
@@ -2258,9 +2260,12 @@ function renderBankCard(q) {
           return `<li class="${isCorrect ? 'correct-static' : ''}"><strong>${letter}.</strong> ${bankHighlight(opt)}</li>`;
         }).join('')}
       </ul>
-      ${q.explanation ? `<div class="bank-explanation"><strong>Explanation:</strong>${renderExplanation(q.explanation)}</div>` : ''}
-      ${renderImageHtml(q.explanationImage, 'Explanation image')}
-      ${renderWhyWrongHtml(q)}
+      <button type="button" class="show-answer-btn ghost-btn small" data-id="${q.id}">Show answer &amp; explanation</button>
+      <div class="bank-answer-block">
+        ${q.explanation ? `<div class="bank-explanation"><strong>Explanation:</strong>${renderExplanation(q.explanation)}</div>` : ''}
+        ${renderImageHtml(q.explanationImage, 'Explanation image')}
+        ${renderWhyWrongHtml(q)}
+      </div>
       ${isAdmin() ? `
       <div class="bank-actions">
         <button type="button" class="secondary-btn small edit-btn" data-id="${q.id}">Edit</button>
@@ -2296,6 +2301,16 @@ function renderBank() {
   el.bankList.className = 'bank-list';
   el.bankList.innerHTML = filtered.map(q => renderBankCard(q)).join('');
   updateBankFilterUI();
+  applyBankRevealMode();
+}
+
+function applyBankRevealMode() {
+  const hidden = state.bankRevealMode === 'hidden';
+  el.bankList.classList.toggle('bank-hide-answers', hidden);
+  if (el.bankRevealToggle) {
+    el.bankRevealToggle.textContent = hidden ? 'Show all answers' : 'Hide answers';
+    el.bankRevealToggle.classList.toggle('active', hidden);
+  }
 }
 
 function switchTab(tabName) {
@@ -3051,9 +3066,24 @@ function bindEvents() {
     const deleteBtn = event.target.closest('.delete-btn');
     const cancelBtn = event.target.closest('.cancel-inline-btn');
     const removeImageBtn = event.target.closest('.remove-image-btn');
+    const showAnswerBtn = event.target.closest('.show-answer-btn');
 
     if (removeImageBtn) {
       handleInlineImageRemove(removeImageBtn);
+      return;
+    }
+
+    if (showAnswerBtn) {
+      const card = showAnswerBtn.closest('.bank-card');
+      if (!card) return;
+      const revealed = card.hasAttribute('data-revealed');
+      if (revealed) {
+        card.removeAttribute('data-revealed');
+        showAnswerBtn.textContent = 'Show answer & explanation';
+      } else {
+        card.setAttribute('data-revealed', '');
+        showAnswerBtn.textContent = 'Hide answer';
+      }
       return;
     }
 
@@ -3079,6 +3109,20 @@ function bindEvents() {
   el.exportCsvBtn.addEventListener('click', exportCsv);
   el.bankExportJsonBtn.addEventListener('click', exportJson);
   el.bankExportCsvBtn.addEventListener('click', exportCsv);
+
+  if (el.bankRevealToggle) {
+    el.bankRevealToggle.addEventListener('click', () => {
+      state.bankRevealMode = state.bankRevealMode === 'open' ? 'hidden' : 'open';
+      try { localStorage.setItem('neet-bank-reveal', state.bankRevealMode); } catch {}
+      // Reset any individually revealed cards so they re-hide
+      el.bankList.querySelectorAll('[data-revealed]').forEach(c => {
+        c.removeAttribute('data-revealed');
+        const btn = c.querySelector('.show-answer-btn');
+        if (btn) btn.textContent = 'Show answer & explanation';
+      });
+      applyBankRevealMode();
+    });
+  }
   el.resetAllBtn.addEventListener('click', resetAllData);
 
   if (el.syncBankBtn) {

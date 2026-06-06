@@ -391,6 +391,31 @@ button, input, select, textarea { font: inherit; }
 .options.interactive { display: grid; gap: 10px; margin-top: 16px; }
 .options.compact { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 6px; }
 
+/* Bank card correct answer highlight */
+.options.compact .correct-static {
+  background: #f0fdf4;
+  border-left: 3px solid var(--success);
+  padding-left: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* "Show answer" button — hidden in open mode, visible in hide mode */
+.show-answer-btn { display: none; margin: 10px 0 4px; }
+.bank-hide-answers .show-answer-btn { display: inline-flex; }
+
+/* In hide-answers mode: mask correct-answer green until card is revealed */
+.bank-hide-answers .bank-card:not([data-revealed]) .correct-static {
+  background: none !important;
+  border-left: none !important;
+  padding-left: 0 !important;
+  font-weight: inherit !important;
+}
+
+/* Explanation/why-wrong block — shown open by default, hidden in hide mode */
+.bank-answer-block { margin-top: 4px; }
+.bank-hide-answers .bank-card:not([data-revealed]) .bank-answer-block { display: none; }
+
 .option-btn {
   display: block;
   width: 100%; text-align: left;
