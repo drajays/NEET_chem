@@ -31,6 +31,11 @@
       .replace(/'/g, '&#39;');
   }
 
+  /** Strip $ ... $ LaTeX delimiters so search sees plain text, not LaTeX syntax. */
+  function stripLatex(text) {
+    return String(text ?? '').replace(/\$\s*([\s\S]+?)\s*\$/g, '$1');
+  }
+
   function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
@@ -57,9 +62,9 @@
 
   /** Build a per-question searchable field map (lowercased text per field). */
   function fieldText(question, key) {
-    if (key === 'tags') return (question.tags || []).join(' ');
-    if (key === 'options') return (question.options || []).join(' ');
-    return question[key] || '';
+    if (key === 'tags') return stripLatex((question.tags || []).join(' '));
+    if (key === 'options') return stripLatex((question.options || []).join(' '));
+    return stripLatex(question[key] || '');
   }
 
   /**
@@ -126,9 +131,9 @@
     return scoreQuestion(question, parsed) > 0;
   }
 
-  /** Escape text, then wrap matched tokens in <mark>. */
+  /** Escape text (LaTeX stripped), then wrap matched tokens in <mark>. */
   function highlight(text, parsed) {
-    const safe = escapeHtml(text);
+    const safe = escapeHtml(stripLatex(text));
     if (!parsed || !parsed.tokens.length) return safe;
     const tokens = [...parsed.tokens]
       .filter(Boolean)
@@ -141,9 +146,10 @@
 
   /** A short highlighted snippet around the first matching token. */
   function snippet(question, parsed, max = 160) {
-    const source = question.explanation && parsed.tokens.some(t => (question.explanation || '').toLowerCase().includes(t))
+    const rawSource = question.explanation && parsed.tokens.some(t => stripLatex(question.explanation || '').toLowerCase().includes(t))
       ? question.explanation
       : question.question || '';
+    const source = stripLatex(rawSource);
     const lower = source.toLowerCase();
     let idx = -1;
     for (const t of parsed.tokens) {

@@ -695,9 +695,9 @@ function renderSearchResults() {
     el.searchResults.innerHTML = `
       <div class="search-empty">
         <p class="search-empty-title">Find any MCQ instantly</p>
-        <p class="muted">Try a keyword like <button type="button" class="search-suggest" data-q="krebs">krebs</button>,
-          several words like <button type="button" class="search-suggest" data-q="dna replication">dna replication</button>,
-          or an exact phrase like <button type="button" class="search-suggest" data-q='"electron transport chain"'>"electron transport chain"</button>.</p>
+        <p class="muted">Try a keyword like <button type="button" class="search-suggest" data-q="molarity">molarity</button>,
+          several words like <button type="button" class="search-suggest" data-q="ionisation energy">ionisation energy</button>,
+          or an exact phrase like <button type="button" class="search-suggest" data-q='"Le Chatelier"'>"Le Chatelier"</button>.</p>
       </div>`;
     el.searchPracticeAllBtn.hidden = true;
     return;
@@ -1178,10 +1178,10 @@ function renderFlagReview() {
             <div class="flag-review-meta">${formatTimestamp(flag.createdAt)} · ${escapeHtml(snap.topic || question?.topic || '')} · <span class="learn-badge ${flag.status === 'pending' ? 'wrong' : flag.status}">${flag.status}</span></div>
           </div>
         </div>
-        <p class="question">${escapeHtml(qText)}</p>
+        <p class="question">${renderMath(qText)}</p>
         <div class="flag-answer-compare">
-          <div class="flag-answer-box"><strong>Current key</strong>${escapeHtml(currentAnswer)} — ${escapeHtml(options[answerLetterToIndex(currentAnswer)] || '')}</div>
-          <div class="flag-answer-box suggested"><strong>Student says</strong>${escapeHtml(flag.suggestedAnswer)} — ${escapeHtml(options[answerLetterToIndex(flag.suggestedAnswer)] || '')}</div>
+          <div class="flag-answer-box"><strong>Current key</strong>${escapeHtml(currentAnswer)} — ${renderMath(options[answerLetterToIndex(currentAnswer)] || '')}</div>
+          <div class="flag-answer-box suggested"><strong>Student says</strong>${escapeHtml(flag.suggestedAnswer)} — ${renderMath(options[answerLetterToIndex(flag.suggestedAnswer)] || '')}</div>
         </div>
         <div class="flag-comment"><strong>Comment:</strong> ${escapeHtml(flag.comment)}</div>
         ${adminForm}
@@ -1394,6 +1394,33 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+/**
+ * Render text that may contain LaTeX delimited by $ ... $.
+ * Math segments are processed by KaTeX; plain text is HTML-escaped.
+ * Falls back to escapeHtml when KaTeX is not loaded.
+ */
+function renderMath(text) {
+  const str = String(text ?? '');
+  if (!str) return '';
+  if (typeof katex === 'undefined') return escapeHtml(str);
+
+  const parts = [];
+  let last = 0;
+  const re = /\$\s*([\s\S]+?)\s*\$/g;
+  let m;
+  while ((m = re.exec(str)) !== null) {
+    if (m.index > last) parts.push(escapeHtml(str.slice(last, m.index)));
+    try {
+      parts.push(katex.renderToString(m[1].trim(), { throwOnError: false, displayMode: false }));
+    } catch (_) {
+      parts.push(escapeHtml(m[0]));
+    }
+    last = re.lastIndex;
+  }
+  if (last < str.length) parts.push(escapeHtml(str.slice(last)));
+  return parts.join('');
 }
 
 function makeId() {
@@ -1644,7 +1671,7 @@ function renderWhyWrongHtml(question, displayLetterByCanonical = null) {
       <strong>Why the other options are incorrect:</strong>
       <ul class="why-wrong-list">
         ${entries.map(entry => `
-          <li><strong>${letterOf(entry)}. ${escapeHtml(entry.option)}:</strong> ${escapeHtml(entry.text)}</li>
+          <li><strong>${letterOf(entry)}. ${renderMath(entry.option)}:</strong> ${renderMath(entry.text)}</li>
         `).join('')}
       </ul>
     </div>
@@ -2017,8 +2044,10 @@ function renderBankEditForm(q) {
 
 function bankHighlight(text) {
   const query = (state.bankSearch || '').trim();
-  if (!query) return escapeHtml(text);
-  return NeetSearch.highlight(text, NeetSearch.parseQuery(query));
+  if (!query) return renderMath(text);
+  // Highlight search matches, then render any remaining $ ... $ math
+  const highlighted = NeetSearch.highlight(text, NeetSearch.parseQuery(query));
+  return highlighted;
 }
 
 function renderBankCard(q) {
@@ -2306,7 +2335,7 @@ function renderPracticeQuestion() {
       ${current.subtopic ? `<span class="badge">${escapeHtml(current.subtopic)}</span>` : ''}
       ${current.tags.map(tag => `<span class="badge orange">${escapeHtml(tag)}</span>`).join('')}
     </div>
-    <p class="question">${escapeHtml(current.question)}</p>
+    <p class="question">${renderMath(current.question)}</p>
     ${renderImageHtml(current.questionImage, 'Question image')}
     <div class="options interactive">
       ${order.map((originalIndex, displayPos) => {
@@ -2321,15 +2350,15 @@ function renderPracticeQuestion() {
         const disabled = session.answered ? 'disabled' : '';
         return `<button type="button" class="${className}" data-option="${canonicalLetter}" ${disabled}>
           <span class="option-letter">${displayLetter}</span>
-          <span>${escapeHtml(option)}</span>
+          <span>${renderMath(option)}</span>
         </button>`;
       }).join('')}
     </div>
     ${session.answered ? `
       ${session.lastFeedback ? `<div class="coach-feedback ${session.lastFeedback.tone}">${escapeHtml(session.lastFeedback.text)}</div>` : ''}
       <div class="answer show">
-        <strong>Correct answer: ${correctDisplayLetter}.</strong> ${escapeHtml(current.options[correctIndex])}
-        ${current.explanation ? `<br><strong>Explanation:</strong> ${escapeHtml(current.explanation)}` : ''}
+        <strong>Correct answer: ${correctDisplayLetter}.</strong> ${renderMath(current.options[correctIndex])}
+        ${current.explanation ? `<br><strong>Explanation:</strong> ${renderMath(current.explanation)}` : ''}
         ${renderImageHtml(current.explanationImage, 'Explanation image')}
         ${renderWhyWrongHtml(current, displayLetterByCanonical)}
         <button type="button" class="flag-report-btn" data-action="open-flag" ${hasPendingFlagForQuestion(current.id, state.activeStudentId) ? 'disabled' : ''}>
