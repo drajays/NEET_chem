@@ -1794,31 +1794,7 @@ function exportFilename(extension) {
 
 
 function migrateKnownWhyWrongNotes() {
-  const patches = {
-    'Static concept of species was put forward by': {
-      whyWrong: {
-        A: 'Augustin Pyramus de Candolle was a Swiss botanist who made major contributions to plant taxonomy and introduced the term taxonomy itself, but he did not propose the static species concept.',
-        B: 'Linnaeus is famous for binomial nomenclature and systematic classification, but he is not the credited source of the static species concept in this context.',
-        D: 'Charles Darwin explicitly opposed the static concept by introducing the dynamic/evolutionary concept of species, proving that species change over time through natural selection and are not immutable.'
-      }
-    }
-  };
-
-  let changed = false;
-  state.questions = state.questions.map(question => {
-    const patchKey = Object.keys(patches).find(key => question.question.includes(key));
-    if (!patchKey) return question;
-
-    const patch = patches[patchKey];
-    const mergedWhyWrong = { ...question.whyWrong, ...patch.whyWrong };
-    const hasNewNotes = OPTION_LETTERS.some(letter => !clean(question.whyWrong?.[letter]) && clean(mergedWhyWrong[letter]));
-    if (!hasNewNotes) return question;
-
-    changed = true;
-    return normaliseQuestion({ ...question, whyWrong: mergedWhyWrong });
-  });
-
-  if (changed) saveQuestions();
+  // no patches needed for chemistry bank
 }
 
 async function persistQuestions() {
