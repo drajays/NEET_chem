@@ -1,3 +1,4 @@
+const THEME_KEY = 'neet-theme';
 const STORAGE_KEY = 'neet-mcq-bank-v1';
 const PROGRESS_KEY = 'neet-student-progress-v1';
 const FLAGS_KEY = 'neet-answer-flags-v1';
@@ -149,6 +150,8 @@ const el = {
   resetAllBtn: document.getElementById('resetAllBtn'),
   syncBankBtn: document.getElementById('syncBankBtn'),
   adminUnlockBtn: document.getElementById('adminUnlockBtn'),
+  themeToggle: document.getElementById('themeToggle'),
+  toastStack: document.getElementById('toastStack'),
   roleBadge: document.getElementById('roleBadge'),
   syncStatus: document.getElementById('syncStatus'),
   adminDialog: document.getElementById('adminDialog'),
@@ -193,13 +196,107 @@ const el = {
   searchPracticeAllBtn: document.getElementById('searchPracticeAllBtn')
 };
 
+// ── Theme (dark mode) ─────────────────────────────────────────────────────────
+
+function getStoredTheme() {
+  try { return localStorage.getItem(THEME_KEY) || ''; } catch { return ''; }
+}
+
+function applyTheme(theme) {
+  const isDark = theme === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  if (el.themeToggle) {
+    el.themeToggle.textContent = isDark ? '☀️' : '🌙';
+    el.themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem(THEME_KEY, next); } catch {}
+  applyTheme(next);
+}
+
+function initTheme() {
+  const stored = getStoredTheme();
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(stored || (prefersDark ? 'dark' : 'light'));
+}
+
+// ── Toast notifications ───────────────────────────────────────────────────────
+
+const TOAST_ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+
+function showToast(message, { type = 'info', duration = 4200 } = {}) {
+  if (!el.toastStack) { return; }
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${TOAST_ICONS[type] || TOAST_ICONS.info}</span>
+    <div class="toast-body"><div class="toast-msg">${escapeHtml(message)}</div></div>
+  `;
+  const dismiss = () => {
+    if (!toast.isConnected) return;
+    toast.classList.add('toast-leaving');
+    toast.addEventListener('animationend', () => toast.remove(), { once: true });
+  };
+  toast.addEventListener('click', dismiss);
+  el.toastStack.appendChild(toast);
+  if (duration > 0) setTimeout(dismiss, duration);
+  return toast;
+}
+
+function showToastSuccess(message) { return showToast(message, { type: 'success' }); }
+function showToastError(message) { return showToast(message, { type: 'error', duration: 6000 }); }
+function showToastWarning(message) { return showToast(message, { type: 'warning', duration: 5000 }); }
+function showToastInfo(message) { return showToast(message, { type: 'info' }); }
+
+/**
+ * Inline confirm toast — replaces window.confirm() with a non-blocking
+ * toast showing optional context (e.g. a question snippet) plus
+ * Confirm/Cancel buttons. Resolves true/false.
+ */
+function showConfirmToast(message, { snippet = '', confirmLabel = 'Delete', cancelLabel = 'Cancel' } = {}) {
+  return new Promise(resolve => {
+    if (!el.toastStack) { resolve(window.confirm(message)); return; }
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-warning';
+    toast.innerHTML = `
+      <span class="toast-icon">⚠️</span>
+      <div class="toast-body">
+        <div class="toast-msg">${escapeHtml(message)}</div>
+        ${snippet ? `<div class="toast-snippet">${escapeHtml(snippet)}</div>` : ''}
+        <div class="toast-actions">
+          <button type="button" class="toast-confirm-btn">${escapeHtml(confirmLabel)}</button>
+          <button type="button" class="toast-cancel-btn">${escapeHtml(cancelLabel)}</button>
+        </div>
+      </div>
+    `;
+    const finish = result => {
+      toast.classList.add('toast-leaving');
+      toast.addEventListener('animationend', () => toast.remove(), { once: true });
+      resolve(result);
+    };
+    toast.querySelector('.toast-confirm-btn').addEventListener('click', event => {
+      event.stopPropagation();
+      finish(true);
+    });
+    toast.querySelector('.toast-cancel-btn').addEventListener('click', event => {
+      event.stopPropagation();
+      finish(false);
+    });
+    el.toastStack.appendChild(toast);
+  });
+}
+
 function isAdmin() {
   return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
 }
 
 function requireAdmin(actionLabel = 'change the question bank') {
   if (isAdmin()) return true;
-  alert(`Admin access is required to ${actionLabel}. Tap Admin and enter your PIN.`);
+  showToastWarning(`Admin access is required to ${actionLabel}. Tap Admin and enter your PIN.`);
   openAdminDialog();
   return false;
 }
@@ -434,7 +531,7 @@ async function fetchRemoteProgress() {
 async function syncProgressFromRemote({ silent = false } = {}) {
   const config = getAppConfig();
   if (!clean(config.remoteProgressUrl)) {
-    if (!silent) alert('Set remoteProgressUrl in config.js first.');
+    if (!silent) showToastWarning('Set remoteProgressUrl in config.js first.');
     return false;
   }
 
@@ -448,7 +545,7 @@ async function syncProgressFromRemote({ silent = false } = {}) {
     if (el.syncStatus) {
       el.syncStatus.textContent = `${message} Last updated ${formatTimestamp(state.progress.updatedAt)}.`;
     }
-    if (!silent) alert(message);
+    if (!silent) showToastSuccess(message);
     return true;
   } catch (error) {
     const missing = String(error.message).includes('404');
@@ -459,7 +556,7 @@ async function syncProgressFromRemote({ silent = false } = {}) {
       return false;
     }
     if (el.syncStatus) el.syncStatus.textContent = `Progress sync failed: ${error.message}`;
-    if (!silent) alert(error.message);
+    if (!silent) showToastError(error.message);
     return false;
   }
 }
@@ -630,7 +727,7 @@ function applyChapterPractice(chapterName, { sectionKey = '', unsolvedOnly = tru
   switchTab('practice');
   const pool = getPracticePool(state.selectedFilters);
   if (!pool.length) {
-    alert('No matching questions for this selection.');
+    showToastWarning('No matching questions for this selection.');
     return;
   }
   el.practiceCount.value = Math.min(pool.length, sectionKey ? pool.length : 20);
@@ -643,7 +740,7 @@ function startRevisionPractice() {
   // Keep that order so the most important questions are actually included.
   const queue = plan.dailyQueue.map(item => item.question).slice(0, 25);
   if (!queue.length) {
-    alert('Revision queue is empty. Explore new chapters instead.');
+    showToastWarning('Revision queue is empty. Explore new chapters instead.');
     return;
   }
   startPracticeWithQuestions(queue);
@@ -661,7 +758,7 @@ function startFocusedRevision(kind) {
   if (!target) return;
   const questions = target.items.map(item => item.question);
   if (!questions.length) {
-    alert(target.empty);
+    showToastWarning(target.empty);
     return;
   }
   startPracticeWithQuestions(questions);
@@ -839,7 +936,17 @@ function bindSearchPalette() {
       event.preventDefault();
       el.searchDialog.open ? closeSearchPalette() : openSearchPalette();
     }
+    if (event.shiftKey && event.key.toLowerCase() === 'd' && !event.metaKey && !event.ctrlKey) {
+      const tag = (event.target && event.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      event.preventDefault();
+      toggleTheme();
+    }
   });
+
+  if (el.themeToggle) {
+    el.themeToggle.addEventListener('click', toggleTheme);
+  }
 }
 
 function handleViewAction(event) {
@@ -929,7 +1036,7 @@ function hasPendingFlagForQuestion(questionId, studentId) {
 
 function openFlagDialog(question) {
   if (!question?.id || !state.activeStudentId) {
-    alert('Select a student profile first.');
+    showToastWarning('Select a student profile first.');
     return;
   }
   if (!el.flagDialog) return;
@@ -1017,7 +1124,7 @@ async function fetchRemoteFlags() {
 
 async function syncFlagsFromRemote({ silent = false } = {}) {
   if (!clean(getAppConfig().remoteFlagsUrl)) {
-    if (!silent) alert('Set remoteFlagsUrl in config.js first.');
+    if (!silent) showToastWarning('Set remoteFlagsUrl in config.js first.');
     return false;
   }
   try {
@@ -1029,7 +1136,7 @@ async function syncFlagsFromRemote({ silent = false } = {}) {
     return true;
   } catch (error) {
     if (!silent && el.flagsStatus) el.flagsStatus.textContent = `Flag sync failed: ${error.message}`;
-    if (!silent) alert(error.message);
+    if (!silent) showToastError(error.message);
     return false;
   }
 }
@@ -1066,7 +1173,7 @@ async function approveAnswerFlag(flagId) {
   if (!flag || flag.status !== 'pending') return;
   const question = state.questions.find(q => q.id === flag.questionId);
   if (!question) {
-    alert('Question no longer in bank.');
+    showToastWarning('Question no longer in bank.');
     return;
   }
   const note = flag.comment ? `\n[Student report ${flag.studentName}]: ${flag.comment}` : '';
@@ -1092,7 +1199,7 @@ async function approveAnswerFlag(flagId) {
   resolveFlag(flagId, 'approved', 'Answer updated to student suggestion.');
   await persistFlags();
   renderFlagReview();
-  alert('Answer updated and flag approved.');
+  showToastSuccess('Answer updated and flag approved.');
 }
 
 async function rejectAnswerFlag(flagId, adminNote) {
@@ -1128,7 +1235,7 @@ async function saveFlagAdminEdit(form) {
   resolveFlag(flagId, 'approved', clean(formData.get('admin_note')) || 'Modified by admin.');
   await persistFlags();
   renderFlagReview();
-  alert('Question updated and flag resolved.');
+  showToastSuccess('Question updated and flag resolved.');
 }
 
 function renderFlagReview() {
@@ -1290,7 +1397,7 @@ async function fetchRemoteBank() {
 async function syncFromRemote({ force = false, silent = false } = {}) {
   const config = getAppConfig();
   if (!clean(config.remoteBankUrl)) {
-    if (!silent) alert('Set remoteBankUrl in config.js first.');
+    if (!silent) showToastWarning('Set remoteBankUrl in config.js first.');
     return false;
   }
 
@@ -1305,11 +1412,11 @@ async function syncFromRemote({ force = false, silent = false } = {}) {
 
     const message = `Synced ${remote.questions.length} questions from server.`;
     if (el.syncStatus) el.syncStatus.textContent = `${message} Last updated ${formatTimestamp(remote.updatedAt)}.`;
-    if (!silent) alert(message);
+    if (!silent) showToastSuccess(message);
     return true;
   } catch (error) {
     if (el.syncStatus) el.syncStatus.textContent = `Sync failed: ${error.message}`;
-    if (!silent) alert(error.message);
+    if (!silent) showToastError(error.message);
     return false;
   }
 }
@@ -1742,7 +1849,7 @@ async function bindImageControl(fileInput, hiddenInput, previewWrap, previewImg,
       const dataUrl = await processImageFile(file);
       setImagePreview(hiddenInput, previewWrap, previewImg, dataUrl);
     } catch (error) {
-      alert(error.message);
+      showToastError(error.message);
       fileInput.value = '';
     }
   });
@@ -1780,7 +1887,7 @@ async function handleInlineImageChange(input) {
     previewImg.src = dataUrl;
     previewWrap.classList.remove('hidden');
   } catch (error) {
-    alert(error.message);
+    showToastError(error.message);
     input.value = '';
   }
 }
@@ -2033,7 +2140,7 @@ async function persistQuestions() {
       // ignore legacy cleanup errors
     }
   } catch (error) {
-    alert('Could not save all data. Try fewer/smaller images, export a backup, or remove some images.');
+    showToastError('Could not save all data. Try fewer/smaller images, export a backup, or remove some images.');
     throw error;
   }
   updateStorageStatus();
@@ -2400,7 +2507,7 @@ function upsertQuestion(data) {
   if (!requireAdmin('add or edit questions')) return false;
   const question = normaliseQuestion(data);
   if (!question) {
-    alert('Please fill in the question, all four options, and a valid correct answer.');
+    showToastWarning('Please fill in the question, all four options, and a valid correct answer.');
     return false;
   }
 
@@ -2419,9 +2526,12 @@ function upsertQuestion(data) {
   return true;
 }
 
-function deleteQuestion(id) {
+async function deleteQuestion(id) {
   if (!requireAdmin('delete questions')) return;
-  if (!confirm('Delete this question permanently?')) return;
+  const target = state.questions.find(q => q.id === id);
+  const snippet = target ? String(target.question || '').slice(0, 140) : '';
+  const ok = await showConfirmToast('Delete this question permanently?', { snippet, confirmLabel: 'Delete' });
+  if (!ok) return;
   if (state.editingId === id) state.editingId = null;
   state.questions = state.questions.filter(q => q.id !== id);
   saveQuestions();
@@ -2459,7 +2569,7 @@ function practiceFromBank() {
 function startPractice() {
   const pool = getPracticePool(state.selectedFilters);
   if (!pool.length) {
-    alert(state.activeStudentId && el.practiceUnsolvedOnly?.checked
+    showToastWarning(state.activeStudentId && el.practiceUnsolvedOnly?.checked
       ? 'No unsolved questions match your filters for this student.'
       : 'No questions match your filters.');
     return;
@@ -2839,7 +2949,7 @@ function download(filename, content, type) {
 
 function exportJson() {
   if (state.editingId) {
-    alert('Finish or cancel the question you are editing before exporting.');
+    showToastWarning('Finish or cancel the question you are editing before exporting.');
     return;
   }
 
@@ -2860,7 +2970,7 @@ function exportJson() {
 
 function exportCsv() {
   if (state.editingId) {
-    alert('Finish or cancel the question you are editing before exporting.');
+    showToastWarning('Finish or cancel the question you are editing before exporting.');
     return;
   }
 
@@ -2903,9 +3013,13 @@ function exportCsv() {
   });
 }
 
-function resetAllData() {
+async function resetAllData() {
   if (!requireAdmin('clear the question bank')) return;
-  if (!confirm('Delete ALL saved questions from this browser? This cannot be undone.')) return;
+  const ok = await showConfirmToast('Delete ALL saved questions from this browser?', {
+    snippet: 'This cannot be undone.',
+    confirmLabel: 'Clear bank'
+  });
+  if (!ok) return;
   state.questions = [];
   state.editingId = null;
   saveQuestions();
@@ -3221,6 +3335,8 @@ function bindEvents() {
 }
 
 async function init() {
+  initTheme();
+
   // Wire up the views layer first so any refresh triggered during the
   // auto-sync steps below has its dependencies available (state, el, helpers).
   NeetViews.init({
@@ -3294,5 +3410,5 @@ async function init() {
 
 init().catch(error => {
   console.error(error);
-  alert('Could not start the app. Try refreshing the page.');
+  showToastError('Could not start the app. Try refreshing the page.');
 });

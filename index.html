@@ -6,7 +6,7 @@
   <title>NEET Chemistry · MCQ Mastery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
 </head>
@@ -72,6 +72,7 @@
           <select id="studentSelect" class="student-select" aria-label="Active student"></select>
           <button id="syncProgressBtn" class="ghost-btn small" type="button" hidden>Sync progress</button>
           <button id="syncBankBtn" class="ghost-btn small" type="button" hidden>Sync bank</button>
+          <button id="themeToggle" class="icon-btn theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode (Shift+D)">🌙</button>
           <button id="adminUnlockBtn" class="ghost-btn small" type="button">Admin</button>
           <span id="roleBadge" class="pill role-pill">Student</span>
           <span id="totalCount" class="pill">0 MCQs</span>
@@ -391,6 +392,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
   <script src="config.js"></script>
+  <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
   <script src="vendor/xlsx.full.min.js"></script>
   <script src="js/curriculum.js"></script>
   <script src="js/search.js"></script>
