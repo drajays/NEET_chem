@@ -454,9 +454,9 @@
       document.getElementById('gamesHub').querySelector('[style*="grid"]').style.display = '';
     }
     function toggleGameFullscreen() {
-      const frame = document.getElementById('gameFrame');
+      const iframe = document.getElementById('gameIframe');
       if (!document.fullscreenElement) {
-        (frame.requestFullscreen || frame.webkitRequestFullscreen)?.call(frame);
+        (iframe.requestFullscreen || iframe.webkitRequestFullscreen)?.call(iframe);
       } else {
         (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
       }

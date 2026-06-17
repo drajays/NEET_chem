@@ -643,8 +643,14 @@ textarea, input[type="text"], input[type="number"], input[type="search"], input[
 /* Science games — full screen */
 .game-frame-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .game-frame-bar .game-fs-btn { margin-left: auto; }
-#gameFrame:fullscreen { background: #0b0c15; padding: 14px; display: flex; flex-direction: column; }
-#gameFrame:fullscreen #gameIframe { flex: 1; height: auto !important; }
+/* Fullscreen the iframe itself so the game's own layout fills the whole screen. */
+#gameIframe:fullscreen,
+#gameIframe:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0 !important;
+  background: #0b0c15;
+}
 
 /* Modal */
 .modal {
