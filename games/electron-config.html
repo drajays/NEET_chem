@@ -561,6 +561,58 @@
     }
     .try-btn:hover { border-color: var(--accent); background: rgba(56,189,248,0.08); }
 
+    /* NCERT Study Solutions */
+    .ncert-module { margin-top: 8px; }
+    .ncert-menu {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+    .ncert-menu-label { width: 100%; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+    .ncert-menu-btn {
+      padding: 7px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ncert-menu-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+    .ncert-menu-btn.active { border-color: var(--accent); color: #fff; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+    .ncert-section { margin-bottom: 28px; scroll-margin-top: 90px; }
+    .ncert-section-head { font-size: 1.15rem; color: var(--accent-2); margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+    .ncert-section-sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 16px; }
+    .ncert-q {
+      background: rgba(0,0,0,0.18);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      padding: 16px 18px; margin-bottom: 14px;
+    }
+    .ncert-q .q-text { font-size: 0.96rem; font-weight: 700; color: var(--text); line-height: 1.5; margin-bottom: 6px; }
+    .ncert-q .q-text .q-num { color: var(--accent); margin-right: 6px; }
+    .ncert-q .q-approach { color: var(--muted); font-size: 0.88rem; font-style: italic; line-height: 1.5; margin-bottom: 12px; }
+    .ncert-reveal-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--accent); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .ncert-reveal-btn:hover { border-color: var(--accent); background: rgba(56,189,248,0.08); }
+    .ncert-solution { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+    .ncert-solution.open { display: block; animation: ncertFade 0.2s ease; }
+    @keyframes ncertFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .ncert-solution p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px; }
+    .ncert-solution ul { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px 18px; }
+    .ncert-answer {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      border-radius: 10px; padding: 10px 14px; margin-top: 8px;
+      color: var(--success); font-weight: 700; font-size: 0.92rem; line-height: 1.5;
+    }
+
     /* Game Styles */
     .game-layout {
       display: grid;
@@ -1097,6 +1149,269 @@
       </table>
       <button class="try-btn" onclick="switchMode('bohr')">🪐 Open Bohr Shell Reference →</button>
     </div>
+
+    <!-- NCERT Study Solutions -->
+    <div class="rule-card">
+      <h3>📘 NCERT Study Solutions — 20 Mastery Problems</h3>
+      <p>Worked, exam-style solutions across quantum numbers, anomalous configurations, the f-block, and core problem-solving. Pick a level from the menu, then reveal each solution after you attempt it.</p>
+
+      <div id="ncert-module" class="ncert-module">
+        <div class="ncert-menu">
+          <span class="ncert-menu-label">Level Menu</span>
+          <button class="ncert-menu-btn active" onclick="ncertShowSection('all', this)">🏠 Home (All)</button>
+          <button class="ncert-menu-btn" onclick="ncertShowSection('ncert-sec-1', this)">Section 1</button>
+          <button class="ncert-menu-btn" onclick="ncertShowSection('ncert-sec-2', this)">Section 2</button>
+          <button class="ncert-menu-btn" onclick="ncertShowSection('ncert-sec-3', this)">Section 3</button>
+          <button class="ncert-menu-btn" onclick="ncertShowSection('ncert-sec-4', this)">Section 4</button>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="ncert-section" id="ncert-sec-1">
+          <h4 class="ncert-section-head">⚛️ Section 1 — Quantum Numbers &amp; Orbital Energies</h4>
+          <p class="ncert-section-sub">Energy ordering, node counting, and orbital angular momentum.</p>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q1.</span>Arrange the following orbitals in decreasing order of their energy: 4f, 5p, 5d, 6s.</div>
+            <div class="q-approach">Use the (n + ℓ) rule — orbitals fill in increasing order of (n+ℓ); for equal (n+ℓ), lower n means lower energy.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <table class="exception-table">
+                <thead><tr><th>Orbital</th><th>n</th><th>ℓ</th><th>n + ℓ</th></tr></thead>
+                <tbody>
+                  <tr><td>4f</td><td>4</td><td>3</td><td>7</td></tr>
+                  <tr><td>5p</td><td>5</td><td>1</td><td>6</td></tr>
+                  <tr><td>5d</td><td>5</td><td>2</td><td>7</td></tr>
+                  <tr><td>6s</td><td>6</td><td>0</td><td>6</td></tr>
+                </tbody>
+              </table>
+              <p><strong>Tie-breaker:</strong> for equal (n+ℓ), lower n = lower energy. So 5p (n=5) &lt; 6s (n=6) and 4f (n=4) &lt; 5d (n=5).</p>
+              <div class="ncert-answer">Decreasing energy: 5d &gt; 4f &gt; 6s &gt; 5p</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q2.</span>What is the maximum number of electrons in an atom that can have n = 4 and mℓ = 0?</div>
+            <div class="q-approach">For n = 4 the subshells are 4s, 4p, 4d, 4f. Every subshell has exactly one orbital with mℓ = 0.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Total orbitals with mℓ = 0 = 4 (one in each subshell). By the Pauli Exclusion Principle each orbital holds a maximum of 2 electrons.</p>
+              <div class="ncert-answer">4 × 2 = 8 electrons</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q3.</span>Calculate angular and radial nodes for the differentiating electron in Tungsten (W, Z = 74).</div>
+            <div class="q-approach">Tungsten is a d-block element; its outermost filled orbital per Aufbau is 5d.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Angular nodes = ℓ = 2 (for a d-orbital).<br>Radial nodes = n − ℓ − 1 = 5 − 2 − 1 = 2.</p>
+              <div class="ncert-answer">2 angular nodes and 2 radial nodes</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q4.</span>The orbital angular momentum of an electron in a 5f orbital of Uranium is:</div>
+            <div class="q-approach">Formula: √ℓ(ℓ+1) · h/2π. For any f orbital, ℓ = 3.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>√3(3+1) = √12 = 2√3.</p>
+              <div class="ncert-answer">2√3 · h/2π</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="ncert-section" id="ncert-sec-2">
+          <h4 class="ncert-section-head">🎯 Section 2 — Exceptions &amp; Stability Principles</h4>
+          <p class="ncert-section-sub">Anomalous configurations, exchange energy, and magnetic moments.</p>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q5.</span>Assertion (A): Cu configuration is 3d¹⁰ 4s¹ instead of 3d⁹ 4s². Reason (R): Exchange energy is maximized only when half-filled.</div>
+            <div class="q-approach">Evaluate the Assertion–Reason pair.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p><strong>Assertion is True:</strong> Cu is [Ar] 3d¹⁰ 4s¹ (not 3d⁹ 4s²).<br><strong>Reason is False:</strong> exchange energy is maximized for <em>both</em> half-filled and completely filled subshells. A full d¹⁰ provides both maximum exchange energy and a highly symmetrical distribution.</p>
+              <div class="ncert-answer">A is true, but R is false.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q6.</span>Calculate the total number of exchange pairs for 3d electrons in Chromium (Z = 24).</div>
+            <div class="q-approach">Chromium's ground state is [Ar] 3d⁵ 4s¹ — the 3d subshell has 5 parallel-spin electrons.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Exchange pairs = n(n−1)/2 = 5 × 4 / 2 = 10.</p>
+              <div class="ncert-answer">10 exchange pairs</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q7.</span>Which transition metal does NOT exhibit an anomalous electronic configuration? (a) Cr (b) Mo (c) W (d) Ag</div>
+            <div class="q-approach">Compare expected vs actual configurations.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <ul>
+                <li>Cr (Z=24): 3d⁵ 4s¹ — anomalous</li>
+                <li>Mo (Z=42): 4d⁵ 5s¹ — anomalous (same group)</li>
+                <li>Ag (Z=47): 4d¹⁰ 5s¹ — anomalous (like Cu)</li>
+                <li>W (Z=74): 5d⁴ 6s² — normal, expected</li>
+              </ul>
+              <div class="ncert-answer">(c) Tungsten — poor 4f shielding and high nuclear charge make the promotion unfavorable.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q8.</span>Ground state electronic configuration of Palladium (Pd, Z = 46) and its spin-only magnetic moment.</div>
+            <div class="q-approach">Palladium is a unique exception where both s-electrons shift to the d-subshell.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Configuration: <span class="mono">[Kr] 4d¹⁰ 5s⁰</span>. Unpaired electrons = 0.<br>Spin-only moment: √0(0+2) = 0 BM.</p>
+              <div class="ncert-answer">[Kr] 4d¹⁰ 5s⁰ · μ = 0 BM (diamagnetic)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="ncert-section" id="ncert-sec-3">
+          <h4 class="ncert-section-head">🌐 Section 3 — Lanthanides &amp; Actinides (f-block)</h4>
+          <p class="ncert-section-sub">Contraction, half-filled stability, oxidation states, and ionic configurations.</p>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q9.</span>Statement I: Actinide contraction occurs from Ac to Lr. Statement II: 5f electrons provide superior shielding compared to 4f.</div>
+            <div class="q-approach">Evaluate the two statements.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p><strong>Statement I is Correct:</strong> actinide contraction is observed.<br><strong>Statement II is Incorrect:</strong> 5f orbitals are more diffuse than 4f, so they shield <em>poorly</em>. This poor shielding lets the nuclear charge pull electrons tighter.</p>
+              <div class="ncert-answer">I is correct, II is incorrect.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q10.</span>Ground state electronic configuration of Gadolinium (Gd, Z = 64).</div>
+            <div class="q-approach">Expected: [Xe] 4f⁸ 6s². But a half-filled f⁷ subshell is exceptionally stable.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>To gain the stability of a half-filled f⁷ subshell, one electron shifts to the 5d orbital.</p>
+              <div class="ncert-answer">[Xe] 4f⁷ 5d¹ 6s²</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q11.</span>How many unpaired electrons are present in a neutral Uranium atom (Z = 92)?</div>
+            <div class="q-approach">Configuration of Uranium: [Rn] 5f³ 6d¹ 7s².</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>5f³: 3 unpaired electrons (Hund's rule, 7 orbitals).<br>6d¹: 1 unpaired electron.</p>
+              <div class="ncert-answer">Total = 3 + 1 = 4 unpaired electrons</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q12.</span>Why do early actinides (U, Np, Pu) exhibit more oxidation states than early lanthanides?</div>
+            <div class="q-approach">Compare the energy-level gaps in actinides vs lanthanides.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>The 5f, 6d, and 7s levels are comparable (almost degenerate). Because the gaps are so small, electrons from all three can participate in bonding, giving highly variable oxidation states (up to +6 or +7).</p>
+              <div class="ncert-answer">Comparable 5f, 6d and 7s energies allow all outer electrons to participate in bonding.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q13.</span>Write the electronic configuration of the Ce³⁺ ion (Cerium, Z = 58).</div>
+            <div class="q-approach">Neutral Ce: [Xe] 4f¹ 5d¹ 6s². Remove electrons from the highest principal quantum number first.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Remove 6s² first, then 5d¹.</p>
+              <div class="ncert-answer">Ce³⁺: [Xe] 4f¹</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="ncert-section" id="ncert-sec-4">
+          <h4 class="ncert-section-head">🧩 Section 4 — Core Principles &amp; Problem Solving</h4>
+          <p class="ncert-section-sub">Rule violations, element identification, ionic stability, and radii.</p>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q14.</span>If a theoretical atom had 3 electrons in a single 2s orbital, which rule is violated?</div>
+            <div class="q-approach">A single orbital has only two spin states (ms = +½ and −½).</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>A third electron would be forced to duplicate all four quantum numbers with one of the others.</p>
+              <div class="ncert-answer">Violates Pauli's Exclusion Principle.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q15.</span>Identify the element whose configuration has K=2, L=8, M=13, N=1.</div>
+            <div class="q-approach">Total electrons = 2 + 8 + 13 + 1 = 24.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <ul>
+                <li>K (n=1): 1s² = 2</li>
+                <li>L (n=2): 2s² 2p⁶ = 8</li>
+                <li>M (n=3): 3s² 3p⁶ 3d⁵ = 13</li>
+                <li>N (n=4): 4s¹ = 1</li>
+              </ul>
+              <p>This matches the exceptional [Ar] 3d⁵ 4s¹.</p>
+              <div class="ncert-answer">Chromium (Cr)</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q16.</span>Which ion is more stable in aqueous medium: Mn²⁺ or Mn³⁺ (Z = 25)?</div>
+            <div class="q-approach">Mn (Z=25): [Ar] 3d⁵ 4s². Remove electrons from the highest n first.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Mn²⁺: [Ar] 3d⁵ (exactly half-filled, highly stable).<br>Mn³⁺: [Ar] 3d⁴ (less stable).</p>
+              <div class="ncert-answer">Mn²⁺ is more stable — the half-filled d-subshell maximizes exchange energy and symmetry.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q17.</span>Identify the lowest atomic number element that possesses a completely filled d-subshell.</div>
+            <div class="q-approach">A filled d-subshell means d¹⁰. The first d-subshell to fill is 3d.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Expected: Zn (Z=30) → [Ar] 3d¹⁰ 4s². But due to anomalous stability, Cu (Z=29) steals an electron from 4s to reach [Ar] 3d¹⁰ 4s¹.</p>
+              <div class="ncert-answer">Copper (Z=29) — lowest atomic number with a d¹⁰ configuration.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q18.</span>Calculate the spin-only magnetic moment of an actinide ion with a 5f³ configuration.</div>
+            <div class="q-approach">The 5f subshell has 7 degenerate orbitals; by Hund's rule 3 electrons occupy separate orbitals with parallel spins.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Unpaired electrons n = 3. μ = √n(n+2) = √3(5) = √15 ≈ 3.87 BM.</p>
+              <div class="ncert-answer">μ ≈ 3.87 BM</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q19.</span>An orbital diagram is drawn as [↑↓][↑][ ]. Which rule does this violate?</div>
+            <div class="q-approach">The diagram pairs the first p-orbital while the third orbital is still empty.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Hund's rule states that pairing in orbitals of the same subshell cannot occur until each orbital is singly occupied with parallel spins. Correct diagram: [↑][↑][↑].</p>
+              <div class="ncert-answer">Violates Hund's Rule of Maximum Multiplicity.</div>
+            </div>
+          </div>
+
+          <div class="ncert-q">
+            <div class="q-text"><span class="q-num">Q20.</span>Arrange the following isoelectronic species in decreasing order of ionic radii: N³⁻, O²⁻, F⁻, Na⁺, Mg²⁺, Al³⁺.</div>
+            <div class="q-approach">All species have 10 electrons (1s² 2s² 2p⁶). For isoelectronic species, radius decreases as nuclear charge (Z) increases.</div>
+            <button class="ncert-reveal-btn" onclick="ncertToggle(this)">Show solution</button>
+            <div class="ncert-solution">
+              <p>Protons: N(7) &lt; O(8) &lt; F(9) &lt; Na(11) &lt; Mg(12) &lt; Al(13). Higher nuclear charge pulls the same electron cloud tighter.</p>
+              <div class="ncert-answer">N³⁻ &gt; O²⁻ &gt; F⁻ &gt; Na⁺ &gt; Mg²⁺ &gt; Al³⁺</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="muted" style="text-align:center;font-size:0.85rem;margin-top:8px">Master these 20 questions to dominate atomic structure in NEET. 🚀</p>
+      </div>
+    </div>
   </div>
 
   <!-- ================================================================
@@ -1397,6 +1712,22 @@
     currentPeriod = period;
     renderFilters();
     renderReference();
+  }
+
+  function ncertShowSection(id, btn) {
+    document.querySelectorAll('#ncert-module .ncert-section').forEach(s => {
+      s.style.display = (id === 'all' || s.id === id) ? 'block' : 'none';
+    });
+    document.querySelectorAll('#ncert-module .ncert-menu-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(id === 'all' ? 'ncert-module' : id)
+      .scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function ncertToggle(btn) {
+    const sol = btn.nextElementSibling;
+    const open = sol.classList.toggle('open');
+    btn.textContent = open ? 'Hide solution' : 'Show solution';
   }
 
   function switchMode(mode) {
