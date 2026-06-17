@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electron Hunter</title>
+<style>
+:root {
+  --bg: #080c11;
+  --panel: #131b26;
+  --panel-2: #1b2432;
+  --border: #273345;
+  --text: #d6e2f0;
+  --muted: #8190a8;
+  --neon: #39ff14;
+  --neon-dim: rgba(57,255,20,0.2);
+  --amber: #ffb84d;
+  --red: #ff5c5c;
+  --blue: #5cafff;
+  --shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 800px at 70% -20%, #142032 0%, var(--bg) 55%);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+.app {
+  display:flex;
+  height:100vh;
+}
+.notebook {
+  width: 330px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  transition: margin-left .35s ease;
+  position:relative;
+  z-index: 20;
+  box-shadow: var(--shadow);
+}
+.notebook.collapsed { margin-left: -295px; }
+.notebook-inner { padding: 18px 16px; overflow-y:auto; flex:1; }
+.notebook h3 { font-size: 14px; text-transform: uppercase; letter-spacing: .12em; color: var(--amber); margin-bottom:12px;}
+.notebook-toggle {
+  position:absolute;
+  right:-38px; top:14px;
+  background: var(--panel-2);
+  border:1px solid var(--border);
+  border-left:none;
+  color: var(--text);
+  width:38px; height:44px;
+  border-radius:0 10px 10px 0;
+  cursor:pointer;
+  font-size:18px;
+}
+.evidence-list { list-style:none; display:flex; flex-direction:column; gap:8px;}
+.evidence-item {
+  background: #0f1622;
+  border:1px solid #223047;
+  border-left:3px solid var(--neon);
+  padding:10px 11px;
+  border-radius:8px;
+  font-size:13px;
+  color:#c3d2e6;
+  line-height:1.4;
+}
+.evidence-item.locked { border-left-color:#3a4152; color:#667792; font-style:italic;}
+.conclusion-drop {
+  margin-top:14px;
+  border:2px dashed #2d3b52;
+  border-radius:12px;
+  min-height:120px;
+  padding:10px;
+  background:#0d131d;
+  transition:.2s;
+}
+.conclusion-drop.drag-over { border-color: var(--amber); background: #171e2b;}
+.conclusion-drop h4 { font-size:12px; color:var(--muted); margin-bottom:8px;}
+.evidence-card {
+  background:#182332;
+  border:1px solid #2b3b53;
+  padding:7px 9px;
+  border-radius:7px;
+  font-size:12.5px;
+  cursor:grab;
+  margin-bottom:6px;
+  user-select:none;
+}
+.evidence-card:hover { border-color: var(--neon);}
+.evidence-card.placed { opacity:.45; cursor: default;}
+
+.main {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 14px 24px;
+  border-bottom:1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), transparent);
+}
+header h1 { font-size:18px; letter-spacing:.06em; font-weight:700;}
+header h1 span { color: var(--neon);}
+.level-pill {
+  font-size:12px;
+  background:#0f1a27;
+  border:1px solid #24344b;
+  padding:6px 12px;
+  border-radius:999px;
+  color:var(--amber);
+}
+.stage {
+  flex:1;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:auto;
+  padding:20px;
+}
+.stage-inner {
+  width: min(920px, 100%);
+  background: radial-gradient(800px 400px at 50% 40%, #101825 0%, #0c121c 100%);
+  border:1px solid #223043;
+  border-radius:18px;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.6), var(--shadow);
+  padding:28px 24px 22px;
+  min-height: 420px;
+  position:relative;
+}
+.stage-title { font-size:13px; color:var(--muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:.1em;}
+
+.crt-wrap { position:relative; width:100%; max-width:820px; margin: 10px auto;}
+.crt-svg { width:100%; height:auto; display:block; }
+.beam-path {
+  fill:none;
+  stroke: var(--neon);
+  stroke-width: 3.8;
+  filter: url(#beamGlow);
+  stroke-dasharray: 8 4;
+  animation: beamFlow 1.2s linear infinite;
+  transition: d 0.25s ease;
+}
+@keyframes beamFlow { to { stroke-dashoffset: -24; } }
+.beam-strong { stroke-width:5; opacity:1; }
+.beam-off { opacity:0; }
+
+.parts-tray {
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:18px;
+  padding:14px;
+  background:#0d141f;
+  border:1px solid #1f2c3f;
+  border-radius:12px;
+}
+.draggable {
+  background: #182536;
+  border:1px solid #2d3e58;
+  border-radius:10px;
+  padding:10px 14px;
+  cursor:grab;
+  font-size:13.5px;
+  font-weight:600;
+  user-select:none;
+  transition:.15s;
+  color:#cfe0f5;
+  min-width:96px;
+  text-align:center;
+}
+.draggable:hover { border-color: var(--neon); transform: translateY(-2px);}
+.draggable.dragging { opacity:.35;}
+.drop-zone {
+  transition: .15s;
+}
+.drop-zone.active { filter: drop-shadow(0 0 10px rgba(57,255,20,0.35));}
+.drop-target {
+  fill: rgba(57,255,20,0.04);
+  stroke: #2d425c;
+  stroke-dasharray: 5 4;
+  rx:8;
+}
+.drop-target.hover { fill: rgba(57,255,20,0.10); stroke: var(--neon); }
+.drop-target.filled { fill: rgba(57,255,20,0.03); stroke: #35506f; stroke-dasharray:none;}
+
+.control-row {
+  display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:16px;
+}
+.control {
+  background:#0f1724; border:1px solid #27354a; border-radius:10px; padding:12px 16px; min-width:220px;
+}
+.control label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px;}
+input[type=range] { width:100%; accent-color: var(--neon);}
+select, .btn {
+  background:#162233;
+  color:var(--text);
+  border:1px solid #2a3b53;
+  border-radius:9px;
+  padding:10px 14px;
+  font-size:14px;
+  font-family:inherit;
+}
+select { min-width:160px; }
+.btn {
+  cursor:pointer;
+  font-weight:600;
+  transition:.15s;
+}
+.btn:hover { border-color: var(--neon); transform: translateY(-1px);}
+.btn.primary { background: #12301a; border-color:#1e7a36; color: #b7ffca;}
+.btn.primary:hover { background:#154522; }
+.btn:disabled { opacity:.5; cursor:not-allowed; transform:none;}
+
+.narrator {
+  border-top:1px solid var(--border);
+  background: linear-gradient(180deg, #101824, #0d141f);
+  padding:16px 22px 18px;
+  display:flex;
+  gap:16px;
+  min-height:148px;
+}
+.narrator-avatar {
+  width:44px; height:44px; border-radius:12px;
+  background: #10271a;
+  border:1px solid #1f6b3a;
+  display:flex; align-items:center; justify-content:center;
+  color: var(--neon);
+  font-weight:800;
+  font-size:12px;
+  flex-shrink:0;
+  box-shadow: 0 0 16px rgba(57,255,20,0.08);
+}
+.narrator-text { font-size:15px; line-height:1.55; color:#d3deec; max-width: 920px; }
+.narrator-actions { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;}
+.mc-btn {
+  background:#172437; border:1px solid #2b3d56; color:#dbe7f5; padding:9px 13px; border-radius:9px; cursor:pointer; font-size:13.5px;
+}
+.mc-btn:hover { border-color: var(--amber);}
+.mc-btn.correct { border-color:#2f9b55; background:#11261a; }
+.mc-btn.wrong { border-color:#8b2f2f; background:#261212; opacity:.8;}
+
+.hint { color:var(--muted); font-size:12.5px; margin-top:8px;}
+.pulse { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+
+.maltese-cross { cursor:grab; }
+.magnet-body { fill:#3a4354; stroke:#6b768d;}
+.magnet-n { fill: var(--red);}
+.magnet-s { fill: var(--blue);}
+.tag { display:inline-block; background:#101d2a; border:1px solid #253a52; padding:2px 7px; border-radius:6px; font-size:11.5px; color:#8fa8c7; margin-right:6px;}
+
+.pudding-wrap { display:flex; justify-content:center; align-items:center; gap:30px; flex-wrap:wrap; }
+.pudding-circle {
+  width:300px; height:300px; border-radius:50%;
+  background: radial-gradient(circle at 40% 35%, #ff7a6a, #c22a2a 65%, #8a1616);
+  box-shadow: 0 0 40px rgba(255,90,90,0.12), inset 0 0 60px rgba(0,0,0,0.25);
+  position:relative;
+  border:2px solid #ff9a8a55;
+}
+.electron-dot {
+  width:22px; height:22px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #9eff8a, #39ff14);
+  box-shadow: 0 0 14px rgba(57,255,20,0.55);
+  position:absolute;
+  cursor:grab;
+}
+.electron-pool { display:flex; gap:10px; flex-wrap:wrap; max-width:200px; justify-content:center;}
+.electron-pool .electron-dot { position:relative; }
+
+.shadow-cross {
+  fill:#081018;
+  opacity:.95;
+}
+
+.measure-grid {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  max-width:520px;
+  margin:12px auto 0;
+}
+.measure-readout {
+  grid-column: 1 / -1;
+  background:#0d141f;
+  border:1px solid #25364d;
+  border-radius:10px;
+  padding:12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:13px;
+  color:#b8ffcb;
+}
+.kbd { font-family: ui-monospace, monospace; background:#0f1928; border:1px solid #2a394f; padding:1px 6px; border-radius:5px; font-size:12px;}
+
+.small { font-size:12.5px; color:var(--muted);}
+.center { text-align:center;}
+
+.fade-in { animation: fadeIn .35s ease; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+
+@media (max-width: 860px) {
+  .notebook { position:absolute; height:100%; left:0; top:0; }
+  .notebook.collapsed { margin-left: -330px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="notebook" class="notebook collapsed">
+    <button class="notebook-toggle" id="notebookToggle" aria-label="Toggle notebook">📓</button>
+    <div class="notebook-inner">
+      <h3>Evidence Board</h3>
+      <ul class="evidence-list" id="evidenceList"></ul>
+      <div id="conclusionArea" style="display:none; margin-top:18px;">
+        <h3>Final Conclusion</h3>
+        <p class="small">Drag all 5 evidence cards into the box to unlock Thomson's conclusion.</p>
+        <div class="conclusion-drop" id="conclusionDrop">
+          <h4>Conclusion Box — <span id="conclusionCount">0</span>/5</h4>
+          <div id="conclusionCards"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header>
+      <h1>Electron <span>Hunter</span></h1>
+      <div class="level-pill" id="levelPill">Intro — Dalton's Atom</div>
+    </header>
+
+    <section class="stage" id="stage">
+      <!-- dynamic -->
+    </section>
+
+    <section class="narrator">
+      <div class="narrator-avatar">AI</div>
+      <div style="flex:1; min-width:0;">
+        <p class="narrator-text" id="narratorText"></p>
+        <div class="narrator-actions" id="narratorActions"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+class ElectronHunter {
+  constructor() {
+    this.level = 'intro';
+    this.evidence = [];
+    this.state = {
+      l1: { cathode:false, anode:false, screen:false },
+      l2Pressure: 100,
+      l2Fired: false,
+      l3cross: false,
+      l4top: null, l4bottom: null,
+      l5mag: false,
+      l6tests: new Set(),
+      l7e: 0, l7b: 0,
+      finalPlaced: new Set(),
+      bonusCount: 0
+    };
+    this.evidenceDefs = [
+      {id:'e1', text:'Cathode rays travel in straight lines, casting sharp shadows.'},
+      {id:'e2', text:'Rays bend toward the positive plate — they carry a negative charge.'},
+      {id:'e3', text:'Rays are deflected by magnets. Moving charged particles.'},
+      {id:'e4', text:'The ray is identical for every metal / gas. Universal constituent of atoms.'},
+      {id:'e5', text:'e/m is ~1837× larger than H⁺. Mass ≈ 1/1837 H atom — subatomic.'},
+    ];
+    this.init();
+  }
+
+  init() {
+    document.getElementById('notebookToggle').onclick = () => {
+      document.getElementById('notebook').classList.toggle('collapsed');
+    };
+    this.render();
+  }
+
+  addEvidence(id) {
+    const def = this.evidenceDefs.find(e => e.id===id);
+    if (!def) return;
+    if (this.evidence.find(e=>e.id===id)) return;
+    this.evidence.push(def);
+    this.renderEvidence();
+    // little toast in narrator
+    this.narrateFlash(`Evidence logged: ${def.text}`);
+  }
+
+  renderEvidence() {
+    const ul = document.getElementById('evidenceList');
+    ul.innerHTML = '';
+    this.evidenceDefs.forEach(def => {
+      const found = this.evidence.find(e=>e.id===def.id);
+      const li = document.createElement('li');
+      li.className = 'evidence-item' + (found ? '' : ' locked');
+      li.textContent = found ? def.text : '??? undiscovered';
+      ul.appendChild(li);
+    });
+  }
+
+  setLevel(level) {
+    this.level = level;
+    const names = {
+      intro: 'Intro — Dalton\'s Atom',
+      l1: 'Level 1 — Build the CRT',
+      l2: 'Level 2 — Evacuate & Fire',
+      l3: 'Level 3 — Shadow Test',
+      l4: 'Level 4 — Electric Deflection',
+      l5: 'Level 5 — Magnetic Deflection',
+      l6: 'Level 6 — Universal Rays',
+      l7: 'Level 7 — e/m Measurement',
+      final: 'Final — Evidence Board',
+      bonus: 'Bonus — Plum Pudding'
+    };
+    document.getElementById('levelPill').textContent = names[level] || level;
+    this.render();
+  }
+
+  narrate(text, actionsHTML='') {
+    document.getElementById('narratorText').textContent = text;
+    document.getElementById('narratorActions').innerHTML = actionsHTML;
+  }
+
+  narrateFlash(msg) {
+    const el = document.getElementById('narratorText');
+    const prev = el.textContent;
+    el.textContent = '✓ ' + msg;
+    setTimeout(()=> { if(document.getElementById('narratorText').textContent.startsWith('✓')) el.textContent = prev; }, 1700);
+  }
+
+  mcQuestion(question, options, onCorrect) {
+    const actions = document.getElementById('narratorActions');
+    actions.innerHTML = '';
+    const q = document.createElement('div');
+    q.style.width='100%';
+    q.style.marginBottom='2px';
+    q.style.color='#ffcf84';
+    q.style.fontSize='13.5px';
+    q.textContent = question;
+    actions.appendChild(q);
+    options.forEach(opt => {
+      const b = document.createElement('button');
+      b.className='mc-btn';
+      b.textContent = opt.text;
+      b.onclick = () => {
+        if(opt.correct) {
+          b.classList.add('correct');
+          setTimeout(onCorrect, 380);
+        } else {
+          b.classList.add('wrong');
+        }
+      };
+      actions.appendChild(b);
+    });
+  }
+
+  nextBtn(nextLevel, label='Continue →') {
+    document.getElementById('narratorActions').innerHTML =
+      `<button class="btn primary" id="nextBtn">${label}</button>`;
+    document.getElementById('nextBtn').onclick = () => this.setLevel(nextLevel);
+  }
+
+  render() {
+    const stage = document.getElementById('stage');
+    stage.innerHTML = '';
+    this.renderEvidence();
+
+    const wrap = document.createElement('div');
+    wrap.className = 'stage-inner fade-in';
+    stage.appendChild(wrap);
+
+    const fn = {
+      intro: ()=>this.renderIntro(wrap),
+      l1: ()=>this.renderL1(wrap),
+      l2: ()=>this.renderL2(wrap),
+      l3: ()=>this.renderL3(wrap),
+      l4: ()=>this.renderL4(wrap),
+      l5: ()=>this.renderL5(wrap),
+      l6: ()=>this.renderL6(wrap),
+      l7: ()=>this.renderL7(wrap),
+      final: ()=>this.renderFinal(wrap),
+      bonus: ()=>this.renderBonus(wrap)
+    }[this.level];
+    if (fn) fn();
+  }
+
+  // --- SVG CRT helper ---
+  crtSVG({showBeam=true, beamCurve=0, showShadow=false, hideElectrodes=false}={}) {
+    // beamCurve: -100..100 negative = up, positive = down
+    const cy = 140;
+    const cx = 400;
+    const bend = beamCurve * 0.7;
+    const qy = cy + bend;
+    const beamD = `M 88 ${cy} Q ${cx} ${qy} 715 ${qy}`;
+    return `
+    <div class="crt-wrap">
+    <svg class="crt-svg" viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" aria-label="Cathode Ray Tube">
+      <defs>
+        <filter id="beamGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.8" result="glow"/>
+          <feMerge>
+            <feMergeNode in="glow"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1d2939"/>
+          <stop offset="100%" stop-color="#0f1824"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Tube outline -->
+      <path d="M 40 110 L 40 170 L 180 170 L 540 210 L 740 210 L 740 70 L 540 70 L 180 110 Z"
+        fill="url(#glassGrad)" stroke="#3a4d65" stroke-width="2"/>
+      <rect x="738" y="62" width="22" height="156" rx="5" fill="#c9d7e8" opacity=".9"/>
+      <text x="749" y="146" fill="#122" font-size="10" text-anchor="middle" font-weight="700">SCR</text>
+
+      <!-- Drop zones (visual only, real drop handled in JS) -->
+      <rect class="drop-target ${this.state.l1.cathode?'filled':''}" id="dz-cathode" x="55" y="118" width="100" height="44" />
+      <text x="105" y="145" fill="#68809f" font-size="11" text-anchor="middle">${this.state.l1.cathode ? 'Cathode ✓' : 'Cathode (-)'}</text>
+      
+      <rect class="drop-target ${this.state.l1.anode?'filled':''}" id="dz-anode" x="250" y="118" width="90" height="44" />
+      <text x="295" y="145" fill="#68809f" font-size="11" text-anchor="middle">${this.state.l1.anode ? 'Anode ✓' : 'Anode (+)'}</text>
+
+      <rect class="drop-target ${this.state.l1.screen?'filled':''}" id="dz-screen" x="700" y="88" width="48" height="104" />
+      
+      <!-- Electric plates (levels 4+) -->
+      <g id="electricPlates" style="display:${this.level==='l4' || this.level==='l7' ? 'block':'none'}">
+        <rect x="300" y="38" width="190" height="18" rx="4" fill="${this.state.l4top==='pos' ? '#23364f' : '#16202d'}" stroke="#3d5570"/>
+        <text x="395" y="51" text-anchor="middle" fill="#9ab6d8" font-size="12">${this.state.l4top ? (this.state.l4top==='pos' ? '+ Plate' : '− Plate') : 'Plate slot'}</text>
+        <rect x="300" y="226" width="190" height="18" rx="4" fill="${this.state.l4bottom==='pos' ? '#23364f' : '#16202d'}" stroke="#3d5570"/>
+        <text x="395" y="239" text-anchor="middle" fill="#9ab6d8" font-size="12">${this.state.l4bottom ? (this.state.l4bottom==='pos' ? '+ Plate' : '− Plate') : 'Plate slot'}</text>
+      </g>
+
+      <!-- Beam -->
+      <path id="beamPath" class="beam-path ${showBeam ? 'beam-strong': 'beam-off'}" d="${beamD}" />
+
+      <!-- Maltese cross shadow / cross -->
+      ${showShadow ? `
+        <g transform="translate(380, ${qy})">
+          <g transform="scale(0.85)" opacity="0.95">
+            <circle cx="0" cy="0" r="30" fill="none" stroke="#0b1119" stroke-width="9"/>
+            <rect x="-33" y="-7" width="66" height="14" fill="#0b1119"/>
+            <rect x="-7" y="-33" width="14" height="66" fill="#0b1119"/>
+          </g>
+        </g>
+        <!-- shadow on screen -->
+        <g opacity="0.95">
+          <circle cx="715" cy="${qy}" r="34" fill="#06100a"/>
+          <rect x="682" y="${qy-8}" width="66" height="16" fill="#06100a"/>
+          <rect x="707" y="${qy-38}" width="16" height="76" fill="#06100a"/>
+        </g>
+      ` : ''}
+
+      <!-- endpoint glow -->
+      <circle id="beamEnd" cx="715" cy="${qy}" r="8" fill="#39ff14" opacity="${showBeam ? 0.82:0}"/>
+    </svg>
+    </div>`;
+  }
+
+  // Simple drag helper
+  makeDraggable(root, selector='.draggable') {
+    root.querySelectorAll(selector).forEach(el => {
+      el.draggable = true;
+      el.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', el.dataset.id);
+        setTimeout(()=>el.classList.add('dragging'),0);
+      });
+      el.addEventListener('dragend', ()=> el.classList.remove('dragging'));
+    });
+  }
+  makeDropZone(el, acceptId, onDrop) {
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('hover'); });
+    el.addEventListener('dragleave', ()=> el.classList.remove('hover'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('hover');
+      const id = e.dataTransfer.getData('text/plain');
+      if (!acceptId || acceptId === id || (Array.isArray(acceptId) && acceptId.includes(id))) {
+        onDrop(id);
+      }
+    });
+  }
+
+  // --- LEVELS ---
+
+  renderIntro(wrap) {
+    wrap.innerHTML = `
+      <div class="stage-title">Crookes Laboratory — London, 1897</div>
+      <div style="text-align:center; padding:28px 10px;">
+        <div style="font-size:44px; margin-bottom:12px;">⚛︎</div>
+        <h2 style="font-size:26px; margin-bottom:10px;">Dalton said atoms were indivisible.</h2>
+        <p class="small" style="max-width:520px; margin:0 auto 18px; font-size:14.5px; color:#b9c8da; line-height:1.6">
+          For 90 years chemistry worked on that idea. Then J.J. Thomson turned on a strange glowing tube in a dark laboratory…
+          <br>Can you follow his first-principles reasoning and <span style="color:var(--neon)">hunt the electron</span>?
+        </p>
+        <button class="btn primary" id="enterLab">Enter Lab →</button>
+        <p class="hint">No images loaded. Everything is CSS + SVG.</p>
+      </div>
+    `;
+    this.narrate("Welcome, investigator. I'm your lab AI. In 1803, John Dalton said atoms are solid, indivisible billiard balls. Today we'll break that idea — carefully, from evidence alone. Ready?");
+    document.getElementById('enterLab').onclick = ()=> this.setLevel('l1');
+  }
+
+  renderL1(wrap) {
+    wrap.innerHTML = `<div class="stage-title">Level 1 — Build the Crookes Tube</div>
+      ${this.crtSVG({showBeam:false})}
+      <div class="parts-tray" id="tray">
+        <div class="draggable" data-id="cathode">Cathode (−)</div>
+        <div class="draggable" data-id="anode">Anode (+)</div>
+        <div class="draggable" data-id="screen">Phosphor Screen</div>
+      </div>
+      <p class="hint center">Drag each part into the glass tube outline — or just tap it.</p>
+    `;
+    this.makeDraggable(wrap);
+    const dzc = wrap.querySelector('#dz-cathode');
+    const dza = wrap.querySelector('#dz-anode');
+    const dzs = wrap.querySelector('#dz-screen');
+    this.makeDropZone(dzc, 'cathode', ()=> { this.state.l1.cathode=true; this.render(); });
+    this.makeDropZone(dza, 'anode', ()=> { this.state.l1.anode=true; this.render(); });
+    this.makeDropZone(dzs, 'screen', ()=> { this.state.l1.screen=true; this.render(); });
+    // tap fallback (touch screens): each part drops into its own slot
+    wrap.querySelectorAll('.draggable').forEach(el=>{
+      el.addEventListener('click', ()=>{ this.state.l1[el.dataset.id]=true; this.render(); });
+    });
+
+    const done = this.state.l1.cathode && this.state.l1.anode && this.state.l1.screen;
+    this.narrate(done
+      ? 'Perfect assembly. Cathode on the left, anode in the middle, fluorescent screen on the right. Next: we need a vacuum.'
+      : 'Drag the Cathode (−), Anode (+), and Phosphor Screen into their slots in the evacuated glass tube.',
+      done ? `<button class="btn primary" id="nextBtn">Seal Tube →</button>` : ''
+    );
+    if (done) document.getElementById('nextBtn').onclick = ()=> this.setLevel('l2');
+  }
+
+  renderL2(wrap) {
+    const p = this.state.l2Pressure;
+    wrap.innerHTML = `<div class="stage-title">Level 2 — Evacuate & Fire</div>
+      ${this.crtSVG({showBeam:this.state.l2Fired, beamCurve:0})}
+      <div class="control-row">
+        <div class="control">
+          <label id="vacLabel">Vacuum Pump — Air remaining: ${p}%</label>
+          <input type="range" id="vacSlider" min="0" max="100" value="${p}">
+          <div class="small" id="vacNote">${p < 5 ? 'High vacuum achieved!' : 'Pump out the air...'}</div>
+        </div>
+        <div>
+          <button class="btn primary" id="fireBtn" ${p < 5 ? '' : 'disabled'}>⚡ Apply 10,000 V</button>
+        </div>
+      </div>
+    `;
+    // Update in place so dragging the slider stays smooth (no full re-render mid-drag).
+    wrap.querySelector('#vacSlider').oninput = (e)=>{
+      const p2 = parseInt(e.target.value,10);
+      this.state.l2Pressure = p2;
+      wrap.querySelector('#vacLabel').textContent = `Vacuum Pump — Air remaining: ${p2}%`;
+      wrap.querySelector('#vacNote').textContent = p2 < 5 ? 'High vacuum achieved!' : 'Pump out the air...';
+      const fb = wrap.querySelector('#fireBtn');
+      if (fb && !this.state.l2Fired) fb.disabled = !(p2 < 5);
+      if (!this.state.l2Fired) {
+        this.narrate(p2 < 5
+          ? 'Vacuum is good — below 1/10000 atm. Now apply high voltage across the electrodes.'
+          : 'Crookes tubes only glow when nearly all the air is pumped out. Drag the slider left.');
+      }
+    };
+    const fireBtn = wrap.querySelector('#fireBtn');
+    if (fireBtn) fireBtn.onclick = ()=>{
+      this.state.l2Fired = true;
+      this.addEvidence('e1'); // actually e1 is straight lines, but log travel note separately? We'll still give e1 later. For now just log manually.
+      // override evidence text for l2?
+      // Keep evidence system clean: add e1 at level 3. So remove here.
+      this.evidence = this.evidence.filter(e=>e.id!=='e1');
+      this.renderEvidence();
+      this.render();
+      this.narrate('A vivid green ray shoots cathode → anode → screen. It travels in a straight line, even with no air left inside. What IS this?', `<button class="btn primary" id="nextBtn">Log: “Beam travels cathode to anode” →</button>`);
+      document.getElementById('nextBtn').onclick = ()=> { this.setLevel('l3'); };
+    };
+    if (!this.state.l2Fired) {
+      this.narrate(p < 5 
+        ? 'Vacuum is good. <1/10000 atm. Now apply high voltage across the electrodes.'
+        : 'Crookes tubes only glow when nearly all the air is pumped out. Drag the slider left.');
+    } else {
+      this.narrate('A vivid green ray shoots cathode → anode → screen. It travels in a straight line, even with no air left inside. What IS this?', `<button class="btn primary" id="nextBtn">Log: “Beam travels cathode to anode” →</button>`);
+      const nb = document.getElementById('nextBtn');
+      if (nb) nb.onclick = ()=> this.setLevel('l3');
+    }
+  }
+
+  renderL3(wrap) {
+    wrap.innerHTML = `<div class="stage-title">Level 3 — Shadow Test</div>
+      ${this.crtSVG({showBeam:true, showShadow: this.state.l3cross })}
+      <div class="parts-tray">
+        ${this.state.l3cross ? '<span class="small">Maltese Cross inserted.</span>' : `<div class="draggable maltese-cross" data-id="cross" style="font-size:22px;">✠ Maltese Cross</div>`}
+      </div>
+    `;
+    if (!this.state.l3cross) {
+      this.makeDraggable(wrap);
+      const svg = wrap.querySelector('.crt-svg');
+      // make whole tube droppable
+      svg.style.cursor = 'copy';
+      svg.addEventListener('dragover', e=>e.preventDefault());
+      svg.addEventListener('drop', e=>{
+        e.preventDefault();
+        this.state.l3cross = true;
+        this.render();
+      });
+      // tap fallback
+      const cross = wrap.querySelector('.maltese-cross');
+      if (cross) cross.addEventListener('click', ()=>{ this.state.l3cross = true; this.render(); });
+      this.narrate('If the ray is a wave in the ether, it should go around objects. If it’s particles, it should cast a shadow. Drag (or tap) the Maltese Cross into the beam path.');
+    } else {
+      this.narrate('Sharp shadow on the phosphor screen. The ray travels in straight lines and is blocked by solid matter — like a stream of tiny projectiles.');
+      this.mcQuestion('What does this suggest?', [
+        {text:'Rays travel in straight lines', correct:true},
+        {text:'Rays are light waves bending around', correct:false},
+        {text:'The tube is leaking', correct:false},
+      ], ()=>{
+        this.addEvidence('e1');
+        this.nextBtn('l4', 'Confirmed → Electric Test');
+      });
+    }
+  }
+
+  renderL4(wrap) {
+    const top = this.state.l4top;
+    const bottom = this.state.l4bottom;
+    const platesPlaced = top && bottom;
+    // Beam bends toward positive plate. If top is +, bend up (-curve). If bottom is +, bend down.
+    let curve = 0;
+    if (platesPlaced) {
+      curve = top === 'pos' ? -38 : 38;
+    }
+    // Show whichever plates still need placing, plus tags for placed slots.
+    const trayParts = [];
+    if (!top || !bottom) {
+      if (top!=='pos' && bottom!=='pos') trayParts.push('<div class="draggable" data-id="pos">+ Plate</div>');
+      if (top!=='neg' && bottom!=='neg') trayParts.push('<div class="draggable" data-id="neg">− Plate</div>');
+    }
+    wrap.innerHTML = `<div class="stage-title">Level 4 — Electric Deflection</div>
+      ${this.crtSVG({showBeam:true, beamCurve: curve })}
+      <div class="parts-tray">
+        ${top ? `<span class="tag">Top: ${top==='pos' ? '+ Plate ✓' : '− Plate ✓'}</span>` : ''}
+        ${bottom ? `<span class="tag">Bottom: ${bottom==='pos' ? '+ Plate ✓' : '− Plate ✓'}</span>` : ''}
+        ${trayParts.join('')}
+        ${platesPlaced ? '' : '<span class="small" style="align-self:center">Drag (or tap) a + and a − plate onto the slots above/below the tube.</span>'}
+      </div>
+    `;
+    // Drop zones are the plate rects in the SVG
+    const svg = wrap.querySelector('.crt-svg');
+    const topRect = svg.querySelector('#electricPlates rect:nth-of-type(1)');
+    const botRect = svg.querySelector('#electricPlates rect:nth-of-type(2)');
+    const placePlate = (id, slot)=>{
+      if (id!=='pos' && id!=='neg') return;
+      if (slot==='top' && !this.state.l4top) this.state.l4top = id;
+      else if (slot==='bottom' && !this.state.l4bottom) this.state.l4bottom = id;
+      else if (!this.state.l4top) this.state.l4top = id;       // tap: fill first empty slot
+      else if (!this.state.l4bottom) this.state.l4bottom = id;
+      this.render();
+    };
+    if (!platesPlaced) {
+      this.makeDraggable(wrap);
+      [[topRect,'top'],[botRect,'bottom']].forEach(([el,slot])=>{
+        if(!el) return;
+        el.style.cursor='copy';
+        el.addEventListener('dragover', e=>{ e.preventDefault(); el.setAttribute('fill', '#1f3b2b'); });
+        el.addEventListener('dragleave', ()=> el.setAttribute('fill', '#16202d'));
+        el.addEventListener('drop', e=>{
+          e.preventDefault();
+          placePlate(e.dataTransfer.getData('text/plain'), slot);
+        });
+      });
+      // tap fallback: tapping a plate fills the next empty slot
+      wrap.querySelectorAll('.parts-tray .draggable').forEach(el=>{
+        el.addEventListener('click', ()=> placePlate(el.dataset.id, null));
+      });
+    }
+
+    if (!platesPlaced) {
+      this.narrate('Charged particles are attracted to opposite charge. Place a + and − deflection plate above/below the tube to test the ray’s charge.');
+      return;
+    }
+    this.narrate('Look — the green beam bends toward the positive plate. That means the particles in the ray are negatively charged.');
+    this.mcQuestion('Charge of the cathode ray particles?', [
+      {text:'Negative', correct:true},
+      {text:'Positive', correct:false},
+      {text:'Neutral', correct:false},
+    ], ()=>{
+      this.addEvidence('e2');
+      this.nextBtn('l5', 'Magnetic Test →');
+    });
+  }
+
+  renderL5(wrap) {
+    const curve = this.state.l5mag ? 42 : 0;
+    wrap.innerHTML = `<div class="stage-title">Level 5 — Magnetic Deflection</div>
+      ${this.crtSVG({showBeam:true, beamCurve: curve })}
+      <div class="parts-tray">
+        ${this.state.l5mag ? '<span class="small">Horseshoe magnet in place — beam deflects perpendicular to field.</span>' :
+        `<div class="draggable" data-id="magnet" style="display:flex; align-items:center; gap:8px;">
+          <svg width="56" height="34" viewBox="0 0 56 34">
+            <path d="M8 8 H48 C52 8 52 26 48 26 H8 C4 26 4 8 8 8Z" class="magnet-body"/>
+            <rect x="2" y="6" width="10" height="12" class="magnet-n"/>
+            <rect x="2" y="18" width="10" height="12" class="magnet-s"/>
+            <text x="7" y="15" text-anchor="middle" fill="white" font-size="8">N</text>
+            <text x="7" y="27" text-anchor="middle" fill="white" font-size="8">S</text>
+          </svg>
+          Drag Magnet
+        </div>`}
+      </div>
+    `;
+    if (!this.state.l5mag) {
+      this.makeDraggable(wrap);
+      const svg = wrap.querySelector('.crt-svg');
+      svg.addEventListener('dragover', e=>e.preventDefault());
+      svg.addEventListener('drop', e=>{
+        e.preventDefault();
+        this.state.l5mag = true;
+        this.render();
+      });
+      // tap fallback: tap the magnet to bring it to the tube
+      const mag = wrap.querySelector('.draggable[data-id="magnet"]');
+      if (mag) mag.addEventListener('click', ()=>{ this.state.l5mag = true; this.render(); });
+      this.narrate('Electric deflection proved charge. A magnetic field should deflect moving charges too — by the Lorentz force. Drag (or tap) the horseshoe magnet near the tube.');
+    } else {
+      this.narrate('Deflected again, 90° to the magnetic field. This is exactly how moving charged particles behave. Not light. Particles.');
+      if (!this.evidence.find(e=>e.id==='e3')) this.addEvidence('e3');
+      this.nextBtn('l6', 'Is it universal? →');
+    }
+  }
+
+  renderL6(wrap) {
+    wrap.innerHTML = `<div class="stage-title">Level 6 — Universal Test</div>
+      ${this.crtSVG({showBeam:true, beamCurve:0})}
+      <div class="control-row">
+        <div class="control">
+          <label>Electrode Metal</label>
+          <select id="metalSel">
+            <option>Platinum</option><option>Aluminium</option><option>Copper</option><option>Iron</option>
+          </select>
+        </div>
+        <div class="control">
+          <label>Residual Gas</label>
+          <select id="gasSel">
+            <option>Air</option><option>Hydrogen</option><option>Neon</option><option>Carbon Dioxide</option>
+          </select>
+        </div>
+        <button class="btn" id="fireTest">Fire Ray</button>
+      </div>
+      <p class="hint center" id="testLog">Tested combinations: ${this.state.l6tests.size} / 2 needed</p>
+    `;
+    const log = ()=>{
+      document.getElementById('testLog').textContent = `Tested combinations: ${this.state.l6tests.size} / 2 needed — Ray is always identical: green, negative, same deflection.`;
+    };
+    document.getElementById('fireTest').onclick = ()=>{
+      const m = document.getElementById('metalSel').value;
+      const g = document.getElementById('gasSel').value;
+      this.state.l6tests.add(m+'|'+g);
+      log();
+      // flash beam
+      const bp = document.getElementById('beamPath');
+      if (bp){ bp.style.opacity=.2; setTimeout(()=>bp.style.opacity=1,120);}
+      if (this.state.l6tests.size >= 2 && !wrap.querySelector('.mc-btn')) {
+        this.narrate('Change the metal. Change the gas. The ray is ALWAYS the same.');
+        this.mcQuestion('What does this mean?', [
+          {text:'These particles exist in ALL atoms', correct:true},
+          {text:'Platinum is special', correct:false},
+          {text:'The gas creates the rays', correct:false},
+        ], ()=>{
+          this.addEvidence('e4');
+          this.nextBtn('l7', 'Measure e/m →');
+        });
+      }
+    };
+    this.narrate('Dalton said each element’s atoms are unique. If cathode rays come FROM the atoms, are they different for different metals? Test it.');
+  }
+
+  renderL7(wrap) {
+    const targetE = 42, targetB = 38;
+    const calcCurve = ()=> (this.state.l7e - targetE)*0.9 - (this.state.l7b - targetB)*0.9;
+    wrap.innerHTML = `<div class="stage-title">Level 7 — Crossed-Field e/m Measurement</div>
+      ${this.crtSVG({showBeam:true, beamCurve: calcCurve() })}
+      <div class="measure-grid">
+        <div class="control">
+          <label id="eLabel">Electric Field E (V/m) — ${this.state.l7e}</label>
+          <input type="range" id="eSlider" min="-80" max="80" value="${this.state.l7e}">
+        </div>
+        <div class="control">
+          <label id="bLabel">Magnetic Field B (mT) — ${this.state.l7b}</label>
+          <input type="range" id="bSlider" min="-80" max="80" value="${this.state.l7b}">
+        </div>
+        <div class="measure-readout" id="l7readout"></div>
+      </div>
+    `;
+    // Update only the beam + readout while dragging (no full re-render, so sliders stay grabbable).
+    const refresh = ()=>{
+      const curve = calcCurve();
+      const balanced = Math.abs(curve) < 6;
+      const cy = 140, qy = cy + curve*0.7;
+      const bp = wrap.querySelector('#beamPath');
+      if (bp) bp.setAttribute('d', `M 88 ${cy} Q 400 ${qy} 715 ${qy}`);
+      const be = wrap.querySelector('#beamEnd');
+      if (be) be.setAttribute('cy', qy);
+      wrap.querySelector('#eLabel').textContent = `Electric Field E (V/m) — ${this.state.l7e}`;
+      wrap.querySelector('#bLabel').textContent = `Magnetic Field B (mT) — ${this.state.l7b}`;
+      wrap.querySelector('#l7readout').innerHTML =
+        `Beam deflection: ${balanced ? '<span style="color:#39ff14">NULL — straight!</span>' : curve.toFixed(1)+' px'}<br>` +
+        (balanced
+          ? `v = E / B<br>e/m = E² / (2 V B²) = <b>1.76 × 10¹¹ C/kg</b><br>Hydrogen ion e/m = 9.6 × 10⁷ C/kg<br>→ Mass ≈ <b>1 / 1837</b> H atom`
+          : 'Adjust E and B to cancel deflection and straighten the beam...');
+      if (balanced && !this._l7done) {
+        this._l7done = true;
+        this.narrate('Null deflection! E = v B. Thomson measured e/m = 1.76×10¹¹ C/kg — nearly two thousand times larger than a hydrogen ion. Either enormous charge, or minuscule mass. It was mass.');
+        if (!this.evidence.find(x=>x.id==='e5')) this.addEvidence('e5');
+        this.nextBtn('final', 'Open Evidence Board →');
+      } else if (!balanced && this._l7done) {
+        this._l7done = false;
+        this.narrate('Beam deflected again. Re-tune E and B until it is perfectly straight (null).');
+      }
+    };
+    wrap.querySelector('#eSlider').oninput = ev => { this.state.l7e = parseInt(ev.target.value); refresh(); };
+    wrap.querySelector('#bSlider').oninput = ev => { this.state.l7b = parseInt(ev.target.value); refresh(); };
+
+    this._l7done = false;
+    this.narrate('Crossed electric and magnetic fields. Tune E and B until the beam is perfectly straight again — the electric force cancels the magnetic force. Then we can compute e/m.');
+    refresh();
+  }
+
+  renderFinal(wrap) {
+    // show evidence board UI
+    document.getElementById('notebook').classList.remove('collapsed');
+    document.getElementById('conclusionArea').style.display = 'block';
+    wrap.innerHTML = `
+      <div class="stage-title">Final — Build Thomson's Conclusion</div>
+      <p style="text-align:center; margin:8px 0 14px; color:#c9d8ea;">Drag (or tap) all 5 evidence cards into the Conclusion Box on the left.</p>
+      <div style="text-align:center; font-size:13.5px; color:var(--muted);">
+        Placed: <b id="placedCount">${this.state.finalPlaced.size}</b> / 5
+      </div>
+      <div id="evidenceTray" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:16px;"></div>
+    `;
+    const placeEvidence = (id)=>{
+      if (!this.evidence.find(x=>x.id===id)) return;
+      if (this.state.finalPlaced.has(id)) return;
+      this.state.finalPlaced.add(id);
+      const cardTarget = document.getElementById('conclusionCards');
+      const def = this.evidenceDefs.find(d=>d.id===id);
+      if (![...cardTarget.children].some(c=>c.dataset.id===id)) {
+        const c = document.createElement('div');
+        c.dataset.id = id;
+        c.className='evidence-card placed';
+        c.textContent = def.text;
+        cardTarget.appendChild(c);
+      }
+      document.getElementById('conclusionCount').textContent = this.state.finalPlaced.size;
+      this.render(); // refresh tray + check completion
+    };
+
+    const tray = wrap.querySelector('#evidenceTray');
+    this.evidenceDefs.forEach(def=>{
+      const has = this.evidence.find(e=>e.id===def.id);
+      if (!has) return;
+      const placed = this.state.finalPlaced.has(def.id);
+      const card = document.createElement('div');
+      card.className = 'evidence-card' + (placed ? ' placed':'' );
+      card.textContent = def.text;
+      card.draggable = !placed;
+      card.dataset.id = def.id;
+      card.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', def.id));
+      if (!placed) card.addEventListener('click', ()=> placeEvidence(def.id)); // tap fallback
+      tray.appendChild(card);
+    });
+
+    const drop = document.getElementById('conclusionDrop');
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('drag-over'); };
+    drop.ondragleave = ()=> drop.classList.remove('drag-over');
+    drop.ondrop = e => {
+      e.preventDefault(); drop.classList.remove('drag-over');
+      placeEvidence(e.dataTransfer.getData('text/plain'));
+    };
+    document.getElementById('conclusionCount').textContent = this.state.finalPlaced.size;
+
+    if (this.state.finalPlaced.size >= 5) {
+      this.narrate('All evidence assembled. One final question for the Royal Society...');
+      this.mcQuestion('Thomson discovered a universal, negatively charged subatomic particle. He called it a...', [
+        {text:'Corpuscle / Electron', correct:true},
+        {text:'Proton', correct:false},
+        {text:'Neutron', correct:false},
+        {text:'Alpha particle', correct:false},
+      ], ()=>{
+        this.narrate('Correct. 1897 — the electron. The atom IS divisible. First subatomic particle discovered. Beautiful first-principles work.', 
+          `<button class="btn primary" id="bonusBtn">Bonus: Build Plum Pudding →</button>
+           <button class="btn" onclick="location.reload()">Play Again</button>`);
+        document.getElementById('bonusBtn').onclick = ()=> {
+          document.getElementById('conclusionArea').style.display='none';
+          this.setLevel('bonus');
+        };
+      });
+    } else {
+      this.narrate('Drag the 5 evidence cards from the stage (or mentally from your notebook) into the Conclusion Box in the Evidence Board on the left. You have ' + this.evidence.length + '/5 pieces discovered.');
+    }
+  }
+
+  renderBonus(wrap) {
+    document.getElementById('conclusionArea').style.display='none';
+    document.getElementById('notebook').classList.add('collapsed');
+    wrap.innerHTML = `
+      <div class="stage-title">Bonus — Thomson's Plum Pudding Model, 1904</div>
+      <div class="pudding-wrap">
+        <div class="pudding-circle" id="pudding"></div>
+        <div>
+          <h3 style="margin-bottom:8px;">Electrons</h3>
+          <div class="electron-pool" id="electronPool"></div>
+          <p class="small" style="margin-top:12px; max-width:220px;">Drag green electrons into the positive red “pudding” — or tap one to drop it in at random. Thomson thought electrons were embedded like plums, making a neutral atom.<br><br>Placed: <b id="pCount">0</b></p>
+          <button class="btn" style="margin-top:10px" onclick="game.setLevel('final')">← Back to Conclusion</button>
+        </div>
+      </div>
+    `;
+    const pool = document.getElementById('electronPool');
+    const pudding = document.getElementById('pudding');
+    const embedElectron = (x, y)=>{
+      const r = pudding.clientWidth/2 - 14;
+      if (x==null || y==null){ // tap: random spot inside the sphere
+        const ang = Math.random()*Math.PI*2, rad = Math.sqrt(Math.random())*r;
+        x = pudding.clientWidth/2 + Math.cos(ang)*rad;
+        y = pudding.clientHeight/2 + Math.sin(ang)*rad;
+      }
+      const dot = document.createElement('div');
+      dot.className='electron-dot';
+      dot.style.left = (x-11)+'px';
+      dot.style.top = (y-11)+'px';
+      pudding.appendChild(dot);
+      this.state.bonusCount++;
+      document.getElementById('pCount').textContent = this.state.bonusCount;
+    };
+    for(let i=0;i<14;i++){
+      const d = document.createElement('div');
+      d.className='electron-dot';
+      d.draggable=true;
+      d.dataset.id='e'+i;
+      d.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain','electron'));
+      d.addEventListener('click', ()=> embedElectron(null, null)); // tap fallback
+      pool.appendChild(d);
+    }
+    pudding.addEventListener('dragover', e=>e.preventDefault());
+    pudding.addEventListener('drop', e=>{
+      e.preventDefault();
+      const rect = pudding.getBoundingClientRect();
+      embedElectron(e.clientX - rect.left, e.clientY - rect.top);
+    });
+    this.narrate('Bonus lab: Thomson’s 1904 model. Atoms are a sphere of uniform positive charge with electrons embedded in it — “plums in a pudding”. It was wrong (Rutherford, 1911), but it was the first atomic model with subatomic particles. Drag or tap electrons in to build it!');
+  }
+}
+
+const game = new ElectronHunter();
+window.game = game;
+</script>
+</body>
+</html>
