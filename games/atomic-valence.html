@@ -273,7 +273,27 @@
     .nucleus { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #f87171, #dc2626); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; }
     .detail-btn { margin-top: 12px; }
     .detail-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.4s ease; opacity: 0; }
-    .detail-panel.open { max-height: 2000px; opacity: 1; margin-top: 14px; }
+    .detail-panel.open { max-height: 4000px; opacity: 1; margin-top: 14px; }
+
+    /* Element picker / random generator */
+    .picker-bar {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: center;
+      background: rgba(15,23,42,0.5); border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 18px;
+    }
+    .picker-field { display: flex; flex-direction: column; gap: 6px; }
+    .picker-field label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .picker-field select {
+      padding: 10px 12px; border-radius: 10px; border: 1px solid var(--card-border);
+      background: rgba(15,23,42,0.7); color: var(--text); font-size: 0.92rem; min-width: 210px; cursor: pointer;
+    }
+    .picker-field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.15); }
+    .picker-bar .btn { align-self: flex-end; }
+    .rules-applied { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.25); border-radius: 12px; padding: 14px; margin-top: 14px; text-align: left; }
+    .rules-applied h4 { color: var(--warning); font-size: 0.95rem; margin-bottom: 8px; }
+    .rules-applied ul { margin: 0 0 0 18px; }
+    .rules-applied li { color: #cbd5e1; font-size: 0.88rem; margin-bottom: 5px; line-height: 1.5; }
+    .rules-applied li strong { color: #fcd34d; }
   </style>
 </head>
 <body>
@@ -601,6 +621,28 @@
         <div class="stat"><div class="stat-value" id="round">1</div><div class="stat-label">Round</div></div>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+
+      <div class="picker-bar" id="picker-bar">
+        <div class="picker-field">
+          <label for="el-picker">Choose any element</label>
+          <select id="el-picker" onchange="loadSpecificElement()"></select>
+        </div>
+        <div class="picker-field">
+          <label for="charge-picker">Charge / ion state</label>
+          <select id="charge-picker" onchange="loadSpecificElement()">
+            <option value="auto">Auto (random)</option>
+            <option value="0">Neutral atom</option>
+            <option value="1">Cation +1</option>
+            <option value="2">Cation +2</option>
+            <option value="3">Cation +3</option>
+            <option value="4">Cation +4</option>
+            <option value="-1">Anion −1</option>
+            <option value="-2">Anion −2</option>
+            <option value="-3">Anion −3</option>
+          </select>
+        </div>
+        <button class="btn btn-outline" type="button" onclick="randomElement()">🎲 Random element</button>
+      </div>
 
       <div class="element-hero" id="element-hero">
         <div class="big-symbol" id="el-symbol">H</div>
@@ -936,8 +978,10 @@
       chem.classList.add('hidden');
 
       const hero = document.getElementById('element-hero');
+      const pickerBar = document.getElementById('picker-bar');
       const btnNext = document.getElementById('btn-next');
       hero.classList.remove('hidden');
+      if (pickerBar) pickerBar.classList.remove('hidden');
       btnNext.classList.add('hidden');
 
       if (currentMode === 'quick') {
@@ -947,6 +991,7 @@
         chem.classList.remove('hidden');
         mini.classList.add('hidden');
         hero.classList.add('hidden');
+        if (pickerBar) pickerBar.classList.add('hidden');
         initChemLab();
       } else {
         full.classList.remove('hidden');
@@ -1270,19 +1315,21 @@
     }
     function formatCharge(c) { return c>0 ? '+'+c : c<0 ? '−'+Math.abs(c) : '0'; }
 
-    function newRound() {
-      answered = false; hideFeedback();
-      document.getElementById('btn-next').classList.add('hidden');
-      clearInputs();
-      renderModeUI();
+    // Populate the "choose any element" dropdown once.
+    function populateElementPicker() {
+      const sel = document.getElementById('el-picker');
+      if (!sel) return;
+      sel.innerHTML = names.map((nm, i) => `<option value="${i+1}">${i+1} · ${symbols[i]} — ${nm}</option>`).join('');
+    }
 
-      const z = pickRandomElement();
+    // Load a specific element + charge into the hero and compute the answer key.
+    function applyElement(z, chg) {
+      if (chg > z) chg = z; // can't lose more electrons than the atom has
       el = { z, name: names[z-1], symbol: symbols[z-1], neutrons: neutrons[z-1], mass: z + neutrons[z-1] };
-      charge = randCharge(z); if (charge > z) charge = z;
+      charge = chg;
       const {vs, ve, sh, cfg} = getValenceInfo(z);
       const valency = getValency(z, ve);
-      const protons = z; const neutrons = el.neutrons; const electrons = z - charge;
-      answers = { protons, neutrons, electrons, valenceShell: vs, valenceElectrons: ve, valency, sh, cfg };
+      answers = { protons: z, neutrons: el.neutrons, electrons: z - charge, valenceShell: vs, valenceElectrons: ve, valency, sh, cfg };
 
       const hero = document.getElementById('element-hero');
       hero.style.setProperty('--category-color', getCategoryColor(z));
@@ -1297,6 +1344,10 @@
       else if (charge > 0) { ce.textContent = `Cation: ${el.symbol}${formatCharge(charge)}`; ce.className = 'charge-badge cation'; }
       else { ce.textContent = `Anion: ${el.symbol}${formatCharge(charge)}`; ce.className = 'charge-badge anion'; }
 
+      // keep the picker dropdowns in sync with the current element/charge
+      const elPicker = document.getElementById('el-picker'); if (elPicker) elPicker.value = String(z);
+      const chPicker = document.getElementById('charge-picker'); if (chPicker) chPicker.value = String(charge);
+
       if (currentMode === 'quick') {
         const types = ['protons','neutrons','electrons','valenceShell','valenceElectrons','valency'];
         qType = types[Math.floor(Math.random()*types.length)];
@@ -1304,6 +1355,38 @@
         document.getElementById('quick-question').textContent = labels[qType];
         document.getElementById('in-quick').value = '';
       }
+    }
+
+    function newRound() {
+      answered = false; hideFeedback();
+      document.getElementById('btn-next').classList.add('hidden');
+      clearInputs();
+      renderModeUI();
+
+      const z = pickRandomElement();
+      let chg = randCharge(z);
+      applyElement(z, chg);
+    }
+
+    // Load whatever element + charge the student picked from the dropdowns.
+    function loadSpecificElement() {
+      const z = parseInt(document.getElementById('el-picker').value);
+      if (!z) return;
+      const chSel = document.getElementById('charge-picker').value;
+      const chg = chSel === 'auto' ? randCharge(z) : parseInt(chSel);
+      answered = false; hideFeedback();
+      document.getElementById('btn-next').classList.add('hidden');
+      clearInputs();
+      renderModeUI();
+      applyElement(z, chg);
+    }
+
+    // Jump to a random element (charge auto-randomised).
+    function randomElement() {
+      const z = Math.floor(Math.random() * 118) + 1;
+      document.getElementById('el-picker').value = String(z);
+      document.getElementById('charge-picker').value = 'auto';
+      loadSpecificElement();
     }
 
     function clearInputs() {
@@ -1439,6 +1522,32 @@
           ${ionReason}
         </div>
 
+        <div class="rules-applied">
+          <h4>📏 Rules Applied (why the answer is what it is)</h4>
+          <ul>
+            <li><strong>Protons = Z:</strong> the proton count equals the atomic number and never changes → ${protons}.</li>
+            <li><strong>Neutrons = A − Z:</strong> ${mass} − ${z} = ${neutrons} (uses the most common isotope).</li>
+            <li><strong>Electrons:</strong> ${charge === 0
+              ? `neutral atom, so electrons = protons = Z = ${electrons}.`
+              : charge > 0
+                ? `cation, so electrons = Z − charge = ${z} − ${Math.abs(charge)} = ${electrons} (lost ${Math.abs(charge)} e⁻).`
+                : `anion, so electrons = Z + |charge| = ${z} + ${Math.abs(charge)} = ${electrons} (gained ${Math.abs(charge)} e⁻).`}</li>
+            <li><strong>Valence shell:</strong> the highest principal shell (n) holding electrons → n = ${valenceShell}.</li>
+            <li><strong>Valence electrons:</strong> electrons sitting in shell n=${valenceShell} → ${valenceElectrons}.</li>
+            <li><strong>Valency:</strong> ${sBlock.has(z) || pBlock.has(z)
+              ? (valenceElectrons <= 4
+                  ? `valence e⁻ ≤ 4, so valency = valence e⁻ = ${valency} (loses electrons).`
+                  : valenceElectrons >= 8
+                    ? `complete octet, so valency = 0 (stable).`
+                    : `valence e⁻ > 4, so valency = 8 − ${valenceElectrons} = ${valency} (gains electrons).`)
+              : dBlock.has(z)
+                ? `transition metal — variable valency; common value = ${valency}.`
+                : fBlock.has(z)
+                  ? `inner-transition metal — typical valency = ${valency}.`
+                  : `valency = ${valency}.`}</li>
+          </ul>
+        </div>
+
         <div class="exp-card" style="margin-top:14px;">
           <h4>🎨 Shell Diagram</h4>
           <div class="shell-diagram">
@@ -1464,13 +1573,18 @@
       html += '</div>';
       const pills = Object.keys(sh).sort((a,b)=>+a-+b).map(n => `<span class="shell-pill">Shell ${n}: ${sh[n]}e</span>`).join('');
       html += `<div style="margin-top:8px;">${pills}</div>`;
-      html += `<button class="btn btn-info detail-btn" onclick="toggleDetail()">🔍 Show Detailed Explanation</button>`;
-      html += `<div id="detail-panel" class="detail-panel">${buildDetailedExplanation()}</div>`;
+      html += `<button class="btn btn-info detail-btn" onclick="toggleDetail()">🔍 Hide Detailed Explanation</button>`;
+      html += `<div id="detail-panel" class="detail-panel open">${buildDetailedExplanation()}</div>`;
       return html;
     }
 
     function toggleDetail() {
-      document.getElementById('detail-panel').classList.toggle('open');
+      const p = document.getElementById('detail-panel');
+      const open = p.classList.toggle('open');
+      const btn = p.previousElementSibling;
+      if (btn && btn.classList.contains('detail-btn')) {
+        btn.textContent = open ? '🔍 Hide Detailed Explanation' : '🔍 Show Detailed Explanation';
+      }
     }
 
     function showFeedback(type, title, body) {
@@ -1519,6 +1633,7 @@
     });
 
     selectMode('full');
+    populateElementPicker();
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0cf303c4a4a45ec',t:'MTc4MTY2OTI1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
