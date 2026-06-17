@@ -300,6 +300,12 @@
                 <p class="muted" style="font-size:0.9rem;margin:0 0 14px">Build atoms shell by shell · valence electrons · metal/non-metal classification · interactive filling game.</p>
                 <span class="primary-btn" style="display:inline-block;font-size:0.85rem;padding:8px 18px">Launch →</span>
               </div>
+              <div class="panel-card" style="cursor:pointer;border-radius:12px;padding:24px;transition:box-shadow 0.2s,transform 0.15s" onmouseenter="this.style.transform='translateY(-3px)'" onmouseleave="this.style.transform=''" onclick="loadGame('dalton')">
+                <div style="font-size:2.4rem;margin-bottom:12px">🔬</div>
+                <h3 style="margin:0 0 6px">Become John Dalton</h3>
+                <p class="muted" style="font-size:0.9rem;margin:0 0 14px">Discover the atom by experiment — gas sim, combining-weight trials &amp; build your own atomic model from evidence.</p>
+                <span class="primary-btn" style="display:inline-block;font-size:0.85rem;padding:8px 18px">Launch →</span>
+              </div>
             </div>
             <div id="gameFrame" style="display:none">
               <div class="game-frame-bar">
@@ -444,7 +450,8 @@
   <script>
     const GAMES = {
       'electron-config': { title: '⚛️ Electronic Configurations', src: 'games/electron-config.html' },
-      'atomic-valence': { title: '🧪 Atomic Structure & Valence Filling', src: 'games/atomic-valence.html' }
+      'atomic-valence': { title: '🧪 Atomic Structure & Valence Filling', src: 'games/atomic-valence.html' },
+      'dalton': { title: '🔬 Become John Dalton — Discover the Atom', src: 'games/dalton.html' }
     };
     function loadGame(key) {
       const g = GAMES[key];

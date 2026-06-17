@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Become John Dalton: Discover the Atom Yourself</title>
+<style>
+  :root {
+    --bg: #f5f0e6;
+    --paper: #fffcf5;
+    --ink: #2b241c;
+    --accent: #8b4513;
+    --accent2: #1a6b4e;
+    --accent3: #2a5a8c;
+    --warn: #b5472a;
+    --gold: #c8963e;
+    --shadow: rgba(43,36,28,0.15);
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family: 'Georgia', 'Times New Roman', serif; background: var(--bg); color: var(--ink); line-height:1.5; }
+  header {
+    background: #221a12; color: #f5e9d4;
+    padding: 16px 20px;
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;
+  }
+  header h1 { font-size:1.3rem; font-weight:700; }
+  header h1 span { color: var(--gold); font-weight:400; font-size:0.95rem; display:block; }
+  .score-bar { font-size:0.85rem; opacity:0.9; }
+  .chapter-nav { display:flex; gap:8px; flex-wrap:wrap; }
+  .chapter-btn {
+    background:#3a2c1e; color:#e8d9c2; border:1px solid #5a4530; padding:8px 14px; border-radius:20px;
+    cursor:pointer; font-family:inherit; font-size:0.85rem; transition:0.2s;
+  }
+  .chapter-btn.active { background: var(--gold); color:#221a12; font-weight:bold; }
+  .chapter-btn.locked { opacity:0.45; cursor:not-allowed; }
+  .chapter-btn.unlocked:hover { background:#4a3726; }
+  
+  main { max-width:1100px; margin: 20px auto; padding:0 16px 60px; }
+  .chapter-panel { display:none; }
+  .chapter-panel.active { display:block; animation: fadeIn .35s ease;}
+  @keyframes fadeIn { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .lab-grid {
+    display:grid; grid-template-columns: 1.5fr 1fr; gap:18px;
+  }
+  @media(max-width:860px){ .lab-grid{grid-template-columns:1fr;} }
+
+  .card {
+    background: var(--paper);
+    border:1px solid #d8cfbc;
+    border-radius:14px;
+    box-shadow: 0 4px 18px var(--shadow);
+    padding:18px;
+  }
+  .card h2 { font-size:1.15rem; margin-bottom:10px; color: var(--accent); }
+  .card h3 { font-size:1rem; margin: 12px 0 6px; color: var(--accent3);}
+  
+  canvas.sim-canvas {
+    background: #fcf8ef;
+    border:2px solid #c9baa0;
+    border-radius:10px;
+    width:100%;
+    height:340px;
+    display:block;
+  }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  button, select, input[type="range"] {
+    font-family: inherit;
+  }
+  .btn {
+    background: var(--accent2); color:white; border:none; padding:9px 14px; border-radius:8px;
+    cursor:pointer; font-size:0.9rem; transition:0.15s;
+  }
+  .btn:hover { filter:brightness(1.08); }
+  .btn.secondary { background: #6b5a44; }
+  .btn.ghost { background: transparent; color: var(--accent); border:1px solid #c9baa0; }
+  .btn.small { padding:5px 10px; font-size:0.82rem;}
+  .btn:disabled { opacity:0.5; cursor:not-allowed;}
+
+  label { font-size:0.88rem; }
+  .gas-picker { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;}
+  .gas-dot {
+    width:44px; height:44px; border-radius:50%; border:2px solid #00000022; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:bold; color:#fff;
+    text-shadow:0 1px 2px #00000055;
+  }
+  .gas-dot.selected { outline:3px solid #222; outline-offset:2px; }
+
+  .notebook {
+    background:#fdf8e9;
+    border:1px dashed #c6b38a;
+    border-radius:10px;
+    padding:12px;
+    font-family: 'Courier New', monospace;
+    font-size:0.84rem;
+    min-height:140px;
+    max-height:240px;
+    overflow-y:auto;
+  }
+  .notebook p { margin-bottom:6px; border-bottom:1px dotted #e2d3b5; padding-bottom:4px;}
+  .mentor-box {
+    background:#eef5f1; border-left:4px solid var(--accent2);
+    padding:12px 14px; border-radius:8px; margin-top:12px; font-style:italic;
+  }
+  .mentor-box strong { font-style:normal; }
+  .choices { display:grid; gap:8px; margin-top:10px;}
+  .choice {
+    background:#fff; border:1.5px solid #cfc2aa; padding:10px 12px; border-radius:9px; cursor:pointer;
+    transition:0.15s;
+  }
+  .choice:hover { border-color: var(--accent3); background:#f7f2e6;}
+  .choice.correct { border-color:#1a6b4e; background:#e6f3eb;}
+  .choice.wrong { border-color:#b5472a; background:#fbe9e4;}
+
+  .evidence-strip {
+    display:flex; gap:12px; flex-wrap:wrap; margin:14px 0;
+  }
+  .evidence-card {
+    background:#fff9ee; border:1px solid #d5c5a4; border-radius:10px; padding:10px 12px; min-width:220px; flex:1;
+    font-size:0.86rem;
+  }
+  .evidence-card.locked { opacity:0.45; filter: grayscale(0.6);}
+  .evidence-card .tag { font-size:0.72rem; text-transform:uppercase; letter-spacing:.04em; color:#8b6a3a; }
+
+  table.data-table { width:100%; border-collapse:collapse; font-size:0.88rem; margin-top:8px;}
+  table.data-table th, table.data-table td { border:1px solid #d5c7ad; padding:6px 8px; text-align:center;}
+  table.data-table th { background:#f2e7d2;}
+
+  .ratio-bank { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+  .ratio-chip {
+    background:#fff; border:1.5px solid #bfae8c; padding:7px 12px; border-radius:20px; cursor:grab;
+    font-family: 'Courier New', monospace; user-select:none;
+  }
+  .ratio-drop {
+    min-height:54px; background:#f7f0de; border:2px dashed #c9b48d; border-radius:10px;
+    padding:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  }
+  .model-workshop {
+    display:grid; grid-template-columns: 200px 1fr; gap:14px;
+  }
+  @media(max-width:700px){ .model-workshop{grid-template-columns:1fr;} }
+  .parts-palette { background:#f7f0de; border-radius:10px; padding:12px; }
+  .model-part {
+    background:#fff; border:1.5px solid #ccb998; border-radius:10px; padding:8px; margin-bottom:8px;
+    cursor:grab; text-align:center; font-size:0.84rem;
+  }
+  .model-canvas-drop {
+    background:#fcf8ef; border:2px dashed #c9baa0; border-radius:12px; min-height:280px;
+    display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+  }
+  .dropped-part {
+    position:absolute; font-size:0.8rem; background:#fff; border:1px solid #c9baa0; padding:6px 10px; border-radius:8px;
+    cursor:move;
+  }
+  .test-results { font-size:0.9rem; margin-top:10px; }
+  .test-results li { margin-bottom:5px; }
+
+  .toast {
+    position:fixed; right:18px; bottom:18px; background:#221a12; color:#f3e5cc;
+    padding:12px 16px; border-radius:10px; box-shadow:0 8px 26px rgba(0,0,0,0.3);
+    opacity:0; transform:translateY(10px); transition:0.3s; z-index:999;
+    max-width:320px; font-size:0.9rem;
+  }
+  .toast.show { opacity:1; transform:translateY(0);}
+  .badge { display:inline-block; background:var(--gold); color:#221a12; padding:2px 8px; border-radius:99px; font-size:0.73rem; font-weight:bold; margin-left:6px;}
+
+  footer { text-align:center; padding:30px 16px; color:#8a7860; font-size:0.82rem; }
+  .muted { color:#7b6a54; font-size:0.86rem;}
+  .flex { display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  hr.dotted { border:none; border-top:1px dashed #c9baa0; margin:12px 0;}
+  .big-theory {
+    background:#fff9ee; border:2px solid var(--gold); border-radius:14px; padding:20px; margin-top:14px;
+  }
+  .big-theory ol { padding-left:20px; }
+  .big-theory li { margin-bottom:6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Become John Dalton <span>Discover the Atom Yourself — 1803, Manchester</span></h1>
+  </div>
+  <div class="score-bar" id="scoreBar">
+    Observation: 0 • Reasoning: 0 • Model: 0<br>
+    Achievements: <span id="achievementCount">0 / 4</span>
+  </div>
+  <nav class="chapter-nav" id="chapterNav">
+    <button class="chapter-btn active unlocked" data-chapter="1">Ch.1 Gases</button>
+    <button class="chapter-btn locked" data-chapter="2">Ch.2 Weights</button>
+    <button class="chapter-btn locked" data-chapter="3">Ch.3 Model</button>
+  </nav>
+</header>
+
+<main>
+  <div class="evidence-strip" id="evidenceStrip">
+    <div class="evidence-card locked" id="evidence1">
+      <div class="tag">Evidence Card 1</div>
+      <strong>Gas Independence</strong><br>
+      <span class="muted">Matter is made of tiny independent moving particles.</span>
+    </div>
+    <div class="evidence-card locked" id="evidence2">
+      <div class="tag">Evidence Card 2</div>
+      <strong>Whole-Number Ratios</strong><br>
+      <span class="muted">Matter consists of discrete countable units.</span>
+    </div>
+    <div class="evidence-card locked" id="evidence3">
+      <div class="tag">Final Theory</div>
+      <strong>Dalton's Atomic Theory</strong><br>
+      <span class="muted">Unlock by building a correct model.</span>
+    </div>
+  </div>
+
+  <!-- CHAPTER 1 -->
+  <section class="chapter-panel active" id="ch1">
+    <div class="lab-grid">
+      <div class="card">
+        <h2>Chapter 1: The Mystery of Gases</h2>
+        <p class="muted">What is matter made of? Why do chemicals combine in fixed ratios?</p>
+        <canvas id="gasCanvas" class="sim-canvas" width="640" height="340"></canvas>
+        <div class="flex" style="margin-top:8px;">
+          <label>Pressure: <input type="range" id="pressureSlider" min="1" max="8" value="2"> <span id="pressureVal">2</span> atm</label>
+          <label style="margin-left:12px;">Temperature: <input type="range" id="tempSlider" min="1" max="5" value="3"> <span id="tempVal">cool-warm</span></label>
+        </div>
+        <div class="controls">
+          <button class="btn secondary small" id="addGasBtn">Add 15 particles</button>
+          <button class="btn ghost small" id="clearGasBtn">Evacuate</button>
+          <button class="btn ghost small" id="mixToggleBtn">Mix Mode: OFF</button>
+        </div>
+        <p class="muted" style="margin-top:6px;">Particles collide elastically. Watch them fill the entire container.</p>
+      </div>
+
+      <div class="card">
+        <h3>Gas Selector</h3>
+        <div class="gas-picker" id="gasPicker">
+          <div class="gas-dot selected" data-gas="oxygen" style="background:#d74a3a;">O₂</div>
+          <div class="gas-dot" data-gas="nitrogen" style="background:#3a7bc8;">N₂</div>
+          <div class="gas-dot" data-gas="hydrogen" style="background:#d9b92d; color:#222;">H₂</div>
+          <div class="gas-dot" data-gas="carbon" style="background:#3d8a5a;">CO₂</div>
+        </div>
+        <div class="flex">
+          <label><input type="checkbox" id="trackA"> Track O₂ only</label>
+          <label><input type="checkbox" id="trackB"> Track N₂ only</label>
+        </div>
+
+        <h3>Observation Notebook</h3>
+        <div class="notebook" id="notebook1">
+          <p>1803 — Dalton's Gas Laboratory, Manchester.</p>
+        </div>
+        <div class="mentor-box" id="mentor1">
+          <strong>Mentor Dalton:</strong> "Add a gas, then compress it. What do you observe about how it fills space? Then try mixing two gases."
+        </div>
+
+        <div id="ch1Quiz" style="display:none; margin-top:12px;">
+          <hr class="dotted">
+          <strong>Discovery Challenge:</strong> What explains why each gas behaves independently?
+          <div class="choices" id="ch1Choices">
+            <div class="choice" data-correct="false">A. Matter is continuous.</div>
+            <div class="choice" data-correct="true">B. Matter is made of separate moving particles.</div>
+            <div class="choice" data-correct="false">C. Matter is liquid-like.</div>
+            <div class="choice" data-correct="false">D. Matter has no structure.</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <button class="btn secondary small" id="hint1Btn">Ask Mentor for a hint</button>
+          <button class="btn small" id="completeCh1Btn" disabled>Submit findings → Chapter 2</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 2 -->
+  <section class="chapter-panel" id="ch2">
+    <div class="lab-grid">
+      <div class="card">
+        <h2>Chapter 2: The Mystery of Chemical Weights</h2>
+        <p class="muted">Combine nitrogen and oxygen. Do they mix in any ratio?</p>
+        <div style="background:#fcf8ef; border:2px solid #c9baa0; border-radius:10px; padding:16px;">
+          <div class="flex" style="justify-content:space-between;">
+            <div>
+              <label>Nitrogen: <span id="nMassLabel">1.0</span> units<br>
+              <input type="range" id="nSlider" min="0.5" max="3" step="0.5" value="1"></label>
+            </div>
+            <div>
+              <label>Oxygen: <span id="oMassLabel">1.0</span> units<br>
+              <input type="range" id="oSlider" min="0.5" max="3" step="0.5" value="1"></label>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.8rem;color:#6a5a44;">Balance</div>
+              <div style="font-size:1.6rem; font-weight:bold;" id="balanceReadout">1 : 1</div>
+            </div>
+          </div>
+          <div style="margin-top:14px; text-align:center;">
+            <button class="btn" id="reactBtn">React in Chamber →</button>
+          </div>
+          <div id="reactionVisual" style="min-height:90px; display:flex; align-items:center; justify-content:center; font-family:'Courier New', monospace; font-size:1.05rem; margin-top:8px;">
+            Set masses, then React.
+          </div>
+        </div>
+
+        <h3>Interactive Data Table</h3>
+        <table class="data-table" id="dataTable">
+          <thead><tr><th>Trial</th><th>Nitrogen</th><th>Oxygen</th><th>Result</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn ghost small" id="clearTableBtn" style="margin-top:6px;">Clear table</button>
+      </div>
+
+      <div class="card">
+        <h3>Data Notebook</h3>
+        <div class="notebook" id="notebook2">
+          <p>Mass recorder ready.</p>
+        </div>
+        <div class="mentor-box" id="mentor2">
+          <strong>Mentor:</strong> "Try 1:1, 1:2, then 1:1.5. Record at least 3 trials. What pattern do you notice?"
+        </div>
+
+        <div id="ch2Quiz" style="display:none; margin-top:12px;">
+          <hr class="dotted">
+          <strong>Law of Multiple Proportions Puzzle</strong>
+          <p class="muted">Drag only the valid whole-number combining ratios into the box.</p>
+          <div class="ratio-bank" id="ratioBank">
+            <div class="ratio-chip" draggable="true" data-valid="true">1 : 1</div>
+            <div class="ratio-chip" draggable="true" data-valid="true">1 : 2</div>
+            <div class="ratio-chip" draggable="true" data-valid="false">1.7 : 1</div>
+            <div class="ratio-chip" draggable="true" data-valid="true">1 : 3</div>
+            <div class="ratio-chip" draggable="true" data-valid="false">2.34 : 1</div>
+          </div>
+          <div class="ratio-drop" id="ratioDrop"><span class="muted">Tap or drag valid ratios here…</span></div>
+          <div style="margin-top:8px; font-size:0.86rem;" id="ratioStatus"></div>
+
+          <hr class="dotted">
+          <strong>Discovery Challenge:</strong> Why do chemical combinations occur in whole-number ratios?
+          <div class="choices" id="ch2Choices" style="margin-top:8px;">
+            <div class="choice" data-correct="false">A. Matter combines randomly</div>
+            <div class="choice" data-correct="true">B. Matter consists of countable building blocks</div>
+            <div class="choice" data-correct="false">C. Matter is continuous</div>
+            <div class="choice" data-correct="false">D. Ratios are accidental</div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <button class="btn secondary small" id="hint2Btn">Ask Mentor</button>
+          <button class="btn small" id="completeCh2Btn" disabled>Submit findings → Chapter 3</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 3 -->
+  <section class="chapter-panel" id="ch3">
+    <div class="card">
+      <h2>Chapter 3: Build Your Atomic Model</h2>
+      <p class="muted">You now have 2 Evidence Cards. Build a model that explains both.</p>
+      <div class="model-workshop">
+        <div class="parts-palette">
+          <strong>Model Components</strong>
+          <div class="model-part" draggable="true" data-part="sphere" data-good="true">⚫ Solid Sphere<br><span class="muted">indivisible</span></div>
+          <div class="model-part" draggable="true" data-part="cube" data-good="false">◼ Cube Block</div>
+          <div class="model-part" draggable="true" data-part="fluid" data-good="false">💧 Continuous Fluid</div>
+          <div class="model-part" draggable="true" data-part="cloud" data-good="false">☁️ Electron Cloud</div>
+          <div class="model-part" draggable="true" data-part="fragments" data-good="false">🧩 Broken Fragments</div>
+          <div class="model-part" draggable="true" data-part="elastic" data-good="false">⚪ Elastic Jelly</div>
+          <p class="muted" style="margin-top:8px; font-size:0.8rem;">Drag <em>or tap</em> parts onto the workspace, then test your model. Tap a placed part to remove it.</p>
+          <button class="btn ghost small" id="clearModelBtn">Clear Workspace</button>
+        </div>
+        <div>
+          <div class="model-canvas-drop" id="modelDrop">
+            <span class="muted" id="modelPlaceholder">Drop or tap model components here</span>
+          </div>
+          <div style="margin-top:10px;" class="flex">
+            <button class="btn" id="testModelBtn">Test Model Against Evidence</button>
+            <button class="btn secondary" id="runReactionBtn">Animate Reaction</button>
+          </div>
+          <ul class="test-results" id="testResults"></ul>
+          <canvas id="reactionCanvas" width="580" height="160" style="width:100%; background:#fdf8ef; border:1px solid #d8cfbc; border-radius:8px; display:none;"></canvas>
+        </div>
+      </div>
+
+      <div class="mentor-box" id="mentor3" style="margin-top:14px;">
+        <strong>Mentor:</strong> "Can your model explain gas independence? Whole-number ratios? Do particles stay unchanged in reactions?"
+      </div>
+
+      <div id="finalDiscovery" style="display:none;">
+        <div class="big-theory">
+          <h3>You have reached the same conclusion John Dalton reached in 1808. <span class="badge">Dalton Reborn</span></h3>
+          <p><strong>DALTON'S ATOMIC THEORY</strong></p>
+          <ol>
+            <li>Matter consists of atoms.</li>
+            <li>Atoms are indivisible.</li>
+            <li>Atoms of the same element are identical.</li>
+            <li>Different elements have different atoms.</li>
+            <li>Atoms combine in whole-number ratios.</li>
+            <li>Chemical reactions rearrange atoms.</li>
+          </ol>
+          <p style="margin-top:10px;">Excellent scientific reasoning. You discovered the atom by evidence, not memorization.</p>
+          <button class="btn" id="sandboxBtn">Open Sandbox Mode</button>
+          <button class="btn secondary" id="teacherBtn">Teacher Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card" id="teacherDashboard" style="display:none; margin-top:18px;">
+    <h2>Teacher Dashboard / Assessment</h2>
+    <div id="assessmentText" class="muted"></div>
+    <p style="margin-top:8px;">Save file is stored in browser localStorage as <code>dalton_save_v1</code>. Students can Export/Import.</p>
+    <div class="controls">
+      <button class="btn secondary small" id="exportBtn">Export Save</button>
+      <button class="btn ghost small" id="importBtn">Import Save</button>
+      <button class="btn ghost small" id="resetBtn">Reset Progress</button>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  Become John Dalton: Discover the Atom Yourself — Educational Simulation for Class 8–10<br>
+  Inquiry-based • Evidence-driven • Browser-based • No installs
+</footer>
+
+<script>
+/* ===== STATE ===== */
+let state = {
+  chapter: 1,
+  unlocked: {1:true,2:false,3:false},
+  scores: {observation:0, reasoning:0, model:0},
+  achievements: [],
+  notebook1: ["1803 — Dalton's Gas Laboratory, Manchester."],
+  notebook2: ["Mass recorder ready."],
+  gasTrials:0,
+  mixTrials:0,
+  weightTrials:0,
+  ch1Passed:false,
+  ch2Passed:false,
+  ch3Passed:false,
+  evidence:{1:false,2:false,3:false}
+};
+
+function saveState(){ localStorage.setItem('dalton_save_v1', JSON.stringify(state)); updateAssessment();}
+function loadState(){
+  try{ const s = JSON.parse(localStorage.getItem('dalton_save_v1')); if(s) Object.assign(state, s);}catch(e){}
+}
+loadState();
+
+/* ===== UTIL ===== */
+const $ = id => document.getElementById(id);
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function addAchievement(name){
+  if(!state.achievements.includes(name)){
+    state.achievements.push(name);
+    toast("Achievement unlocked: " + name);
+    updateScoreBar();
+    saveState();
+  }
+}
+function updateScoreBar(){
+  $('scoreBar').innerHTML = `Observation: ${state.scores.observation} • Reasoning: ${state.scores.reasoning} • Model: ${state.scores.model}<br>Achievements: <span id="achievementCount">${state.achievements.length} / 4</span>`;
+}
+function unlockEvidence(n){
+  state.evidence[n]=true;
+  const el = $('evidence'+n);
+  if(el) el.classList.remove('locked');
+  saveState();
+}
+function updateAssessment(){
+  const ad = $('assessmentText');
+  if(!ad) return;
+  ad.innerHTML = `
+  <strong>Observation Skills:</strong> ${state.scores.observation}/30<br>
+  <strong>Data Interpretation:</strong> ${state.scores.reasoning}/30<br>
+  <strong>Scientific Reasoning / Model Construction:</strong> ${state.scores.model}/40<br><br>
+  <strong>Trials completed:</strong> Gas ${state.gasTrials}, Mixing ${state.mixTrials}, Weight ${state.weightTrials}<br>
+  <strong>Achievements:</strong> ${state.achievements.join(', ') || 'None yet'}<br>
+  <strong>Evidence Cards:</strong> ${Object.values(state.evidence).filter(Boolean).length}/3
+  `;
+}
+
+/* ===== CHAPTER NAV ===== */
+function goChapter(n){
+  if(!state.unlocked[n]) return;
+  state.chapter=n;
+  document.querySelectorAll('.chapter-panel').forEach(p=>p.classList.remove('active'));
+  $('ch'+n).classList.add('active');
+  document.querySelectorAll('.chapter-btn').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.chapter)===n);
+  });
+}
+document.querySelectorAll('.chapter-btn').forEach(b=>{
+  b.addEventListener('click', ()=> goChapter(parseInt(b.dataset.chapter)));
+});
+function refreshNav(){
+  document.querySelectorAll('.chapter-btn').forEach(b=>{
+    const n=parseInt(b.dataset.chapter);
+    b.classList.toggle('locked', !state.unlocked[n]);
+    b.classList.toggle('unlocked', !!state.unlocked[n]);
+  });
+}
+
+/* ===== CHAPTER 1: GAS SIM ===== */
+const gasCanvas = $('gasCanvas');
+const gctx = gasCanvas.getContext('2d');
+let particles = [];
+const gasColors = {oxygen:'#d74a3a', nitrogen:'#3a7bc8', hydrogen:'#d9b92d', carbon:'#3d8a5a'};
+let selectedGas='oxygen';
+let mixMode=false;
+
+function addGasParticles(gas, count){
+  for(let i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*(gasCanvas.width-40)+20,
+      y: Math.random()*(gasCanvas.height-40)+20,
+      vx: (Math.random()-0.5)*2.6,
+      vy: (Math.random()-0.5)*2.6,
+      gas,
+      r: gas==='hydrogen' ? 5 : 7
+    });
+  }
+  state.gasTrials++;
+  if(state.gasTrials===1) addNote1("Gas fills all available space.");
+  if(state.gasTrials===3){ addNote1("Particles are constantly moving."); state.scores.observation+=8; updateScoreBar();}
+  if(particles.length>40) addAchievement("First Gas Investigator");
+  checkCh1QuizUnlock();
+  saveState();
+}
+function addNote1(text){
+  const nb=$('notebook1');
+  const p=document.createElement('p');
+  p.textContent = "→ " + text;
+  nb.appendChild(p); nb.scrollTop = nb.scrollHeight;
+  if(!state.notebook1.includes(text)) state.notebook1.push(text);
+}
+function gasStep(){
+  const pressure = parseInt($('pressureSlider').value);
+  const temp = parseInt($('tempSlider').value);
+  const speedFactor = 0.6 + temp*0.35;
+  const boxMargin = 18 + (8-pressure)*14;
+  const left = boxMargin, right = gasCanvas.width-boxMargin, top=boxMargin, bottom=gasCanvas.height-boxMargin;
+
+  gctx.clearRect(0,0,gasCanvas.width,gasCanvas.height);
+  // container
+  gctx.strokeStyle='#b8a78a'; gctx.lineWidth=2;
+  gctx.strokeRect(left, top, right-left, bottom-top);
+
+  particles.forEach(p=>{
+    p.x += p.vx * speedFactor;
+    p.y += p.vy * speedFactor;
+    if(p.x < left+p.r || p.x > right-p.r){ p.vx*=-1; p.x = Math.max(left+p.r, Math.min(right-p.r, p.x)); }
+    if(p.y < top+p.r || p.y > bottom-p.r){ p.vy*=-1; p.y = Math.max(top+p.r, Math.min(bottom-p.r, p.y)); }
+    // draw
+    const trackA = $('trackA').checked;
+    const trackB = $('trackB').checked;
+    let alpha = 1;
+    if(trackA || trackB){
+      if(trackA && p.gas==='oxygen') alpha=1;
+      else if(trackB && p.gas==='nitrogen') alpha=1;
+      else alpha=0.18;
+    }
+    gctx.globalAlpha=alpha;
+    gctx.beginPath();
+    gctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    gctx.fillStyle = gasColors[p.gas] || '#888';
+    gctx.fill();
+    gctx.globalAlpha=1;
+  });
+  requestAnimationFrame(gasStep);
+}
+gasStep();
+
+$('addGasBtn').onclick = ()=>{
+  const gas = mixMode ? (Math.random()<0.5 ? 'oxygen':'nitrogen') : selectedGas;
+  addGasParticles(gas, 15);
+  if(mixMode){
+    state.mixTrials++;
+    if(state.mixTrials===1) addNote1("Mixed gases: particles do NOT merge. Each behaves independently.");
+    if(state.mixTrials>=2){ state.scores.observation+=7; updateScoreBar(); addAchievement("Master of Ratios"); }
+    checkCh1QuizUnlock();
+    saveState();
+  }
+};
+$('clearGasBtn').onclick = ()=> { particles=[]; toast("Container evacuated."); };
+$('mixToggleBtn').onclick = (e)=>{
+  mixMode=!mixMode;
+  e.target.textContent = 'Mix Mode: ' + (mixMode?'ON':'OFF');
+  if(mixMode) toast("Mix Mode: adding O₂ + N₂ together");
+};
+document.querySelectorAll('#gasPicker .gas-dot').forEach(d=>{
+  d.onclick = ()=>{
+    document.querySelectorAll('#gasPicker .gas-dot').forEach(x=>x.classList.remove('selected'));
+    d.classList.add('selected');
+    selectedGas = d.dataset.gas;
+  };
+});
+$('pressureSlider').oninput = e=>{ $('pressureVal').textContent=e.target.value; if(parseInt(e.target.value)>5) addNote1("At higher pressure, particles come closer, collisions increase."); };
+$('tempSlider').oninput = e=>{ const labels=['ice-cold','cool','warm','hot','very hot']; $('tempVal').textContent=labels[e.target.value-1]; };
+
+function checkCh1QuizUnlock(){
+  if(state.gasTrials>=2 && state.mixTrials>=1){
+    $('ch1Quiz').style.display='block';
+  }
+}
+
+document.querySelectorAll('#ch1Choices .choice').forEach(c=>{
+  c.onclick = ()=>{
+    document.querySelectorAll('#ch1Choices .choice').forEach(x=>x.classList.remove('correct','wrong'));
+    const ok = c.dataset.correct==='true';
+    c.classList.add(ok?'correct':'wrong');
+    if(ok){
+      state.scores.reasoning+=10;
+      state.ch1Passed=true;
+      $('completeCh1Btn').disabled=false;
+      $('mentor1').innerHTML = "<strong>Mentor:</strong> Correct! Separate moving particles explain gas independence. Evidence Card unlocked.";
+      unlockEvidence(1);
+      updateScoreBar(); saveState();
+    } else {
+      $('mentor1').innerHTML = "<strong>Mentor:</strong> Hmm. Can a continuous substance explain independent behavior? Try mixing gases again and observe.";
+    }
+  };
+});
+$('hint1Btn').onclick = ()=>{
+  $('mentor1').innerHTML = "<strong>Mentor:</strong> What pattern do you notice? Do oxygen particles ever turn into nitrogen? Can a continuous substance explain this?";
+  toast("Hint recorded – no penalty.");
+};
+$('completeCh1Btn').onclick = ()=>{
+  state.unlocked[2]=true;
+  refreshNav();
+  goChapter(2);
+  toast("Chapter 1 complete! Evidence Card 1 secured.");
+  saveState();
+};
+
+/* ===== CHAPTER 2 ===== */
+let trialCount=0;
+function updateMassLabels(){
+  const n = parseFloat($('nSlider').value);
+  const o = parseFloat($('oSlider').value);
+  $('nMassLabel').textContent = n.toFixed(1);
+  $('oMassLabel').textContent = o.toFixed(1);
+  $('balanceReadout').textContent = n.toFixed(1)+" : "+o.toFixed(1);
+}
+$('nSlider').oninput = updateMassLabels;
+$('oSlider').oninput = updateMassLabels;
+updateMassLabels();
+
+$('reactBtn').onclick = ()=>{
+  const n = parseFloat($('nSlider').value);
+  const o = parseFloat($('oSlider').value);
+  const ratio = o/n;
+  let result, note;
+  // Dalton's nitric oxide ratios: allow 1:1 and 1:2 well
+  const isWhole = Math.abs(ratio - Math.round(ratio)) < 0.15 && ratio <= 3 && ratio >= 0.8;
+  const rounded = Math.round(ratio);
+  if(isWhole && (rounded===1 || rounded===2)){
+    result = `Compound NO${rounded===2?'₂':''} formed`;
+    note = `Trial: N ${n} + O ${o} → complete reaction.`;
+    $('reactionVisual').innerHTML = `<span style="color:#1a6b4e">N • + ${rounded} × O • → <strong>NO${rounded===2?'₂':''}</strong> ✓</span>`;
+  } else {
+    result = "No stable complete reaction / leftover";
+    note = `Trial: N ${n} + O ${o} → incomplete.`;
+    $('reactionVisual').innerHTML = `<span style="color:#b5472a">Leftover gas remains. No stable compound at ${n}:${o}</span>`;
+  }
+  trialCount++;
+  const tbody = $('dataTable').querySelector('tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${trialCount}</td><td>${n}</td><td>${o}</td><td>${result}</td>`;
+  tbody.appendChild(tr);
+  const nb=$('notebook2');
+  const p=document.createElement('p'); p.textContent="→ "+note; nb.appendChild(p); nb.scrollTop=nb.scrollHeight;
+  state.weightTrials++;
+  state.scores.observation+=3;
+  updateScoreBar();
+  if(state.weightTrials>=3){
+    $('ch2Quiz').style.display='block';
+    $('mentor2').innerHTML = "<strong>Mentor:</strong> Look at your table. Do you see 1.3 : 1 ? Or only whole numbers like 1:1, 1:2 ?";
+  }
+  saveState();
+};
+$('clearTableBtn').onclick = ()=>{ $('dataTable').querySelector('tbody').innerHTML=''; trialCount=0; toast('Table cleared'); };
+
+// Ratio sorting — works by drag OR tap, each chip usable once.
+let correctRatiosDropped=0;
+let draggedChip=null;
+const dropBox = $('ratioDrop');
+
+function placeRatio(chip){
+  if(!chip || chip.dataset.used==='1') return;
+  chip.dataset.used='1';
+  chip.style.opacity='0.4';
+  chip.style.cursor='default';
+  const valid = chip.dataset.valid==='true';
+  const span = document.createElement('span');
+  span.textContent = chip.textContent.trim();
+  span.style.padding='4px 8px'; span.style.borderRadius='12px';
+  span.style.background = valid ? '#d7efe1' : '#f8d7cf';
+  span.style.border='1px solid #aaa';
+  if(dropBox.querySelector('.muted')) dropBox.innerHTML='';
+  dropBox.appendChild(span);
+  if(valid){
+    correctRatiosDropped++;
+    $('ratioStatus').textContent = `✓ Valid whole-number ratios collected: ${correctRatiosDropped}/3`;
+  } else {
+    $('ratioStatus').textContent = `✗ ${chip.textContent.trim()} is not a whole-number ratio — such a compound is never observed.`;
+  }
+  if(correctRatiosDropped>=3){
+    $('ratioStatus').textContent = '✓ Perfect! Only whole-number ratios are real. Law of Multiple Proportions confirmed.';
+    state.scores.reasoning+=5; updateScoreBar(); saveState();
+  }
+}
+
+document.querySelectorAll('#ratioBank .ratio-chip').forEach(chip=>{
+  chip.addEventListener('dragstart', ()=> draggedChip=chip);
+  chip.addEventListener('click', ()=> placeRatio(chip)); // tap fallback for touch
+});
+dropBox.addEventListener('dragover', e=>{ e.preventDefault(); dropBox.style.background='#efe3c8';});
+dropBox.addEventListener('dragleave', ()=> dropBox.style.background='');
+dropBox.addEventListener('drop', e=>{
+  e.preventDefault(); dropBox.style.background='';
+  placeRatio(draggedChip); draggedChip=null;
+});
+
+document.querySelectorAll('#ch2Choices .choice').forEach(c=>{
+  c.onclick = ()=>{
+    document.querySelectorAll('#ch2Choices .choice').forEach(x=>x.classList.remove('correct','wrong'));
+    const ok = c.dataset.correct==='true';
+    c.classList.add(ok?'correct':'wrong');
+    if(ok){
+      state.scores.reasoning+=12;
+      state.ch2Passed=true;
+      $('completeCh2Btn').disabled=false;
+      $('mentor2').innerHTML = "<strong>Mentor:</strong> Exactly. Countable building blocks = whole-number ratios. Evidence Card 2 unlocked.";
+      unlockEvidence(2);
+      addAchievement("Atomic Detective");
+      updateScoreBar(); saveState();
+    } else {
+      $('mentor2').innerHTML = "<strong>Mentor:</strong> If matter were continuous, why couldn't we get 1.7 : 1 compounds?";
+    }
+  };
+});
+$('hint2Btn').onclick = ()=>{ $('mentor2').innerHTML="<strong>Mentor:</strong> What does this suggest? Can a continuous substance explain whole numbers?"; toast("Hint: think 'countable'"); };
+$('completeCh2Btn').onclick = ()=>{
+  state.unlocked[3]=true;
+  refreshNav(); goChapter(3);
+  toast("Chapter 2 complete! Evidence Card 2 secured.");
+  saveState();
+};
+
+/* ===== CHAPTER 3 ===== */
+let modelParts = [];
+const modelDrop = $('modelDrop');
+
+// Add one component to the workspace. Works for both drag-drop and tap/click.
+function addModelPart(part, good, label, x, y){
+  $('modelPlaceholder')?.remove();
+  const isGood = good===true || good==='true';
+  const div = document.createElement('div');
+  div.className='dropped-part';
+  div.textContent = label;
+  div.title = 'Click to remove';
+  div.dataset.good = isGood;
+  div.dataset.part = part;
+  const px = (x != null) ? x : 16 + Math.random()*Math.max(20, modelDrop.clientWidth-130);
+  const py = (y != null) ? y : 16 + Math.random()*Math.max(20, modelDrop.clientHeight-60);
+  div.style.left = Math.max(4, px) + 'px';
+  div.style.top  = Math.max(4, py) + 'px';
+  const entry = {part, good:isGood, el:div};
+  div.onclick = ()=>{
+    div.remove();
+    const i = modelParts.indexOf(entry);
+    if(i>=0) modelParts.splice(i,1);
+    if(modelParts.length===0) modelDrop.innerHTML = '<span class="muted" id="modelPlaceholder">Drop or tap model components here</span>';
+  };
+  modelDrop.appendChild(div);
+  modelParts.push(entry);
+}
+
+modelDrop.addEventListener('dragover', e=> e.preventDefault());
+document.querySelectorAll('.model-part').forEach(el=>{
+  const part = el.dataset.part;
+  const good = el.dataset.good;
+  const label = el.textContent.trim().split('\n')[0];
+  el.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('part', part);
+    e.dataTransfer.setData('good', good);
+    e.dataTransfer.setData('label', label);
+  });
+  // tap/click fallback — essential for touch screens (tablets/phones)
+  el.addEventListener('click', ()=> addModelPart(part, good, label));
+});
+modelDrop.addEventListener('drop', e=>{
+  e.preventDefault();
+  const part = e.dataTransfer.getData('part');
+  if(!part) return;
+  const good = e.dataTransfer.getData('good');
+  const label = e.dataTransfer.getData('label') || part;
+  const rect = modelDrop.getBoundingClientRect();
+  addModelPart(part, good, label, e.clientX - rect.left - 40, e.clientY - rect.top - 14);
+});
+$('clearModelBtn').onclick = ()=>{
+  modelDrop.innerHTML = '<span class="muted" id="modelPlaceholder">Drop or tap model components here</span>';
+  modelParts=[];
+  $('testResults').innerHTML='';
+};
+
+$('testModelBtn').onclick = ()=>{
+  const hasSphere = modelParts.some(p=>p.part==='sphere' && p.good);
+  const hasBad = modelParts.some(p=>!p.good);
+  const results = $('testResults');
+  results.innerHTML='';
+  const tests = [
+    ["Can your model explain gas independence?", hasSphere && !hasBad],
+    ["Can your model explain whole-number ratios?", hasSphere && !hasBad],
+    ["Do particles remain unchanged during reactions?", hasSphere]
+  ];
+  let pass=0;
+  tests.forEach(([q, ok])=>{
+    const li=document.createElement('li');
+    li.textContent = (ok ? "✓ " : "✗ ") + q;
+    li.style.color = ok ? '#1a6b4e' : '#b5472a';
+    results.appendChild(li);
+    if(ok) pass++;
+  });
+  if(pass===3 && hasSphere && !hasBad){
+    state.scores.model = 40;
+    state.ch3Passed = true;
+    $('finalDiscovery').style.display='block';
+    unlockEvidence(3);
+    addAchievement("Dalton Reborn");
+    $('mentor3').innerHTML = "<strong>Mentor:</strong> Solid indivisible spheres. Atoms rearrange, they do not break. You did it.";
+    updateScoreBar(); saveState();
+    toast("Atomic Theory discovered!");
+  } else {
+    state.scores.model = Math.max(state.scores.model, pass*10);
+    updateScoreBar();
+    $('mentor3').innerHTML = "<strong>Mentor:</strong> Your model fails "+(3-pass)+" evidence test(s). Try 'Solid Sphere – indivisible'. Continuous fluid / clouds / fragments fail the ratio evidence.";
+    saveState();
+  }
+};
+
+// Reaction animation
+$('runReactionBtn').onclick = ()=>{
+  const rc = $('reactionCanvas');
+  rc.style.display='block';
+  const ctx = rc.getContext('2d');
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,rc.width,rc.height);
+    ctx.font = '14px Georgia';
+    ctx.fillStyle='#2b241c';
+    ctx.fillText('N + O → NO    |   N + 2O → NO₂   Atoms rearrange, none break.', 18, 22);
+    // Draw simple atoms moving together
+    const x1 = 80 + Math.min(t,60);
+    const x2 = 220 - Math.min(t,60);
+    ctx.beginPath(); ctx.arc(x1, 90, 18,0,Math.PI*2); ctx.fillStyle='#3a7bc8'; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.fillText('N', x1-5, 95);
+    ctx.beginPath(); ctx.arc(x2, 90, 16,0,Math.PI*2); ctx.fillStyle='#d74a3a'; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.fillText('O', x2-5, 95);
+    if(t>60){
+      ctx.fillStyle='#2b241c';
+      ctx.fillText('→  NO  (billiard ball atoms bonded)', 280, 95);
+    }
+    t+=1.2;
+    if(t<160) requestAnimationFrame(draw);
+  }
+  draw();
+};
+
+$('sandboxBtn').onclick = ()=>{
+  toast("Sandbox Mode: Use Chapter 1 & 2 labs freely. Alter particle sizes in code!");
+  goChapter(1);
+};
+$('teacherBtn').onclick = ()=>{
+  $('teacherDashboard').style.display='block';
+  $('teacherDashboard').scrollIntoView({behavior:'smooth'});
+  updateAssessment();
+};
+
+/* Save / Export */
+$('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='dalton_save.json'; a.click();
+};
+$('importBtn').onclick = ()=>{
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange = e=>{
+    const f=e.target.files[0]; if(!f) return;
+    f.text().then(txt=>{ try{ state = JSON.parse(txt); saveState(); location.reload(); }catch(err){ alert('Invalid file');}});
+  };
+  inp.click();
+};
+$('resetBtn').onclick = ()=>{
+  if(confirm('Reset all progress?')){ localStorage.removeItem('dalton_save_v1'); location.reload();}
+};
+
+/* Restore notebooks */
+function restoreNotebooks(){
+  const nb1 = $('notebook1'); nb1.innerHTML='';
+  state.notebook1.forEach(t=>{ const p=document.createElement('p'); p.textContent=t.startsWith('→')?t:'→ '+t; nb1.appendChild(p);});
+  const nb2 = $('notebook2'); nb2.innerHTML='';
+  state.notebook2.forEach(t=>{ const p=document.createElement('p'); p.textContent=t.startsWith('→')?t:'→ '+t; nb2.appendChild(p);});
+}
+restoreNotebooks();
+
+/* Restore evidence / progression */
+if(state.evidence[1]) unlockEvidence(1);
+if(state.evidence[2]) unlockEvidence(2);
+if(state.evidence[3]) unlockEvidence(3);
+if(state.ch1Passed) $('completeCh1Btn').disabled=false;
+if(state.ch2Passed) $('completeCh2Btn').disabled=false;
+refreshNav();
+updateScoreBar();
+updateAssessment();
+if(state.ch3Passed) $('finalDiscovery').style.display='block';
+
+// initial gas particles for fun
+addGasParticles('oxygen', 22);
+
+</script>
+</body>
+</html>
