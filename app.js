@@ -56,6 +56,7 @@ const state = {
     selectedOption: null
   },
   bankSearch: '',
+  bankRenderLimit: 50,
   bankRevealMode: (() => { try { return localStorage.getItem('neet-bank-reveal') || 'open'; } catch { return 'open'; } })(),
   search: { query: '', results: [], total: 0, activeIndex: 0, parsed: null },
   editingId: null,
@@ -2382,7 +2383,10 @@ function renderBankCard(q) {
   `;
 }
 
-function renderBank() {
+const BANK_PAGE_SIZE = 50;
+
+function renderBank(preserveLimit = false) {
+  if (!preserveLimit) state.bankRenderLimit = BANK_PAGE_SIZE;
   const filtered = getBankFilteredQuestions();
   const filterActive = Object.values(state.bankFilters).some(set => set.size > 0);
   const filterNote = filterActive ? ' (filtered)' : '';
@@ -2406,7 +2410,18 @@ function renderBank() {
   }
 
   el.bankList.className = 'bank-list';
-  el.bankList.innerHTML = filtered.map(q => renderBankCard(q)).join('');
+  const limit = Math.min(state.bankRenderLimit, filtered.length);
+  const visible = filtered.slice(0, limit);
+  let html = visible.map(q => renderBankCard(q)).join('');
+  if (filtered.length > limit) {
+    const remaining = filtered.length - limit;
+    const next = Math.min(BANK_PAGE_SIZE, remaining);
+    html += `<div class="bank-load-more">
+      <p class="muted">Showing ${limit} of ${filtered.length}. Use filters or search to narrow results.</p>
+      <button type="button" id="bankLoadMoreBtn" class="secondary-btn">Load ${next} more</button>
+    </div>`;
+  }
+  el.bankList.innerHTML = html;
   updateBankFilterUI();
   applyBankRevealMode();
 }
@@ -3189,9 +3204,11 @@ function bindEvents() {
   });
 
   el.cancelEditBtn.addEventListener('click', resetForm);
+  let bankSearchTimer = null;
   el.bankSearch.addEventListener('input', event => {
     state.bankSearch = event.target.value;
-    renderBank();
+    clearTimeout(bankSearchTimer);
+    bankSearchTimer = setTimeout(renderBank, 220);
   });
 
   bindSearchPalette();
@@ -3208,6 +3225,12 @@ function bindEvents() {
     const cancelBtn = event.target.closest('.cancel-inline-btn');
     const removeImageBtn = event.target.closest('.remove-image-btn');
     const showAnswerBtn = event.target.closest('.show-answer-btn');
+
+    if (event.target.closest('#bankLoadMoreBtn')) {
+      state.bankRenderLimit += BANK_PAGE_SIZE;
+      renderBank(true);
+      return;
+    }
 
     if (removeImageBtn) {
       handleInlineImageRemove(removeImageBtn);

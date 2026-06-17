@@ -609,6 +609,8 @@ textarea, input[type="text"], input[type="number"], input[type="search"], input[
 }
 
 .bank-list { display: grid; gap: 14px; margin-top: 20px; }
+.bank-load-more { text-align: center; padding: 12px 0 4px; display: grid; gap: 10px; place-items: center; }
+.bank-load-more p { margin: 0; font-size: 0.85rem; }
 .bank-card, .empty-state, .empty-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
