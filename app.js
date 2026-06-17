@@ -3039,6 +3039,33 @@ function bindEvents() {
     el.menuToggle.addEventListener('click', () => el.sidebar.classList.toggle('open'));
   }
 
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  if (sidebarToggle) {
+    const layout = document.querySelector('.app-layout');
+    const applyCollapsed = collapsed => {
+      layout.classList.toggle('sidebar-collapsed', collapsed);
+      sidebarToggle.textContent = collapsed ? '⮞' : '⮜';
+      sidebarToggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      sidebarToggle.title = (collapsed ? 'Expand' : 'Collapse') + ' sidebar (Shift+S)';
+    };
+    // Use the label text as a tooltip so icons stay meaningful when collapsed.
+    el.navItems.forEach(item => { item.title = item.textContent.trim(); });
+    applyCollapsed(localStorage.getItem('sidebarCollapsed') === '1');
+    const toggle = () => {
+      const collapsed = !layout.classList.contains('sidebar-collapsed');
+      localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+      applyCollapsed(collapsed);
+    };
+    sidebarToggle.addEventListener('click', toggle);
+    document.addEventListener('keydown', e => {
+      if (e.shiftKey && (e.key === 'S' || e.key === 's') &&
+          !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && !e.target.isContentEditable) {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  }
+
   [el.dashboardView, el.chaptersView, el.revisionView, el.auditView, el.practiceResults].forEach(view => {
     if (view) view.addEventListener('click', handleViewAction);
   });

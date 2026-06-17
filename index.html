@@ -64,6 +64,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <button id="menuToggle" class="icon-btn mobile-only" type="button" aria-label="Menu">☰</button>
+          <button id="sidebarToggle" class="icon-btn desktop-only" type="button" aria-label="Collapse sidebar" title="Collapse sidebar (Shift+S)">⮜</button>
           <p class="topbar-eyebrow">NEET · Chemistry only</p>
         </div>
         <div class="topbar-actions">
@@ -295,9 +296,10 @@
               </div>
             </div>
             <div id="gameFrame" style="display:none">
-              <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+              <div class="game-frame-bar">
                 <button class="secondary-btn small" onclick="closeGame()">← Back to games</button>
                 <span id="gameFrameTitle" style="font-weight:600"></span>
+                <button class="secondary-btn small game-fs-btn" onclick="toggleGameFullscreen()" title="Toggle full screen (Esc to exit)">⛶ Full screen</button>
               </div>
               <iframe id="gameIframe" src="" style="width:100%;height:82vh;border:none;border-radius:12px;background:#0b0c15" allowfullscreen></iframe>
             </div>
@@ -446,10 +448,23 @@
       document.getElementById('gameFrame').style.display = 'block';
     }
     function closeGame() {
+      if (document.fullscreenElement) document.exitFullscreen?.();
       document.getElementById('gameIframe').src = '';
       document.getElementById('gameFrame').style.display = 'none';
       document.getElementById('gamesHub').querySelector('[style*="grid"]').style.display = '';
     }
+    function toggleGameFullscreen() {
+      const frame = document.getElementById('gameFrame');
+      if (!document.fullscreenElement) {
+        (frame.requestFullscreen || frame.webkitRequestFullscreen)?.call(frame);
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+      }
+    }
+    document.addEventListener('fullscreenchange', () => {
+      const btn = document.querySelector('.game-fs-btn');
+      if (btn) btn.textContent = document.fullscreenElement ? '⛶ Exit full screen' : '⛶ Full screen';
+    });
   </script>
 </body>
 </html>

@@ -89,7 +89,19 @@ button, input, select, textarea { font: inherit; }
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
+  transition: grid-template-columns 0.2s ease;
 }
+
+/* Collapsed sidebar (desktop) — icon-only rail */
+.app-layout.sidebar-collapsed { grid-template-columns: 72px 1fr; }
+.sidebar-collapsed .sidebar { padding: 24px 10px; }
+.sidebar-collapsed .sidebar-brand { justify-content: center; padding: 0; }
+.sidebar-collapsed .sidebar-brand > div,
+.sidebar-collapsed .sidebar-foot { display: none; }
+.sidebar-collapsed .nav-item { justify-content: center; font-size: 0; gap: 0; padding: 11px 0; }
+.sidebar-collapsed .nav-icon { font-size: 1.05rem; opacity: 0.9; }
+.sidebar-collapsed .nav-badge { display: none; }
+.sidebar-collapsed .nav-divider { margin: 8px 6px; }
 
 /* Sidebar */
 .sidebar {
@@ -626,6 +638,13 @@ textarea, input[type="text"], input[type="number"], input[type="search"], input[
 .hidden { display: none !important; }
 .muted { color: var(--muted); }
 .mobile-only { display: none; }
+.desktop-only { display: inline-grid; }
+
+/* Science games — full screen */
+.game-frame-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.game-frame-bar .game-fs-btn { margin-left: auto; }
+#gameFrame:fullscreen { background: #0b0c15; padding: 14px; display: flex; flex-direction: column; }
+#gameFrame:fullscreen #gameIframe { flex: 1; height: auto !important; }
 
 /* Modal */
 .modal {
@@ -900,6 +919,15 @@ textarea, input[type="text"], input[type="number"], input[type="search"], input[
   }
   .sidebar.open { transform: none; }
   .mobile-only { display: inline-grid; }
+  .desktop-only { display: none; }
+  /* On mobile the sidebar is a full slide-over drawer; ignore desktop collapse. */
+  .app-layout.sidebar-collapsed { grid-template-columns: 1fr; }
+  .sidebar-collapsed .sidebar { width: 260px; padding: 24px 16px; }
+  .sidebar-collapsed .sidebar-brand { justify-content: flex-start; padding: 0 8px; }
+  .sidebar-collapsed .sidebar-brand > div,
+  .sidebar-collapsed .sidebar-foot { display: block; }
+  .sidebar-collapsed .nav-item { justify-content: flex-start; font-size: 0.92rem; gap: 10px; padding: 11px 14px; }
+  .sidebar-collapsed .nav-icon { font-size: 0.85rem; }
   .split-panels, .practice-layout { grid-template-columns: 1fr; }
   .options-grid, .meta-grid, .why-wrong-grid, .inline-options-grid, .inline-meta-grid { grid-template-columns: 1fr; }
   .content-area { padding: 18px; }
