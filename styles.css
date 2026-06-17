@@ -102,6 +102,7 @@ button, input, select, textarea { font: inherit; }
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
   border-right: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -125,7 +126,7 @@ button, input, select, textarea { font: inherit; }
 .sidebar-brand strong { display: block; color: #fff; font-size: 1rem; }
 .sidebar-brand small { color: #8aa396; font-size: 0.78rem; }
 
-.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
 
 .nav-item {
   display: flex;
