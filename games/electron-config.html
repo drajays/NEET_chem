@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCERT Electronic Configurations — All 118 Elements</title>
+  <style>
+    :root {
+      --bg: #0b0c15;
+      --surface: #121321;
+      --card: #181a2e;
+      --text: #e8e8f0;
+      --muted: #9ca3af;
+      --accent: #38bdf8;
+      --accent-2: #f472b6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --error: #f87171;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 8px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f1120 0%, #1a1d35 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 24px 30px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.6rem);
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      color: var(--muted);
+      max-width: 700px;
+      margin: 0 auto 24px;
+      font-size: 0.95rem;
+    }
+
+    .rules-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .rule-chip {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .controls {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11, 12, 21, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1 1 280px;
+      max-width: 420px;
+    }
+    .search-wrap input,
+    .select-styled {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .select-styled { padding-left: 16px; cursor: pointer; }
+    .search-wrap input:focus,
+    .select-styled:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .filter-group, .mode-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .filter-btn, .mode-btn {
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .mode-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+    .filter-btn.active, .mode-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: transparent;
+      color: #fff;
+    }
+    .stats {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .period-section {
+      margin-bottom: 44px;
+      scroll-margin-top: 130px;
+    }
+    .period-title {
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .period-title span {
+      background: rgba(56, 189, 248, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: rgba(56, 189, 248, 0.25);
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      opacity: 0.6;
+    }
+    .card.exception::before { opacity: 1; background: linear-gradient(90deg, var(--warning), var(--error)); }
+    .card.exception { border-color: rgba(251, 191, 36, 0.15); }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .tile {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .tile .z { font-size: 0.65rem; color: var(--muted); line-height: 1; }
+    .tile .sym { font-size: 1.25rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .name { font-size: 0.95rem; font-weight: 700; color: var(--text); text-align: right; }
+    .category {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .config {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.2);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin: 8px 0 10px;
+      line-height: 1.5;
+      word-break: break-word;
+      color: var(--text);
+    }
+    .config strong, .config .exception-text { color: #fbbf24; font-weight: 700; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .badge.exception {
+      background: rgba(251, 191, 36, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+    .badge.normal {
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.15);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 6, 12, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      animation: pop 0.25s ease;
+    }
+    .modal-header {
+      padding: 24px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .modal-element {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .modal-tile {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-tile .z { font-size: 0.75rem; color: var(--muted); }
+    .modal-tile .sym { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .modal-title h2 { font-size: 1.5rem; color: var(--text); }
+    .modal-title p { color: var(--muted); font-size: 0.9rem; }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .close-btn:hover { color: var(--text); }
+    .modal-body { padding: 24px; }
+    .modal-body h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .modal-config {
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      background: rgba(0,0,0,0.25);
+      padding: 14px 16px;
+      border-radius: 10px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      word-break: break-word;
+    }
+    .modal-config strong, .modal-config .exception-text { color: var(--warning); }
+    .modal-info p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .modal-info p strong { color: var(--text); }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn {
+      flex: 1;
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+    }
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.25); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--success);
+      color: #052e16;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow);
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Rules & Exceptions Styles */
+    .rules-hero {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .rules-hero h2 {
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .rules-hero p { color: var(--muted); max-width: 700px; margin: 0 auto; }
+
+    .rule-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .rule-card h3 {
+      font-size: 1.2rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rule-card p { color: var(--muted); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.6; }
+    .rule-card p strong { color: var(--text); }
+    .rule-card em { color: var(--accent-2); font-style: normal; font-weight: 600; }
+
+    .diagram-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .diagram-box {
+      flex: 1 1 280px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid var(--border);
+    }
+    .diagram-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .diagram-label.correct { color: var(--success); }
+    .diagram-label.wrong { color: var(--error); }
+    .orbital-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .orbital-label {
+      width: 60px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: right;
+    }
+    .orbital-chamber {
+      display: flex;
+      gap: 6px;
+    }
+    .orbital-cell {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+    .orbital-cell .up { color: var(--accent); text-shadow: 0 0 6px var(--accent); }
+    .orbital-cell .down { color: var(--accent-2); text-shadow: 0 0 6px var(--accent-2); margin-top: -3px; }
+    .orbital-cell.empty { color: var(--muted); font-size: 0.7rem; }
+    .orbital-cell.correct { border-color: var(--success); background: rgba(52, 211, 153, 0.06); }
+    .orbital-cell.wrong { border-color: var(--error); background: rgba(248, 113, 113, 0.08); }
+    .caption { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+
+    .cheat-sheet {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .cheat-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .cheat-card h4 { color: var(--accent); font-size: 1rem; margin-bottom: 8px; }
+    .cheat-card p { color: var(--muted); font-size: 0.88rem; line-height: 1.5; margin: 0; }
+
+    .exception-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 16px 0;
+    }
+    .exception-table th, .exception-table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .exception-table th { background: rgba(255,255,255,0.04); color: var(--accent); font-weight: 700; }
+    .exception-table td { color: var(--text); }
+    .exception-table tr:hover { background: rgba(255,255,255,0.02); }
+    .mono { font-family: 'Courier New', monospace; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
+
+    .exception-card {
+      background: rgba(0,0,0,0.15);
+      border-left: 4px solid var(--warning);
+      border-radius: 0 12px 12px 0;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .exception-card h4 { color: var(--warning); font-size: 1.05rem; margin-bottom: 8px; }
+    .exception-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 12px; }
+    .exception-card .diagram-box { background: var(--surface); }
+
+    .try-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+    .try-btn:hover { border-color: var(--accent); background: rgba(56,189,248,0.08); }
+
+    /* Game Styles */
+    .game-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } }
+
+    .game-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .game-panel h3 {
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .target-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .target-tile {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .target-tile .z { font-size: 0.75rem; color: var(--muted); }
+    .target-tile .sym { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .target-info h2 { font-size: 1.3rem; color: var(--text); }
+    .target-info p { color: var(--muted); font-size: 0.85rem; }
+    .game-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .progress-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .aufbau-diagram {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+    }
+    .aufbau-diagram svg { display: block; margin: 0 auto; min-width: 320px; }
+    .orbital-node {
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.15s;
+    }
+    .orbital-node:hover { filter: brightness(1.2); }
+    .orbital-node:active { transform: scale(0.95); transform-origin: center; }
+    .orbital-node text { font-weight: 700; font-family: 'Segoe UI', sans-serif; }
+    .orbital-node .count { font-size: 11px; fill: #fff; font-weight: 800; }
+    .orbital-node.filled .node-circle { stroke: var(--accent); stroke-width: 3; }
+    .orbital-node.error .node-circle { stroke: var(--error); stroke-width: 3; }
+    .orbital-node.correct .node-circle { stroke: var(--success); stroke-width: 3; }
+    .node-circle { transition: all 0.2s; }
+
+    .builder-wrap {
+      margin-top: 20px;
+    }
+    .subshell-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .subshell-row:hover { background: rgba(255,255,255,0.03); }
+    .subshell-row.error { background: rgba(248, 113, 113, 0.08); animation: shake 0.4s; }
+    .subshell-row.correct { background: rgba(52, 211, 153, 0.08); }
+    .subshell-label {
+      width: 60px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .orbital-boxes {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .orbital-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .orbital-box:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.06); }
+    .orbital-box .arrow { font-size: 0.95rem; font-weight: 800; line-height: 1; }
+    .arrow.up { color: var(--accent); text-shadow: 0 0 6px var(--accent); }
+    .arrow.down { color: var(--accent-2); text-shadow: 0 0 6px var(--accent-2); margin-top: -2px; }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.success { background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.25); color: #6ee7b7; }
+    .feedback.error { background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.25); color: #fca5a5; }
+    .feedback ul { margin-left: 18px; margin-top: 8px; }
+    .feedback li { margin-bottom: 4px; }
+
+    .score-board {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .score-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .score-box .num { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+    .score-box .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+
+    .sequence-game {
+      text-align: center;
+    }
+    .sequence-game .orbital-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .seq-orb {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .seq-orb:hover { border-color: var(--accent); }
+    .seq-orb.selected { background: var(--accent); color: #000; border-color: transparent; }
+    .seq-orb.wrong { background: rgba(248, 113, 113, 0.2); border-color: var(--error); color: var(--error); }
+    .sequence-list {
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      color: var(--accent);
+      min-height: 28px;
+      margin: 10px 0;
+    }
+
+    @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-4px); } 40%,80% { transform: translateX(4px); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    @media (max-width: 640px) {
+      .controls { padding: 14px 16px; }
+      .stats { margin-left: 0; width: 100%; text-align: center; }
+      main { padding: 20px 16px 40px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+      .card { padding: 14px; }
+      .config { font-size: 0.78rem; }
+      .game-panel { padding: 16px; }
+      .orbital-box { width: 34px; height: 34px; }
+      .subshell-label { width: 52px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>NCERT Electronic Configurations</h1>
+  <p>All 118 elements arranged by period using the Aufbau principle, Pauli exclusion, and Hund's rule. Configurations that deviate from the strict <em>n + ℓ</em> rule are highlighted in bold.</p>
+  <div class="rules-bar">
+    <div class="rule-chip">Aufbau: 1s → 2s → 2p → 3s → 3p → 4s → 3d → 4p…</div>
+    <div class="rule-chip">Pauli: max 2 e⁻ per orbital</div>
+    <div class="rule-chip">Hund's: single occupation before pairing</div>
+    <div class="rule-chip">Noble gas core notation</div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="mode-group">
+    <button class="mode-btn active" data-mode="reference" onclick="switchMode('reference')">📖 Reference</button>
+    <button class="mode-btn" data-mode="game" onclick="switchMode('game')">🎮 Game Mode</button>
+    <button class="mode-btn" data-mode="rules" onclick="switchMode('rules')">📚 Rules & Exceptions</button>
+  </div>
+
+  <div id="ref-controls" class="search-wrap" style="flex:1 1 280px;max-width:420px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+    <input type="text" id="search" placeholder="Search element, symbol, or atomic number…" autocomplete="off" />
+  </div>
+
+  <div id="game-controls" class="search-wrap" style="display:none;flex:1 1 280px;max-width:320px">
+    <select id="gameElement" class="select-styled" onchange="loadGameElement(this.value)"></select>
+  </div>
+
+  <div class="filter-group" id="periodFilters"></div>
+  <div class="stats" id="stats">Showing 118 elements</div>
+</div>
+
+<main>
+  <!-- Reference View -->
+  <div id="view-reference" class="view active"></div>
+
+  <!-- Game View -->
+  <div id="view-game" class="view">
+    <div class="game-layout">
+      <div class="game-panel">
+        <div class="target-card">
+          <div class="target-tile"><span class="z" id="gZ"></span><span class="sym" id="gSym"></span></div>
+          <div class="target-info">
+            <h2 id="gName"></h2>
+            <p id="gHint"></p>
+          </div>
+        </div>
+        <div class="score-board">
+          <div class="score-box"><div class="num" id="scoreCorrect">0</div><div class="label">Correct</div></div>
+          <div class="score-box"><div class="num" id="scoreAttempts">0</div><div class="label">Attempts</div></div>
+          <div class="score-box"><div class="num" id="scoreStreak">0</div><div class="label">Streak</div></div>
+        </div>
+        <div class="progress-line"><span>Electrons placed</span><span id="gCount">0 / 0</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="gBar" style="width:0%"></div></div>
+        <div class="game-controls">
+          <button class="btn btn-primary" onclick="checkGame()">✅ Check Answer</button>
+          <button class="btn btn-secondary" onclick="resetGame()">🔄 Reset</button>
+          <button class="btn btn-secondary" onclick="randomGame()">🔀 Random</button>
+          <button class="btn btn-secondary" onclick="showGameHint()">💡 Hint</button>
+        </div>
+        <div class="feedback" id="gameFeedback"></div>
+      </div>
+
+      <div class="game-panel">
+        <h3>🎯 Aufbau Diagram — Click to fill electrons</h3>
+        <div class="aufbau-diagram" id="aufbauSvg"></div>
+        <div class="builder-wrap" id="orbitalBuilder"></div>
+      </div>
+    </div>
+
+    <div class="game-panel" style="margin-top:24px">
+      <h3>🧩 Aufbau Sequence Challenge</h3>
+      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:14px">Click the subshells in the correct NCERT filling order. Use the diagram above for help.</p>
+      <div class="sequence-list" id="sequenceList"></div>
+      <div class="orbital-grid" id="sequenceGrid"></div>
+      <div class="game-controls" style="justify-content:center">
+        <button class="btn btn-primary" onclick="checkSequence()">Check Sequence</button>
+        <button class="btn btn-secondary" onclick="resetSequence()">Reset</button>
+      </div>
+      <div class="feedback" id="sequenceFeedback"></div>
+    </div>
+  </div>
+
+  <!-- Rules & Exceptions View -->
+  <div id="view-rules" class="view">
+    <div class="rules-hero">
+      <h2>📚 Quantum Rules & Exception Gallery</h2>
+      <p>Interactive visual guide to the Aufbau principle, Pauli exclusion, Hund’s rule, and the transition-metal exceptions that NCERT marks in bold.</p>
+    </div>
+
+    <div class="rule-card">
+      <h3>🗺️ The Aufbau Sequence & Energy Levels</h3>
+      <p>Electrons must fill the <strong>lowest available energy levels</strong> first before moving upward. The diagram below acts as your roadmap. Notice how the <em>4s</em> orbital sits lower in energy than the <em>3d</em> orbital, creating the standard filling gap.</p>
+      <div class="cheat-sheet">
+        <div class="cheat-card"><h4>Aufbau Order</h4><p>1s → 2s → 2p → 3s → 3p → 4s → 3d → 4p → 5s → 4d → 5p → 6s → 4f → 5d → 6p → 7s → 5f → 6d → 7p</p></div>
+        <div class="cheat-card"><h4>Energy Rule</h4><p>Fill orbitals in increasing order of <em>(n + ℓ)</em>. For equal <em>n + ℓ</em>, lower <em>n</em> wins.</p></div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <h3>🚫 Pauli’s Exclusion Principle</h3>
+      <p>No two electrons in an atom can have the exact same four quantum numbers. Practically, an orbital box can hold at most <strong>two electrons</strong>, and they <strong>must point in opposite directions</strong> (<em>↑↓</em>).</p>
+      <div class="diagram-wrap">
+        <div class="diagram-box">
+          <div class="diagram-label correct">✅ Correct</div>
+          <div class="orbital-row"><span class="orbital-label">1s</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div></div></div>
+          <div class="caption">Opposite spins — valid configuration.</div>
+        </div>
+        <div class="diagram-box">
+          <div class="diagram-label wrong">❌ Wrong</div>
+          <div class="orbital-row"><span class="orbital-label">1s</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span><span class="up">↑</span></div></div></div>
+          <div class="caption">Identical spins in the same orbital — violates Pauli.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <h3>🧲 Hund’s Rule of Maximum Multiplicity</h3>
+      <p>For degenerate orbitals (same energy, like the three <em>2p</em> subshells), electrons fill empty boxes <strong>singly with parallel spins</strong> (<em>↑</em>) before they pair up. This minimizes electron-electron repulsion.</p>
+      <div class="diagram-wrap">
+        <div class="diagram-box">
+          <div class="diagram-label correct">✅ Correct — Nitrogen 2p³</div>
+          <div class="orbital-row"><span class="orbital-label">2p</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div></div></div>
+          <div class="caption">Maximize parallel spins first.</div>
+        </div>
+        <div class="diagram-box">
+          <div class="diagram-label wrong">❌ Wrong — Nitrogen 2p³</div>
+          <div class="orbital-row"><span class="orbital-label">2p</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell empty">empty</div></div></div>
+          <div class="caption">Paired too early while an empty box remains — violates Hund.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <h3>⚠️ Aufbau Principle Violation</h3>
+      <p>Electrons must fully occupy lower energy levels (like <em>2s</em>) before skipping ahead to higher energy levels (like <em>2p</em>).</p>
+      <div class="diagram-wrap">
+        <div class="diagram-box">
+          <div class="diagram-label correct">✅ Correct — Carbon 2s² 2p²</div>
+          <div class="orbital-row"><span class="orbital-label">2s</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div></div></div>
+          <div class="orbital-row"><span class="orbital-label">2p</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell empty">empty</div></div></div>
+          <div class="caption">2s is fully filled before 2p begins.</div>
+        </div>
+        <div class="diagram-box">
+          <div class="diagram-label wrong">❌ Wrong — Carbon</div>
+          <div class="orbital-row"><span class="orbital-label">2s</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span></div></div></div>
+          <div class="orbital-row"><span class="orbital-label">2p</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div></div></div>
+          <div class="caption">Skipped ahead before filling 2s — violates Aufbau.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <h3>📝 Summary Cheat-Sheet</h3>
+      <div class="cheat-sheet">
+        <div class="cheat-card"><h4>1. Aufbau</h4><p>Build from the ground up. Energy order: <em>1s → 2s → 2p → 3s → 3p → 4s → 3d → 4p…</em></p></div>
+        <div class="cheat-card"><h4>2. Pauli</h4><p>Use up and down arrows (<em>↑↓</em>) in any single orbital. Never pair two up-arrows (<em>↑↑</em>).</p></div>
+        <div class="cheat-card"><h4>3. Hund</h4><p>Give every orbital its own electron (<em>↑ | ↑ | ↑</em>) before forcing them to share (<em>↑↓</em>).</p></div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <h3>🎯 Transition Metal Exceptions</h3>
+      <p>Some transition metals deviate from the standard Aufbau sequence because a <strong>half-filled</strong> (<em>d⁵</em>) or <strong>completely filled</strong> (<em>d¹⁰</em>) d-subshell offers extra stability by minimizing repulsion and maximizing exchange energy.</p>
+
+      <div class="exception-card">
+        <h4>Chromium (Cr, Z = 24)</h4>
+        <p><strong>Predicted:</strong> <span class="mono">[Ar] 4s² 3d⁴</span> &nbsp;|&nbsp; <strong>Actual:</strong> <span class="mono">[Ar] 4s¹ 3d⁵</span></p>
+        <div class="diagram-wrap">
+          <div class="diagram-box">
+            <div class="diagram-label wrong">Predicted</div>
+            <div class="orbital-row"><span class="orbital-label">4s</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div></div></div>
+            <div class="orbital-row"><span class="orbital-label">3d</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div><div class="orbital-cell empty">empty</div></div></div>
+            <div class="caption">One empty d-orbital — less stable.</div>
+          </div>
+          <div class="diagram-box">
+            <div class="diagram-label correct">Actual Exception</div>
+            <div class="orbital-row"><span class="orbital-label">4s</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span></div></div></div>
+            <div class="orbital-row"><span class="orbital-label">3d</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div><div class="orbital-cell correct"><span class="up">↑</span></div></div></div>
+            <div class="caption">Symmetric half-filled d-subshell — highly stable.</div>
+          </div>
+        </div>
+        <button class="try-btn" onclick="playElement(24)">🎮 Try Cr in Game</button>
+      </div>
+
+      <div class="exception-card">
+        <h4>Copper (Cu, Z = 29)</h4>
+        <p><strong>Predicted:</strong> <span class="mono">[Ar] 4s² 3d⁹</span> &nbsp;|&nbsp; <strong>Actual:</strong> <span class="mono">[Ar] 4s¹ 3d¹⁰</span></p>
+        <div class="diagram-wrap">
+          <div class="diagram-box">
+            <div class="diagram-label wrong">Predicted</div>
+            <div class="orbital-row"><span class="orbital-label">4s</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div></div></div>
+            <div class="orbital-row"><span class="orbital-label">3d</span><div class="orbital-chamber"><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell wrong"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell wrong"><span class="up">↑</span></div></div></div>
+            <div class="caption">Incomplete d-subshell — less stable.</div>
+          </div>
+          <div class="diagram-box">
+            <div class="diagram-label correct">Actual Exception</div>
+            <div class="orbital-row"><span class="orbital-label">4s</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span></div></div></div>
+            <div class="orbital-row"><span class="orbital-label">3d</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div></div></div>
+            <div class="caption">Symmetric fully-filled d-subshell — highly stable.</div>
+          </div>
+        </div>
+        <button class="try-btn" onclick="playElement(29)">🎮 Try Cu in Game</button>
+      </div>
+
+      <div class="exception-card">
+        <h4>Palladium (Pd, Z = 46) — Advanced Exception</h4>
+        <p>Palladium promotes <strong>both</strong> valence electrons from its outermost <em>5s</em> shell to completely fill its <em>4d</em> subshell.</p>
+        <p><strong>Expected:</strong> <span class="mono">[Kr] 5s² 4d⁸</span> &nbsp;|&nbsp; <strong>Actual:</strong> <span class="mono">[Kr] 5s⁰ 4d¹⁰</span></p>
+        <div class="diagram-wrap">
+          <div class="diagram-box" style="flex:1 1 100%">
+            <div class="orbital-row"><span class="orbital-label">5s</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="empty">empty</span></div></div></div>
+            <div class="orbital-row"><span class="orbital-label">4d</span><div class="orbital-chamber"><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div><div class="orbital-cell correct"><span class="up">↑</span><span class="down">↓</span></div></div></div>
+          </div>
+        </div>
+        <button class="try-btn" onclick="playElement(46)">🎮 Try Pd in Game</button>
+      </div>
+
+      <h3 style="color:var(--accent);margin:24px 0 12px">Exception Summary Matrix</h3>
+      <table class="exception-table">
+        <thead>
+          <tr><th>Element</th><th>Z</th><th>Expected Aufbau</th><th>Actual Correct Model</th><th>Driving Stability Cause</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Chromium (Cr)</td><td>24</td><td class="mono">[Ar] 4s² 3d⁴</td><td class="mono">[Ar] 4s¹ 3d⁵</td><td>Symmetrical half-filled 3d⁵</td></tr>
+          <tr><td>Copper (Cu)</td><td>29</td><td class="mono">[Ar] 4s² 3d⁹</td><td class="mono">[Ar] 4s¹ 3d¹⁰</td><td>Completely filled stable 3d¹⁰</td></tr>
+          <tr><td>Molybdenum (Mo)</td><td>42</td><td class="mono">[Kr] 5s² 4d⁴</td><td class="mono">[Kr] 5s¹ 4d⁵</td><td>Symmetrical half-filled 4d⁵</td></tr>
+          <tr><td>Silver (Ag)</td><td>47</td><td class="mono">[Kr] 5s² 4d⁹</td><td class="mono">[Kr] 5s¹ 4d¹⁰</td><td>Completely filled stable 4d¹⁰</td></tr>
+          <tr><td>Palladium (Pd)</td><td>46</td><td class="mono">[Kr] 5s² 4d⁸</td><td class="mono">[Kr] 5s⁰ 4d¹⁰</td><td>Both s-electrons shift to fill 4d¹⁰</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-element">
+        <div class="modal-tile"><span class="z" id="mZ"></span><span class="sym" id="mSym"></span></div>
+        <div class="modal-title"><h2 id="mName"></h2><p id="mPeriod"></p></div>
+      </div>
+      <button class="close-btn" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <h4>Electronic Configuration</h4>
+      <div class="modal-config" id="mConfig"></div>
+      <div class="modal-info" id="mInfo"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="copyConfig()">📋 Copy</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+  const elements = [
+    { period: 1, n: 1, sym: 'H', name: 'Hydrogen', config: '1s¹', exception: false, reason: '' },
+    { period: 1, n: 2, sym: 'He', name: 'Helium', config: '1s²', exception: false, reason: '' },
+    { period: 2, n: 3, sym: 'Li', name: 'Lithium', config: '[He] 2s¹', exception: false, reason: '' },
+    { period: 2, n: 4, sym: 'Be', name: 'Beryllium', config: '[He] 2s²', exception: false, reason: '' },
+    { period: 2, n: 5, sym: 'B', name: 'Boron', config: '[He] 2s² 2p¹', exception: false, reason: '' },
+    { period: 2, n: 6, sym: 'C', name: 'Carbon', config: '[He] 2s² 2p²', exception: false, reason: '' },
+    { period: 2, n: 7, sym: 'N', name: 'Nitrogen', config: '[He] 2s² 2p³', exception: false, reason: '' },
+    { period: 2, n: 8, sym: 'O', name: 'Oxygen', config: '[He] 2s² 2p⁴', exception: false, reason: '' },
+    { period: 2, n: 9, sym: 'F', name: 'Fluorine', config: '[He] 2s² 2p⁵', exception: false, reason: '' },
+    { period: 2, n: 10, sym: 'Ne', name: 'Neon', config: '[He] 2s² 2p⁶', exception: false, reason: '' },
+    { period: 3, n: 11, sym: 'Na', name: 'Sodium', config: '[Ne] 3s¹', exception: false, reason: '' },
+    { period: 3, n: 12, sym: 'Mg', name: 'Magnesium', config: '[Ne] 3s²', exception: false, reason: '' },
+    { period: 3, n: 13, sym: 'Al', name: 'Aluminium', config: '[Ne] 3s² 3p¹', exception: false, reason: '' },
+    { period: 3, n: 14, sym: 'Si', name: 'Silicon', config: '[Ne] 3s² 3p²', exception: false, reason: '' },
+    { period: 3, n: 15, sym: 'P', name: 'Phosphorus', config: '[Ne] 3s² 3p³', exception: false, reason: '' },
+    { period: 3, n: 16, sym: 'S', name: 'Sulfur', config: '[Ne] 3s² 3p⁴', exception: false, reason: '' },
+    { period: 3, n: 17, sym: 'Cl', name: 'Chlorine', config: '[Ne] 3s² 3p⁵', exception: false, reason: '' },
+    { period: 3, n: 18, sym: 'Ar', name: 'Argon', config: '[Ne] 3s² 3p⁶', exception: false, reason: '' },
+    { period: 4, n: 19, sym: 'K', name: 'Potassium', config: '[Ar] 4s¹', exception: false, reason: '' },
+    { period: 4, n: 20, sym: 'Ca', name: 'Calcium', config: '[Ar] 4s²', exception: false, reason: '' },
+    { period: 4, n: 21, sym: 'Sc', name: 'Scandium', config: '[Ar] 3d¹ 4s²', exception: false, reason: '' },
+    { period: 4, n: 22, sym: 'Ti', name: 'Titanium', config: '[Ar] 3d² 4s²', exception: false, reason: '' },
+    { period: 4, n: 23, sym: 'V', name: 'Vanadium', config: '[Ar] 3d³ 4s²', exception: false, reason: '' },
+    { period: 4, n: 24, sym: 'Cr', name: 'Chromium', config: '[Ar] 3d⁵ 4s¹', exception: true, reason: 'Half-filled 3d and 4s subshells give extra stability.' },
+    { period: 4, n: 25, sym: 'Mn', name: 'Manganese', config: '[Ar] 3d⁵ 4s²', exception: false, reason: '' },
+    { period: 4, n: 26, sym: 'Fe', name: 'Iron', config: '[Ar] 3d⁶ 4s²', exception: false, reason: '' },
+    { period: 4, n: 27, sym: 'Co', name: 'Cobalt', config: '[Ar] 3d⁷ 4s²', exception: false, reason: '' },
+    { period: 4, n: 28, sym: 'Ni', name: 'Nickel', config: '[Ar] 3d⁸ 4s²', exception: false, reason: '' },
+    { period: 4, n: 29, sym: 'Cu', name: 'Copper', config: '[Ar] 3d¹⁰ 4s¹', exception: true, reason: 'Fully-filled 3d¹⁰ subshell is exceptionally stable.' },
+    { period: 4, n: 30, sym: 'Zn', name: 'Zinc', config: '[Ar] 3d¹⁰ 4s²', exception: false, reason: '' },
+    { period: 4, n: 31, sym: 'Ga', name: 'Gallium', config: '[Ar] 3d¹⁰ 4s² 4p¹', exception: false, reason: '' },
+    { period: 4, n: 32, sym: 'Ge', name: 'Germanium', config: '[Ar] 3d¹⁰ 4s² 4p²', exception: false, reason: '' },
+    { period: 4, n: 33, sym: 'As', name: 'Arsenic', config: '[Ar] 3d¹⁰ 4s² 4p³', exception: false, reason: '' },
+    { period: 4, n: 34, sym: 'Se', name: 'Selenium', config: '[Ar] 3d¹⁰ 4s² 4p⁴', exception: false, reason: '' },
+    { period: 4, n: 35, sym: 'Br', name: 'Bromine', config: '[Ar] 3d¹⁰ 4s² 4p⁵', exception: false, reason: '' },
+    { period: 4, n: 36, sym: 'Kr', name: 'Krypton', config: '[Ar] 3d¹⁰ 4s² 4p⁶', exception: false, reason: '' },
+    { period: 5, n: 37, sym: 'Rb', name: 'Rubidium', config: '[Kr] 5s¹', exception: false, reason: '' },
+    { period: 5, n: 38, sym: 'Sr', name: 'Strontium', config: '[Kr] 5s²', exception: false, reason: '' },
+    { period: 5, n: 39, sym: 'Y', name: 'Yttrium', config: '[Kr] 4d¹ 5s²', exception: false, reason: '' },
+    { period: 5, n: 40, sym: 'Zr', name: 'Zirconium', config: '[Kr] 4d² 5s²', exception: false, reason: '' },
+    { period: 5, n: 41, sym: 'Nb', name: 'Niobium', config: '[Kr] 4d⁴ 5s¹', exception: true, reason: 'Anomalous d/s distribution for enhanced stability.' },
+    { period: 5, n: 42, sym: 'Mo', name: 'Molybdenum', config: '[Kr] 4d⁵ 5s¹', exception: true, reason: 'Half-filled 4d subshell is more stable.' },
+    { period: 5, n: 43, sym: 'Tc', name: 'Technetium', config: '[Kr] 4d⁵ 5s²', exception: false, reason: '' },
+    { period: 5, n: 44, sym: 'Ru', name: 'Ruthenium', config: '[Kr] 4d⁷ 5s¹', exception: true, reason: 'Anomalous d/s distribution for enhanced stability.' },
+    { period: 5, n: 45, sym: 'Rh', name: 'Rhodium', config: '[Kr] 4d⁸ 5s¹', exception: true, reason: 'Anomalous d/s distribution for enhanced stability.' },
+    { period: 5, n: 46, sym: 'Pd', name: 'Palladium', config: '[Kr] 4d¹⁰', exception: true, reason: 'Both 5s electrons shift to complete the 4d subshell.' },
+    { period: 5, n: 47, sym: 'Ag', name: 'Silver', config: '[Kr] 4d¹⁰ 5s¹', exception: true, reason: 'Fully-filled 4d subshell is exceptionally stable.' },
+    { period: 5, n: 48, sym: 'Cd', name: 'Cadmium', config: '[Kr] 4d¹⁰ 5s²', exception: false, reason: '' },
+    { period: 5, n: 49, sym: 'In', name: 'Indium', config: '[Kr] 4d¹⁰ 5s² 5p¹', exception: false, reason: '' },
+    { period: 5, n: 50, sym: 'Sn', name: 'Tin', config: '[Kr] 4d¹⁰ 5s² 5p²', exception: false, reason: '' },
+    { period: 5, n: 51, sym: 'Sb', name: 'Antimony', config: '[Kr] 4d¹⁰ 5s² 5p³', exception: false, reason: '' },
+    { period: 5, n: 52, sym: 'Te', name: 'Tellurium', config: '[Kr] 4d¹⁰ 5s² 5p⁴', exception: false, reason: '' },
+    { period: 5, n: 53, sym: 'I', name: 'Iodine', config: '[Kr] 4d¹⁰ 5s² 5p⁵', exception: false, reason: '' },
+    { period: 5, n: 54, sym: 'Xe', name: 'Xenon', config: '[Kr] 4d¹⁰ 5s² 5p⁶', exception: false, reason: '' },
+    { period: 6, n: 55, sym: 'Cs', name: 'Cesium', config: '[Xe] 6s¹', exception: false, reason: '' },
+    { period: 6, n: 56, sym: 'Ba', name: 'Barium', config: '[Xe] 6s²', exception: false, reason: '' },
+    { period: 6, n: 57, sym: 'La', name: 'Lanthanum', config: '[Xe] 5d¹ 6s²', exception: true, reason: 'Electron enters 5d before 4f due to comparable energies.' },
+    { period: 6, n: 58, sym: 'Ce', name: 'Cerium', config: '[Xe] 4f¹ 5d¹ 6s²', exception: true, reason: '4f and 5d are extremely close in energy.' },
+    { period: 6, n: 59, sym: 'Pr', name: 'Praseodymium', config: '[Xe] 4f³ 6s²', exception: false, reason: '' },
+    { period: 6, n: 60, sym: 'Nd', name: 'Neodymium', config: '[Xe] 4f⁴ 6s²', exception: false, reason: '' },
+    { period: 6, n: 61, sym: 'Pm', name: 'Promethium', config: '[Xe] 4f⁵ 6s²', exception: false, reason: '' },
+    { period: 6, n: 62, sym: 'Sm', name: 'Samarium', config: '[Xe] 4f⁶ 6s²', exception: false, reason: '' },
+    { period: 6, n: 63, sym: 'Eu', name: 'Europium', config: '[Xe] 4f⁷ 6s²', exception: false, reason: '' },
+    { period: 6, n: 64, sym: 'Gd', name: 'Gadolinium', config: '[Xe] 4f⁷ 5d¹ 6s²', exception: true, reason: 'Maintains the half-filled 4f⁷ arrangement for stability.' },
+    { period: 6, n: 65, sym: 'Tb', name: 'Terbium', config: '[Xe] 4f⁹ 6s²', exception: false, reason: '' },
+    { period: 6, n: 66, sym: 'Dy', name: 'Dysprosium', config: '[Xe] 4f¹⁰ 6s²', exception: false, reason: '' },
+    { period: 6, n: 67, sym: 'Ho', name: 'Holmium', config: '[Xe] 4f¹¹ 6s²', exception: false, reason: '' },
+    { period: 6, n: 68, sym: 'Er', name: 'Erbium', config: '[Xe] 4f¹² 6s²', exception: false, reason: '' },
+    { period: 6, n: 69, sym: 'Tm', name: 'Thulium', config: '[Xe] 4f¹³ 6s²', exception: false, reason: '' },
+    { period: 6, n: 70, sym: 'Yb', name: 'Ytterbium', config: '[Xe] 4f¹⁴ 6s²', exception: false, reason: '' },
+    { period: 6, n: 71, sym: 'Lu', name: 'Lutetium', config: '[Xe] 4f¹⁴ 5d¹ 6s²', exception: false, reason: '' },
+    { period: 6, n: 72, sym: 'Hf', name: 'Hafnium', config: '[Xe] 4f¹⁴ 5d² 6s²', exception: false, reason: '' },
+    { period: 6, n: 73, sym: 'Ta', name: 'Tantalum', config: '[Xe] 4f¹⁴ 5d³ 6s²', exception: false, reason: '' },
+    { period: 6, n: 74, sym: 'W', name: 'Tungsten', config: '[Xe] 4f¹⁴ 5d⁴ 6s²', exception: false, reason: '' },
+    { period: 6, n: 75, sym: 'Re', name: 'Rhenium', config: '[Xe] 4f¹⁴ 5d⁵ 6s²', exception: false, reason: '' },
+    { period: 6, n: 76, sym: 'Os', name: 'Osmium', config: '[Xe] 4f¹⁴ 5d⁶ 6s²', exception: false, reason: '' },
+    { period: 6, n: 77, sym: 'Ir', name: 'Iridium', config: '[Xe] 4f¹⁴ 5d⁷ 6s²', exception: false, reason: '' },
+    { period: 6, n: 78, sym: 'Pt', name: 'Platinum', config: '[Xe] 4f¹⁴ 5d⁹ 6s¹', exception: true, reason: 'Anomalous d/s distribution for enhanced stability.' },
+    { period: 6, n: 79, sym: 'Au', name: 'Gold', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s¹', exception: true, reason: 'Fully-filled 5d subshell is exceptionally stable.' },
+    { period: 6, n: 80, sym: 'Hg', name: 'Mercury', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s²', exception: false, reason: '' },
+    { period: 6, n: 81, sym: 'Tl', name: 'Thallium', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹', exception: false, reason: '' },
+    { period: 6, n: 82, sym: 'Pb', name: 'Lead', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²', exception: false, reason: '' },
+    { period: 6, n: 83, sym: 'Bi', name: 'Bismuth', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³', exception: false, reason: '' },
+    { period: 6, n: 84, sym: 'Po', name: 'Polonium', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴', exception: false, reason: '' },
+    { period: 6, n: 85, sym: 'At', name: 'Astatine', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵', exception: false, reason: '' },
+    { period: 6, n: 86, sym: 'Rn', name: 'Radon', config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶', exception: false, reason: '' },
+    { period: 7, n: 87, sym: 'Fr', name: 'Francium', config: '[Rn] 7s¹', exception: false, reason: '' },
+    { period: 7, n: 88, sym: 'Ra', name: 'Radium', config: '[Rn] 7s²', exception: false, reason: '' },
+    { period: 7, n: 89, sym: 'Ac', name: 'Actinium', config: '[Rn] 6d¹ 7s²', exception: true, reason: 'Electron enters 6d before 5f due to comparable energies.' },
+    { period: 7, n: 90, sym: 'Th', name: 'Thorium', config: '[Rn] 6d² 7s²', exception: true, reason: 'Both valence electrons occupy 6d before 5f.' },
+    { period: 7, n: 91, sym: 'Pa', name: 'Protactinium', config: '[Rn] 5f² 6d¹ 7s²', exception: true, reason: '5f and 6d are close in energy; mixed filling occurs.' },
+    { period: 7, n: 92, sym: 'U', name: 'Uranium', config: '[Rn] 5f³ 6d¹ 7s²', exception: true, reason: '5f and 6d are close in energy; mixed filling occurs.' },
+    { period: 7, n: 93, sym: 'Np', name: 'Neptunium', config: '[Rn] 5f⁴ 6d¹ 7s²', exception: true, reason: '5f and 6d are close in energy; mixed filling occurs.' },
+    { period: 7, n: 94, sym: 'Pu', name: 'Plutonium', config: '[Rn] 5f⁶ 7s²', exception: false, reason: '' },
+    { period: 7, n: 95, sym: 'Am', name: 'Americium', config: '[Rn] 5f⁷ 7s²', exception: false, reason: '' },
+    { period: 7, n: 96, sym: 'Cm', name: 'Curium', config: '[Rn] 5f⁷ 6d¹ 7s²', exception: true, reason: 'Maintains the half-filled 5f⁷ arrangement for stability.' },
+    { period: 7, n: 97, sym: 'Bk', name: 'Berkelium', config: '[Rn] 5f⁹ 7s²', exception: false, reason: '' },
+    { period: 7, n: 98, sym: 'Cf', name: 'Californium', config: '[Rn] 5f¹⁰ 7s²', exception: false, reason: '' },
+    { period: 7, n: 99, sym: 'Es', name: 'Einsteinium', config: '[Rn] 5f¹¹ 7s²', exception: false, reason: '' },
+    { period: 7, n: 100, sym: 'Fm', name: 'Fermium', config: '[Rn] 5f¹² 7s²', exception: false, reason: '' },
+    { period: 7, n: 101, sym: 'Md', name: 'Mendelevium', config: '[Rn] 5f¹³ 7s²', exception: false, reason: '' },
+    { period: 7, n: 102, sym: 'No', name: 'Nobelium', config: '[Rn] 5f¹⁴ 7s²', exception: false, reason: '' },
+    { period: 7, n: 103, sym: 'Lr', name: 'Lawrencium', config: '[Rn] 5f¹⁴ 6d¹ 7s²', exception: false, reason: '' },
+    { period: 7, n: 104, sym: 'Rf', name: 'Rutherfordium', config: '[Rn] 5f¹⁴ 6d² 7s²', exception: false, reason: '' },
+    { period: 7, n: 105, sym: 'Db', name: 'Dubnium', config: '[Rn] 5f¹⁴ 6d³ 7s²', exception: false, reason: '' },
+    { period: 7, n: 106, sym: 'Sg', name: 'Seaborgium', config: '[Rn] 5f¹⁴ 6d⁴ 7s²', exception: false, reason: '' },
+    { period: 7, n: 107, sym: 'Bh', name: 'Bohrium', config: '[Rn] 5f¹⁴ 6d⁵ 7s²', exception: false, reason: '' },
+    { period: 7, n: 108, sym: 'Hs', name: 'Hassium', config: '[Rn] 5f¹⁴ 6d⁶ 7s²', exception: false, reason: '' },
+    { period: 7, n: 109, sym: 'Mt', name: 'Meitnerium', config: '[Rn] 5f¹⁴ 6d⁷ 7s²', exception: false, reason: '' },
+    { period: 7, n: 110, sym: 'Ds', name: 'Darmstadtium', config: '[Rn] 5f¹⁴ 6d⁸ 7s²', exception: false, reason: 'Theoretical / calculated configuration.' },
+    { period: 7, n: 111, sym: 'Rg', name: 'Roentgenium', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s¹', exception: true, reason: 'Predicted exception: fully-filled 6d subshell.' },
+    { period: 7, n: 112, sym: 'Cn', name: 'Copernicium', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s²', exception: false, reason: '' },
+    { period: 7, n: 113, sym: 'Nh', name: 'Nihonium', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹', exception: false, reason: '' },
+    { period: 7, n: 114, sym: 'Fl', name: 'Flerovium', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²', exception: false, reason: '' },
+    { period: 7, n: 115, sym: 'Mc', name: 'Moscovium', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³', exception: false, reason: '' },
+    { period: 7, n: 116, sym: 'Lv', name: 'Livermorium', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴', exception: false, reason: '' },
+    { period: 7, n: 117, sym: 'Ts', name: 'Tennessine', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵', exception: false, reason: '' },
+    { period: 7, n: 118, sym: 'Og', name: 'Oganesson', config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶', exception: false, reason: '' }
+  ];
+
+  const AUFBAU_ORDER = ['1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d','6p','7s','5f','6d','7p'];
+  const SUBSHELL_CAPACITY = { s:2, p:6, d:10, f:14 };
+  const ORBITAL_COUNT = { s:1, p:3, d:5, f:7 };
+  const ORBITAL_COLORS = { s:'#f59e0b', p:'#22c55e', d:'#a855f7', f:'#0ea5e9' };
+  const OVERRIDES = {
+    24:{ '3d':5, '4s':1 }, 29:{ '3d':10, '4s':1 }, 41:{ '4d':4, '5s':1 }, 42:{ '4d':5, '5s':1 },
+    44:{ '4d':7, '5s':1 }, 45:{ '4d':8, '5s':1 }, 46:{ '4d':10, '5s':0 }, 47:{ '4d':10, '5s':1 },
+    57:{ '5d':1, '4f':0 }, 58:{ '4f':1, '5d':1 }, 64:{ '4f':7, '5d':1 },
+    78:{ '5d':9, '6s':1 }, 79:{ '5d':10, '6s':1 }, 89:{ '6d':1, '5f':0 }, 90:{ '6d':2, '5f':0 },
+    91:{ '5f':2, '6d':1 }, 92:{ '5f':3, '6d':1 }, 93:{ '5f':4, '6d':1 }, 96:{ '5f':7, '6d':1 },
+    111:{ '6d':10, '7s':1 }
+  };
+
+  let currentPeriod = 'all';
+  let selectedElement = null;
+  let currentMode = 'reference';
+  let gameElement = null;
+  let gameState = {};
+  let sequenceState = [];
+  let score = { correct: 0, attempts: 0, streak: 0 };
+
+  const periodNames = ['All', 'Period 1', 'Period 2', 'Period 3', 'Period 4', 'Period 5', 'Period 6', 'Period 7'];
+  const categories = {
+    1:'s-block',2:'s-block',3:'p-block',4:'p-block',5:'p-block',6:'p-block',7:'p-block',8:'p-block',9:'p-block',10:'p-block',
+    11:'s-block',12:'s-block',13:'p-block',14:'p-block',15:'p-block',16:'p-block',17:'p-block',18:'p-block',
+    19:'s-block',20:'s-block',21:'d-block',22:'d-block',23:'d-block',24:'d-block',25:'d-block',26:'d-block',27:'d-block',28:'d-block',29:'d-block',30:'d-block',
+    31:'p-block',32:'p-block',33:'p-block',34:'p-block',35:'p-block',36:'p-block',
+    37:'s-block',38:'s-block',39:'d-block',40:'d-block',41:'d-block',42:'d-block',43:'d-block',44:'d-block',45:'d-block',46:'d-block',47:'d-block',48:'d-block',
+    49:'p-block',50:'p-block',51:'p-block',52:'p-block',53:'p-block',54:'p-block',
+    55:'s-block',56:'s-block',57:'d-block',58:'f-block',59:'f-block',60:'f-block',61:'f-block',62:'f-block',63:'f-block',64:'f-block',65:'f-block',66:'f-block',67:'f-block',68:'f-block',69:'f-block',70:'f-block',71:'d-block',
+    72:'d-block',73:'d-block',74:'d-block',75:'d-block',76:'d-block',77:'d-block',78:'d-block',79:'d-block',80:'d-block',
+    81:'p-block',82:'p-block',83:'p-block',84:'p-block',85:'p-block',86:'p-block',
+    87:'s-block',88:'s-block',89:'d-block',90:'f-block',91:'f-block',92:'f-block',93:'f-block',94:'f-block',95:'f-block',96:'f-block',97:'f-block',98:'f-block',99:'f-block',100:'f-block',101:'f-block',102:'f-block',103:'d-block',
+    104:'d-block',105:'d-block',106:'d-block',107:'d-block',108:'d-block',109:'d-block',110:'d-block',111:'d-block',112:'d-block',
+    113:'p-block',114:'p-block',115:'p-block',116:'p-block',117:'p-block',118:'p-block'
+  };
+
+  function getCategory(n) { return categories[n] || 'unknown'; }
+  function getElement(n) { return elements.find(e => e.n === Number(n)); }
+  function escapeHTML(str) { return str.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function toSuperscript(n) { const map={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'}; return String(n).split('').map(d=>map[d]||d).join(''); }
+
+  function buildStandardConfig(z) {
+    let rem = z;
+    const cfg = {};
+    for (const sub of AUFBAU_ORDER) {
+      const cap = SUBSHELL_CAPACITY[sub[1]];
+      if (rem >= cap) { cfg[sub] = cap; rem -= cap; }
+      else { if (rem > 0) cfg[sub] = rem; rem = 0; break; }
+    }
+    return cfg;
+  }
+  function getSolution(z) {
+    const cfg = buildStandardConfig(z);
+    if (OVERRIDES[z]) Object.assign(cfg, OVERRIDES[z]);
+    return cfg;
+  }
+  function getDisplaySubshells(solution) {
+    let maxIdx = -1;
+    for (const sub in solution) maxIdx = Math.max(maxIdx, AUFBAU_ORDER.indexOf(sub));
+    return AUFBAU_ORDER.slice(0, Math.min(maxIdx + 2, AUFBAU_ORDER.length));
+  }
+  function formatConfig(text, isException) { return isException ? `<strong>${escapeHTML(text)}</strong>` : escapeHTML(text); }
+
+  function renderFilters() {
+    document.getElementById('periodFilters').innerHTML = periodNames.map((name, i) => {
+      const val = i === 0 ? 'all' : i;
+      return `<button class="filter-btn ${String(currentPeriod) === String(val) ? 'active' : ''}" onclick="setPeriod('${val}')">${name}</button>`;
+    }).join('');
+  }
+  function setPeriod(period) {
+    currentPeriod = period;
+    renderFilters();
+    renderReference();
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    document.getElementById('view-reference').classList.toggle('active', mode === 'reference');
+    document.getElementById('view-game').classList.toggle('active', mode === 'game');
+    document.getElementById('view-rules').classList.toggle('active', mode === 'rules');
+    document.getElementById('ref-controls').style.display = mode === 'reference' ? 'block' : 'none';
+    document.getElementById('game-controls').style.display = mode === 'game' ? 'block' : 'none';
+    document.getElementById('periodFilters').style.display = mode === 'reference' ? 'flex' : 'none';
+    document.getElementById('stats').style.display = mode === 'reference' ? 'block' : 'none';
+    if (mode === 'game' && !gameElement) loadGameElement(6);
+  }
+
+  function playElement(n) {
+    switchMode('game');
+    loadGameElement(n);
+  }
+
+  function renderReference() {
+    const search = document.getElementById('search').value.toLowerCase().trim();
+    const main = document.getElementById('view-reference');
+    main.innerHTML = '';
+    const periods = currentPeriod === 'all' ? [1,2,3,4,5,6,7] : [parseInt(currentPeriod)];
+    let totalShown = 0;
+    for (const p of periods) {
+      const items = elements.filter(el => el.period === p && (!search || el.name.toLowerCase().includes(search) || el.sym.toLowerCase().includes(search) || String(el.n).includes(search)));
+      if (!items.length) continue;
+      totalShown += items.length;
+      const section = document.createElement('section');
+      section.className = 'period-section';
+      section.id = `period-${p}`;
+      section.innerHTML = `<h2 class="period-title"><span>Period ${p}</span> ${p===6?'Lanthanides included':p===7?'Actinides included':''}</h2><div class="grid">${items.map(cardHTML).join('')}</div>`;
+      main.appendChild(section);
+    }
+    document.getElementById('stats').textContent = `Showing ${totalShown} of ${elements.length} elements`;
+    if (totalShown === 0) main.innerHTML = `<div class="empty-state"><h3>No elements found</h3><p>Try a different search term.</p></div>`;
+  }
+
+  function cardHTML(el) {
+    const badge = el.exception ? `<span class="badge exception">⚠ Exception</span>` : `<span class="badge normal">✓ Standard</span>`;
+    return `<div class="card ${el.exception ? 'exception' : ''}" onclick="openModal(${el.n})"><div class="card-header"><div class="tile"><span class="z">${el.n}</span><span class="sym">${escapeHTML(el.sym)}</span></div><div><div class="name">${escapeHTML(el.name)}</div><div class="category">${getCategory(el.n)}</div></div></div><div class="config">${formatConfig(el.config, el.exception)}</div><div style="display:flex;justify-content:space-between;align-items:center">${badge}</div></div>`;
+  }
+
+  function openModal(n) {
+    selectedElement = getElement(n);
+    if (!selectedElement) return;
+    document.getElementById('mZ').textContent = selectedElement.n;
+    document.getElementById('mSym').textContent = selectedElement.sym;
+    document.getElementById('mName').textContent = selectedElement.name;
+    document.getElementById('mPeriod').textContent = `Period ${selectedElement.period} · ${getCategory(selectedElement.n)}`;
+    document.getElementById('mConfig').innerHTML = formatConfig(selectedElement.config, selectedElement.exception);
+    document.getElementById('mInfo').innerHTML = selectedElement.exception ? `<p><strong>Why bold?</strong> ${escapeHTML(selectedElement.reason)}</p>` : `<p>This configuration follows the standard Aufbau sequence with no NCERT-marked exceptions.</p>`;
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() { document.getElementById('modal').classList.remove('active'); document.body.style.overflow = ''; selectedElement = null; }
+  function closeModalOnBackdrop(e) { if (e.target === document.getElementById('modal')) closeModal(); }
+  function copyConfig() {
+    if (!selectedElement) return;
+    navigator.clipboard.writeText(`${selectedElement.name} (${selectedElement.sym}): ${selectedElement.config}`).then(() => {
+      const t = document.getElementById('toast'); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000);
+    });
+  }
+
+  // GAME LOGIC
+  function initGame() {
+    const sel = document.getElementById('gameElement');
+    sel.innerHTML = elements.map(e => `<option value="${e.n}">${e.n}. ${e.name} (${e.sym})</option>`).join('');
+    loadGameElement(6);
+    renderSequenceGame();
+  }
+
+  function loadGameElement(n) {
+    gameElement = getElement(n);
+    document.getElementById('gameElement').value = n;
+    document.getElementById('gZ').textContent = 'Z = ' + gameElement.n;
+    document.getElementById('gSym').textContent = gameElement.sym;
+    document.getElementById('gName').textContent = gameElement.name;
+    document.getElementById('gHint').textContent = `Place ${gameElement.n} electrons using the Aufbau sequence`;
+    resetGameState();
+    renderAufbauDiagram();
+    renderOrbitalBuilder();
+    updateGameStats();
+    hideFeedback('gameFeedback');
+  }
+
+  function resetGameState() {
+    const sol = getSolution(gameElement.n);
+    const display = getDisplaySubshells(sol);
+    gameState = {};
+    for (const sub of display) gameState[sub] = new Array(ORBITAL_COUNT[sub[1]]).fill(0);
+  }
+
+  function resetGame() { resetGameState(); renderAufbauDiagram(); renderOrbitalBuilder(); updateGameStats(); hideFeedback('gameFeedback'); }
+  function randomGame() { const n = Math.floor(Math.random() * 118) + 1; loadGameElement(n); }
+  function showGameHint() {
+    const fb = document.getElementById('gameFeedback');
+    fb.className = 'feedback show';
+    fb.innerHTML = `<strong>Hint:</strong> Correct configuration is <strong>${escapeHTML(gameElement.config)}</strong>`;
+  }
+
+  function renderAufbauDiagram() {
+    const sol = getSolution(gameElement.n);
+    const display = getDisplaySubshells(sol);
+    const svgW = 420, svgH = 420;
+    let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="${svgH}">`;
+
+    // Grid positions: n on rows, l on diagonal columns
+    const positions = {};
+    for (let n = 1; n <= 8; n++) {
+      const types = ['s','p','d','f'];
+      for (let l = 0; l < 4; l++) {
+        if ((n === 1 && l > 0) || (n === 2 && l > 1) || (n === 3 && l > 2) || (n === 4 && l > 3) || (n === 5 && l > 3) || (n === 6 && l > 3) || (n === 7 && l > 3) || (n === 8 && l > 0)) continue;
+        const sub = `${n}${types[l]}`;
+        const x = 60 + l * 90 + (n - 1) * 10;
+        const y = 60 + (n - 1) * 45;
+        positions[sub] = { x, y, n, l, type: types[l] };
+      }
+    }
+
+    // Draw connecting arrows for Aufbau order
+    let pathD = '';
+    for (let i = 0; i < AUFBAU_ORDER.length - 1; i++) {
+      const a = positions[AUFBAU_ORDER[i]];
+      const b = positions[AUFBAU_ORDER[i+1]];
+      if (!a || !b) continue;
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2 - 15;
+      pathD += `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y} `;
+    }
+    svg += `<path d="${pathD}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3" stroke-linecap="round" />`;
+
+    // Draw active order arrows
+    for (let i = 0; i < AUFBAU_ORDER.length - 1; i++) {
+      if (i >= display.length - 1) continue;
+      const a = positions[AUFBAU_ORDER[i]];
+      const b = positions[AUFBAU_ORDER[i+1]];
+      if (!a || !b) continue;
+      svg += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(56,189,248,0.35)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrowhead)" />`;
+    }
+    svg += `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="rgba(56,189,248,0.5)" /></marker></defs>`;
+
+    // Draw nodes
+    for (const sub in positions) {
+      const p = positions[sub];
+      const type = sub[1];
+      const isDisplayed = display.includes(sub);
+      const electrons = gameState[sub] ? gameState[sub].reduce((a,b)=>a+b,0) : 0;
+      const expected = sol[sub] || 0;
+      const cls = !isDisplayed ? '' : electrons === expected && expected > 0 ? 'correct' : electrons > 0 ? 'filled' : '';
+      const opacity = isDisplayed ? 1 : 0.35;
+      const radius = 22;
+      svg += `<g class="orbital-node ${cls}" onclick="clickAufbauNode('${sub}')" style="opacity:${opacity}">
+        <circle class="node-circle" cx="${p.x}" cy="${p.y}" r="${radius}" fill="${ORBITAL_COLORS[type]}" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+        <text x="${p.x}" y="${p.y + 4}" text-anchor="middle" fill="#0b0c15" font-size="13">${sub}</text>
+        ${isDisplayed ? `<text class="count" x="${p.x}" y="${p.y + radius + 16}" text-anchor="middle">${electrons}/${expected}</text>` : ''}
+      </g>`;
+    }
+
+    // Axis labels
+    svg += `<text x="20" y="40" fill="var(--muted)" font-size="12">n ↑</text>`;
+    svg += `<text x="${svgW - 50}" y="${svgH - 20}" fill="var(--muted)" font-size="12">ℓ →</text>`;
+    for (let n = 1; n <= 8; n++) svg += `<text x="10" y="${60 + (n-1)*45 + 4}" fill="var(--muted)" font-size="12">n=${n}</text>`;
+    ['s(ℓ=0)','p(ℓ=1)','d(ℓ=2)','f(ℓ=3)'].forEach((label, l) => svg += `<text x="${60 + l*90}" y="35" fill="${ORBITAL_COLORS[['s','p','d','f'][l]]}" font-size="11" text-anchor="middle">${label}</text>`);
+
+    svg += '</svg>';
+    document.getElementById('aufbauSvg').innerHTML = svg;
+  }
+
+  function renderOrbitalBuilder() {
+    const container = document.getElementById('orbitalBuilder');
+    container.innerHTML = '';
+    const display = Object.keys(gameState).sort((a,b) => AUFBAU_ORDER.indexOf(a) - AUFBAU_ORDER.indexOf(b));
+    for (const sub of display) {
+      const type = sub[1];
+      const count = ORBITAL_COUNT[type];
+      const row = document.createElement('div');
+      row.className = 'subshell-row';
+      row.dataset.sub = sub;
+      row.innerHTML = `<div class="subshell-label" style="color:${ORBITAL_COLORS[type]}">${sub}</div><div class="orbital-boxes"></div>`;
+      const boxes = row.querySelector('.orbital-boxes');
+      for (let i = 0; i < count; i++) {
+        const box = document.createElement('div');
+        box.className = 'orbital-box';
+        box.dataset.sub = sub;
+        box.dataset.idx = i;
+        box.onclick = () => clickOrbitalBox(sub, i);
+        box.innerHTML = orbitalBoxHTML(gameState[sub][i]);
+        boxes.appendChild(box);
+      }
+      container.appendChild(row);
+    }
+  }
+
+  function orbitalBoxHTML(state) {
+    if (state === 0) return '';
+    if (state === 1) return `<span class="arrow up">↑</span>`;
+    return `<span class="arrow up">↑</span><span class="arrow down">↓</span>`;
+  }
+
+  function clickOrbitalBox(sub, idx) {
+    gameState[sub][idx] = (gameState[sub][idx] + 1) % 3;
+    renderOrbitalBuilder();
+    renderAufbauDiagram();
+    updateGameStats();
+    hideFeedback('gameFeedback');
+  }
+  function clickAufbauNode(sub) {
+    if (!gameState[sub]) return;
+    // Find first orbital in this subshell that is not full, or cycle the last one
+    let targetIdx = gameState[sub].findIndex(v => v < 2);
+    if (targetIdx === -1) targetIdx = 0;
+    clickOrbitalBox(sub, targetIdx);
+  }
+
+  function updateGameStats() {
+    let total = 0;
+    for (const sub in gameState) total += gameState[sub].reduce((a,b)=>a+b,0);
+    document.getElementById('gCount').textContent = `${total} / ${gameElement.n}`;
+    document.getElementById('gBar').style.width = `${Math.min(100, (total / gameElement.n) * 100)}%`;
+    document.getElementById('scoreCorrect').textContent = score.correct;
+    document.getElementById('scoreAttempts').textContent = score.attempts;
+    document.getElementById('scoreStreak').textContent = score.streak;
+  }
+
+  function checkGame() {
+    const sol = getSolution(gameElement.n);
+    const errors = [];
+    let total = 0;
+    for (const sub in gameState) total += gameState[sub].reduce((a,b)=>a+b,0);
+
+    if (total !== gameElement.n) errors.push(`You placed <strong>${total}</strong> electrons, but ${gameElement.name} has atomic number <strong>${gameElement.n}</strong>.`);
+
+    for (const sub in gameState) {
+      const arr = gameState[sub];
+      const type = sub[1];
+      const numOrbitals = arr.length;
+      const filled = arr.filter(x => x === 2).length;
+      const half = arr.filter(x => x === 1).length;
+      const subTotal = filled*2 + half;
+      const expected = sol[sub] || 0;
+
+      if (arr.some(x => x > 2)) errors.push(`<strong>Pauli Exclusion:</strong> An orbital in ${sub} has more than 2 electrons.`);
+      if (subTotal > 0 && subTotal <= numOrbitals && filled > 0) errors.push(`<strong>Hund's Rule:</strong> In ${sub}, fill every orbital singly before pairing.`);
+      if (subTotal > numOrbitals && (filled + half) < numOrbitals) errors.push(`<strong>Hund's Rule:</strong> Every orbital in ${sub} needs one electron before pairing continues.`);
+      if (subTotal !== expected) {
+        if (expected === 0) errors.push(`<strong>Aufbau:</strong> ${sub} should be empty. Its n+ℓ is higher than an unfilled subshell.`);
+        else errors.push(`<strong>Aufbau:</strong> ${sub} should have <strong>${expected}</strong> electrons, not ${subTotal}.`);
+      }
+    }
+
+    score.attempts++;
+    const fb = document.getElementById('gameFeedback');
+    fb.className = 'feedback show';
+    if (errors.length === 0) {
+      score.correct++;
+      score.streak++;
+      fb.classList.add('success');
+      fb.innerHTML = `<strong>Correct! 🎉</strong> ${gameElement.name} = <strong>${escapeHTML(gameElement.config)}</strong><br><span style="font-size:0.85rem;color:var(--muted)">${gameElement.exception ? escapeHTML(gameElement.reason) : 'This is the standard Aufbau configuration.'}</span>`;
+      markRows('correct');
+    } else {
+      score.streak = 0;
+      fb.classList.add('error');
+      fb.innerHTML = `<strong>Not quite.</strong> Review these rules:<ul>${errors.slice(0,4).map(e=>`<li>${e}</li>`).join('')}</ul>`;
+      markRows('error');
+    }
+    updateGameStats();
+  }
+
+  function markRows(cls) {
+    const sol = getSolution(gameElement.n);
+    document.querySelectorAll('.subshell-row').forEach(row => {
+      const sub = row.dataset.sub;
+      const expected = sol[sub] || 0;
+      const actual = gameState[sub].reduce((a,b)=>a+b,0);
+      row.classList.remove('error', 'correct');
+      if (actual === expected && expected > 0) row.classList.add('correct');
+      else if (actual !== expected) row.classList.add('error');
+    });
+  }
+
+  function hideFeedback(id) {
+    const fb = document.getElementById(id);
+    fb.className = 'feedback';
+    fb.innerHTML = '';
+  }
+
+  // SEQUENCE GAME
+  function renderSequenceGame() {
+    const grid = document.getElementById('sequenceGrid');
+    grid.innerHTML = AUFBAU_ORDER.map(sub => `<div class="seq-orb" id="seq-${sub}" onclick="clickSequence('${sub}')">${sub}</div>`).join('');
+    document.getElementById('sequenceList').textContent = 'Click in order: 1s → 2s → 2p → …';
+  }
+  function clickSequence(sub) {
+    if (sequenceState.includes(sub)) return;
+    sequenceState.push(sub);
+    document.getElementById('sequenceList').textContent = sequenceState.join(' → ');
+    document.getElementById(`seq-${sub}`).classList.add('selected');
+    hideFeedback('sequenceFeedback');
+  }
+  function checkSequence() {
+    const fb = document.getElementById('sequenceFeedback');
+    fb.className = 'feedback show';
+    const correct = AUFBAU_ORDER.slice(0, sequenceState.length);
+    const isFull = sequenceState.length === AUFBAU_ORDER.length;
+    let allCorrect = true;
+    for (let i = 0; i < sequenceState.length; i++) {
+      if (sequenceState[i] !== correct[i]) {
+        document.getElementById(`seq-${sequenceState[i]}`).classList.add('wrong');
+        allCorrect = false;
+      }
+    }
+    if (allCorrect && isFull) {
+      fb.classList.add('success');
+      fb.innerHTML = `<strong>Perfect!</strong> You traced the full Aufbau filling order correctly.`;
+    } else if (allCorrect) {
+      fb.classList.add('success');
+      fb.innerHTML = `<strong>So far so good!</strong> Continue the sequence. (${sequenceState.length}/${AUFBAU_ORDER.length})`;
+    } else {
+      fb.classList.add('error');
+      fb.innerHTML = `<strong>Oops!</strong> The order broke at position ${sequenceState.findIndex((s,i)=>s!==correct[i])+1}. Reset and try again.`;
+    }
+  }
+  function resetSequence() {
+    sequenceState = [];
+    renderSequenceGame();
+    hideFeedback('sequenceFeedback');
+  }
+
+  // INIT
+  document.getElementById('search').addEventListener('input', renderReference);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  renderFilters();
+  renderReference();
+  initGame();
+</script></body>
+</html>

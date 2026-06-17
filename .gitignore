@@ -1,21 +1,68 @@
+# ============================================================
+# NEET Chemistry App — .gitignore
+# Only web-app runtime files go to the repo.
+# Everything else stays local.
+# ============================================================
+
+# ------ noupload/ -----------------------------------------------
+# Local-only folder: source data, build scripts, OCR dumps,
+# test files, reference docs. Never pushed.
+noupload/
+
+# ------ OS / Editor junk ----------------------------------------
 .DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# ------ Python --------------------------------------------------
 __pycache__/
-*.pyc
-node_modules/
+*.py[cod]
+*.pyo
 .venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
 
-# Large OCR source files (keep locally, not in repo)
-Objective-Biology-for-NEET-Vol-I-Pearson-Education-2019.pdf_by_PaddleOCR-VL-1.6.*
-Objective-Biology-for-NEET2.*
-wileyx27s-objective-chemistry-for-neet-k-singh_compress.pdf_by_PaddleOCR-VL-1.6.*
+# ------ Node / npm ----------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm/
 
-# Generated Pearson import outputs (run convert_pearson_md.py locally)
-pearson_biology_vol1.json
-pearson_biology_vol1.csv
-pearson_biology_vol1_report.json
-pearson_biology_vol2.json
-pearson_biology_vol2.csv
-pearson_biology_vol2_report.json
+# ------ Claude / AI session files -------------------------------
+.claude/
 
-# Unrelated / unused assets
+# ------ Test / CI artifacts -------------------------------------
+playwright-report/
+test-results/
+coverage/
+.nyc_output/
+
+# ------ Large source / OCR files (catch-all safety net) ---------
+# These should live in noupload/ but also caught here just in case
+*.pdf
+*_by_PaddleOCR*.json
+*_by_PaddleOCR*.md
+*_by_PaddleOCR*.txt
+
+# ------ Misc generated / intermediate files ---------------------
+*.log
+*.tmp
+*.bak
+*.orig
+*.patch
+
+# ------ Pearson / Biology import outputs ------------------------
+pearson_biology_vol1.*
+pearson_biology_vol2.*
+Objective-Biology-for-NEET*
 bio_classsif.png
