@@ -774,6 +774,58 @@
       .orbital-box { width: 34px; height: 34px; }
       .subshell-label { width: 52px; font-size: 0.78rem; }
     }
+
+  /* ============================================================
+     BOHR SHELL MODEL STYLES
+     ============================================================ */
+  .bohr-hero { text-align: center; margin-bottom: 28px; }
+  .bohr-hero h2 { font-size: 1.8rem; background: linear-gradient(90deg,#06b6d4,#d946ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px; }
+  .bohr-hero p  { color: var(--muted); max-width: 700px; margin: 0 auto; }
+
+  .bohr-sub-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  .bohr-sub-btn  { padding:9px 18px; border-radius:9px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.15s; }
+  .bohr-sub-btn:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+  .bohr-sub-btn.active { background:linear-gradient(135deg,#06b6d4,#d946ef); border-color:transparent; color:#fff; }
+
+  .bohr-ref-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+  .bohr-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; cursor:pointer; transition:transform 0.18s,box-shadow 0.18s,border-color 0.18s; position:relative; overflow:hidden; }
+  .bohr-card:hover { transform:translateY(-3px); box-shadow:var(--shadow); border-color:rgba(6,182,212,0.3); }
+  .bohr-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#06b6d4,#d946ef); opacity:0.5; }
+  .bohr-card.exception::before { opacity:1; background:linear-gradient(90deg,#fbbf24,#f87171); }
+  .bohr-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .shell-chip { display:inline-block; padding:2px 6px; border-radius:5px; font-size:0.72rem; font-weight:700; margin:1px 2px; color:#000; }
+  .shell-bars { margin-top:8px; }
+  .shell-bar-row { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+  .shell-bar-lbl { font-size:0.72rem; font-weight:700; width:14px; flex-shrink:0; }
+  .shell-bar-track { flex:1; height:6px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+  .shell-bar-fill  { height:100%; border-radius:3px; }
+  .shell-bar-num  { font-size:0.68rem; color:var(--muted); width:22px; text-align:right; flex-shrink:0; }
+
+  .bohr-atom-wrap { display:flex; justify-content:center; align-items:center; margin:14px 0; }
+
+  .bohr-game-layout { display:grid; grid-template-columns:1fr 1.15fr; gap:24px; }
+  @media (max-width:900px) { .bohr-game-layout { grid-template-columns:1fr; } }
+
+  .shell-stepper-row { display:flex; align-items:center; gap:9px; margin-bottom:8px; padding:9px 12px; border-radius:10px; border:1.5px solid var(--border); background:rgba(255,255,255,0.015); transition:border-color 0.2s,background 0.2s; }
+  .shell-stepper-row.correct-row { border-color:var(--success); background:rgba(52,211,153,0.07); }
+  .shell-stepper-row.error-row   { border-color:var(--error);   background:rgba(248,113,113,0.07); animation:shake 0.4s; }
+  .shell-stepper-row.inactive-row { opacity:0.25; pointer-events:none; }
+  .shell-circle { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.82rem; font-weight:800; color:#000; flex-shrink:0; }
+  .shell-stepper-count { font-size:1.35rem; font-weight:800; min-width:36px; text-align:center; }
+  .shell-stepper-btn { width:28px; height:28px; border-radius:7px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s; flex-shrink:0; }
+  .shell-stepper-btn:hover { background:rgba(255,255,255,0.1); }
+  .shell-max-info { font-size:0.68rem; color:var(--muted); margin-left:auto; white-space:nowrap; }
+
+  .guess-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .guess-opt { padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.15s; text-align:left; display:flex; align-items:center; gap:10px; }
+  .guess-opt:hover { border-color:#06b6d4; background:rgba(6,182,212,0.06); }
+  .guess-opt.correct-g { border-color:var(--success); background:rgba(52,211,153,0.1); color:var(--success); pointer-events:none; }
+  .guess-opt.wrong-g   { border-color:var(--error);   background:rgba(248,113,113,0.08); color:var(--error);   pointer-events:none; }
+
+  .bohr-rules-table { width:100%; border-collapse:collapse; font-size:0.88rem; margin:14px 0; }
+  .bohr-rules-table th, .bohr-rules-table td { border:1px solid var(--border); padding:9px 12px; text-align:center; }
+  .bohr-rules-table th { background:rgba(6,182,212,0.1); color:#06b6d4; font-weight:700; }
+  .bohr-rules-table td:first-child { font-weight:800; font-size:1rem; color:var(--text); }
   </style>
 </head>
 <body>
@@ -794,6 +846,7 @@
     <button class="mode-btn active" data-mode="reference" onclick="switchMode('reference')">📖 Reference</button>
     <button class="mode-btn" data-mode="game" onclick="switchMode('game')">🎮 Game Mode</button>
     <button class="mode-btn" data-mode="rules" onclick="switchMode('rules')">📚 Rules & Exceptions</button>
+    <button class="mode-btn" data-mode="bohr" onclick="switchMode('bohr')">🪐 Bohr Shells</button>
   </div>
 
   <div id="ref-controls" class="search-wrap" style="flex:1 1 280px;max-width:420px">
@@ -1009,7 +1062,120 @@
         </tbody>
       </table>
     </div>
+
+    <div class="rule-card">
+      <h3>🪐 Bohr-Bury Shell Model — KLMNOPQ Rules</h3>
+      <p>Proposed by Niels Bohr &amp; Charles Bury (1921), these four rules explain the periodic table before <em>s,p,d,f</em> subshell theory. They follow directly from the Aufbau principle.</p>
+      <div class="cheat-sheet" style="margin-bottom:20px">
+        <div class="cheat-card"><h4>Rule 1 — 2n² Capacity</h4><p>Maximum electrons in shell <em>n</em> = <em>2n²</em>. K=2, L=8, M=18, N=32 …</p></div>
+        <div class="cheat-card"><h4>Rule 2 — Octet Rule</h4><p>The outermost (valence) shell can never hold more than <strong>8</strong> electrons (duplet exception for H &amp; He).</p></div>
+        <div class="cheat-card"><h4>Rule 3 — Penultimate Limit</h4><p>The second-to-last shell ≤ 18 e⁻. The third-from-last ≤ 32 e⁻.</p></div>
+        <div class="cheat-card"><h4>Rule 4 — Step-Wise Filling</h4><p>A new outer shell begins once the previous hits 8. A shell expands past 8 only after the next shell has ≥ 2 electrons.</p></div>
+      </div>
+      <h4 style="color:var(--accent);margin-bottom:10px">Shell capacity table</h4>
+      <table class="bohr-rules-table">
+        <thead><tr><th>Shell</th><th>n</th><th>2n² theoretical max</th><th>Max in known elements (Z≤118)</th></tr></thead>
+        <tbody>
+          <tr><td>K</td><td>1</td><td>2</td><td>2</td></tr>
+          <tr><td>L</td><td>2</td><td>8</td><td>8</td></tr>
+          <tr><td>M</td><td>3</td><td>18</td><td>18</td></tr>
+          <tr><td>N</td><td>4</td><td>32</td><td>32</td></tr>
+          <tr><td>O</td><td>5</td><td>50</td><td>32 (Oganesson)</td></tr>
+          <tr><td>P</td><td>6</td><td>72</td><td>18 (Oganesson)</td></tr>
+          <tr><td>Q</td><td>7</td><td>98</td><td>8 (Oganesson)</td></tr>
+        </tbody>
+      </table>
+      <h4 style="color:var(--accent);margin:20px 0 10px">Rule 4 in action — Ca→Sc crossover</h4>
+      <table class="exception-table">
+        <thead><tr><th>Element</th><th>Z</th><th>K</th><th>L</th><th>M</th><th>N</th><th>Why?</th></tr></thead>
+        <tbody>
+          <tr><td>Argon</td><td>18</td><td>2</td><td>8</td><td>8</td><td>—</td><td>M shell hits octet limit</td></tr>
+          <tr><td>Potassium</td><td>19</td><td>2</td><td>8</td><td>8</td><td>1</td><td>N shell begins (Rule 2 blocks M)</td></tr>
+          <tr><td>Calcium</td><td>20</td><td>2</td><td>8</td><td>8</td><td>2</td><td>N shell now has 2 electrons</td></tr>
+          <tr><td>Scandium</td><td>21</td><td>2</td><td>8</td><td>9</td><td>2</td><td>Rule 4: M can now expand (3d begins)</td></tr>
+        </tbody>
+      </table>
+      <button class="try-btn" onclick="switchMode('bohr')">🪐 Open Bohr Shell Reference →</button>
+    </div>
   </div>
+
+  <!-- ================================================================
+       BOHR SHELL VIEW
+       ================================================================ -->
+  <div id="view-bohr" class="view">
+    <div class="bohr-hero">
+      <h2>🪐 Bohr-Bury Shell Model (KLMNOPQ)</h2>
+      <p>The classical shell model groups electrons by principal quantum number <em>n</em>. Master all 118 elements across three modes: reference, fill-the-shells game, and identify-by-shells quiz.</p>
+    </div>
+    <div class="bohr-sub-tabs">
+      <button class="bohr-sub-btn active" id="bst-ref"   onclick="switchBohrSub('bohr-ref'  )">📋 Shell Reference</button>
+      <button class="bohr-sub-btn"        id="bst-fill"  onclick="switchBohrSub('bohr-fill' )">✍️ Fill the Shells</button>
+      <button class="bohr-sub-btn"        id="bst-guess" onclick="switchBohrSub('bohr-guess')">🔍 Identify Element</button>
+    </div>
+
+    <!-- Reference sub-view -->
+    <div id="bohr-ref">
+      <div id="bohrRefGrid"></div>
+    </div>
+
+    <!-- Fill-the-Shells game -->
+    <div id="bohr-fill" style="display:none">
+      <div class="bohr-game-layout">
+        <div class="game-panel">
+          <div class="target-card">
+            <div class="target-tile"><span class="z" id="bgZ"></span><span class="sym" id="bgSym"></span></div>
+            <div class="target-info"><h2 id="bgName"></h2><p id="bgHint" style="color:var(--muted);font-size:0.85rem"></p></div>
+          </div>
+          <div class="score-board">
+            <div class="score-box"><div class="num" id="bohrScoreCorrect">0</div><div class="label">Correct</div></div>
+            <div class="score-box"><div class="num" id="bohrScoreAttempts">0</div><div class="label">Attempts</div></div>
+            <div class="score-box"><div class="num" id="bohrScoreStreak">0</div><div class="label">Streak</div></div>
+          </div>
+          <div id="shellSteppers" style="margin-top:4px"></div>
+          <div class="game-controls" style="margin-top:14px">
+            <button class="btn btn-primary" onclick="checkBohrGame()">✅ Check</button>
+            <button class="btn btn-secondary" onclick="resetBohrGame()">🔄 Reset</button>
+            <button class="btn btn-secondary" onclick="randomBohrGame()">🔀 Random</button>
+            <button class="btn btn-secondary" onclick="showBohrHint()">💡 Hint</button>
+          </div>
+          <div class="feedback" id="bohrFeedback"></div>
+        </div>
+        <div class="game-panel">
+          <h3>🪐 Bohr Atom — live as you fill</h3>
+          <div class="bohr-atom-wrap">
+            <svg id="bohrAtomSvg" viewBox="0 0 300 300" width="300" height="300"></svg>
+          </div>
+          <div id="shellBarViz" style="padding:0 8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Identify-Element guess game -->
+    <div id="bohr-guess" style="display:none">
+      <div style="max-width:620px;margin:0 auto">
+        <div class="game-panel">
+          <h3 style="margin-bottom:16px">🔍 Identify the Element from its Shell Configuration</h3>
+          <div class="score-board">
+            <div class="score-box"><div class="num" id="guessScoreCorrect">0</div><div class="label">Correct</div></div>
+            <div class="score-box"><div class="num" id="guessScoreAttempts">0</div><div class="label">Attempts</div></div>
+            <div class="score-box"><div class="num" id="guessScoreStreak">0</div><div class="label">Streak</div></div>
+          </div>
+          <div style="text-align:center;margin:20px 0">
+            <div class="bohr-atom-wrap">
+              <svg id="guessAtomSvg" viewBox="0 0 280 280" width="280" height="280"></svg>
+            </div>
+            <div id="guessShellNotation" style="font-family:'Courier New',monospace;font-size:1.05rem;color:#06b6d4;margin-top:10px;letter-spacing:0.5px"></div>
+          </div>
+          <p style="color:var(--muted);font-size:0.9rem;text-align:center;margin-bottom:6px">Which element has this shell configuration?</p>
+          <div class="guess-options" id="guessOptions"></div>
+          <div class="feedback" id="guessFeedback" style="margin-top:14px"></div>
+          <div style="margin-top:14px">
+            <button class="btn btn-secondary" onclick="nextGuessGame()" style="width:100%">Next Element →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end view-bohr -->
 </main>
 
 <div class="modal-overlay" id="modal" onclick="closeModalOnBackdrop(event)">
@@ -1239,11 +1405,17 @@
     document.getElementById('view-reference').classList.toggle('active', mode === 'reference');
     document.getElementById('view-game').classList.toggle('active', mode === 'game');
     document.getElementById('view-rules').classList.toggle('active', mode === 'rules');
+    document.getElementById('view-bohr').classList.toggle('active', mode === 'bohr');
     document.getElementById('ref-controls').style.display = mode === 'reference' ? 'block' : 'none';
     document.getElementById('game-controls').style.display = mode === 'game' ? 'block' : 'none';
     document.getElementById('periodFilters').style.display = mode === 'reference' ? 'flex' : 'none';
     document.getElementById('stats').style.display = mode === 'reference' ? 'block' : 'none';
     if (mode === 'game' && !gameElement) loadGameElement(6);
+    if (mode === 'bohr') {
+      if (bohrSubMode === 'bohr-ref') renderBohrReference();
+      else if (bohrSubMode === 'bohr-fill'  && !bohrTarget)  initBohrFillGame();
+      else if (bohrSubMode === 'bohr-guess' && !guessTarget) initGuessGame();
+    }
   }
 
   function playElement(n) {
@@ -1560,6 +1732,342 @@
     sequenceState = [];
     renderSequenceGame();
     hideFeedback('sequenceFeedback');
+  }
+
+  // ============================================================
+  // BOHR SHELL MODEL — Data & Games
+  // ============================================================
+  const SHELL_NAMES  = ['K','L','M','N','O','P','Q'];
+  const SHELL_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#818cf8','#d946ef'];
+  const SHELL_MAX_2N2       = [2, 8, 18, 32, 50, 72, 98];
+  const SHELL_PRACTICAL_MAX = [2, 8, 18, 32, 32, 18,  8];
+
+  const SHELL_DATA = [
+    null,
+    [1],[2],
+    [2,1],[2,2],[2,3],[2,4],[2,5],[2,6],[2,7],[2,8],
+    [2,8,1],[2,8,2],[2,8,3],[2,8,4],[2,8,5],[2,8,6],[2,8,7],[2,8,8],
+    [2,8,8,1],[2,8,8,2],[2,8,9,2],[2,8,10,2],[2,8,11,2],
+    [2,8,13,1],[2,8,13,2],[2,8,14,2],[2,8,15,2],[2,8,16,2],
+    [2,8,18,1],[2,8,18,2],[2,8,18,3],[2,8,18,4],[2,8,18,5],
+    [2,8,18,6],[2,8,18,7],[2,8,18,8],
+    [2,8,18,8,1],[2,8,18,8,2],[2,8,18,9,2],[2,8,18,10,2],[2,8,18,12,1],
+    [2,8,18,13,1],[2,8,18,13,2],[2,8,18,15,1],[2,8,18,16,1],[2,8,18,18,0],
+    [2,8,18,18,1],[2,8,18,18,2],[2,8,18,18,3],[2,8,18,18,4],[2,8,18,18,5],
+    [2,8,18,18,6],[2,8,18,18,7],[2,8,18,18,8],
+    [2,8,18,18,8,1],[2,8,18,18,8,2],[2,8,18,18,9,2],[2,8,18,19,9,2],
+    [2,8,18,21,8,2],[2,8,18,22,8,2],[2,8,18,23,8,2],[2,8,18,24,8,2],
+    [2,8,18,25,8,2],[2,8,18,25,9,2],[2,8,18,27,8,2],[2,8,18,28,8,2],
+    [2,8,18,29,8,2],[2,8,18,30,8,2],[2,8,18,31,8,2],[2,8,18,32,8,2],
+    [2,8,18,32,9,2],[2,8,18,32,10,2],[2,8,18,32,11,2],[2,8,18,32,12,2],
+    [2,8,18,32,13,2],[2,8,18,32,14,2],[2,8,18,32,15,2],[2,8,18,32,17,1],
+    [2,8,18,32,18,1],[2,8,18,32,18,2],[2,8,18,32,18,3],[2,8,18,32,18,4],
+    [2,8,18,32,18,5],[2,8,18,32,18,6],[2,8,18,32,18,7],[2,8,18,32,18,8],
+    [2,8,18,32,18,8,1],[2,8,18,32,18,8,2],[2,8,18,32,18,9,2],[2,8,18,32,18,10,2],
+    [2,8,18,32,20,9,2],[2,8,18,32,21,9,2],[2,8,18,32,22,9,2],[2,8,18,32,24,8,2],
+    [2,8,18,32,25,8,2],[2,8,18,32,25,9,2],[2,8,18,32,27,8,2],[2,8,18,32,28,8,2],
+    [2,8,18,32,29,8,2],[2,8,18,32,30,8,2],[2,8,18,32,31,8,2],[2,8,18,32,32,8,2],
+    [2,8,18,32,32,9,2],[2,8,18,32,32,10,2],[2,8,18,32,32,11,2],[2,8,18,32,32,12,2],
+    [2,8,18,32,32,13,2],[2,8,18,32,32,14,2],[2,8,18,32,32,15,2],[2,8,18,32,32,16,2],
+    [2,8,18,32,32,18,1],[2,8,18,32,32,18,2],[2,8,18,32,32,18,3],[2,8,18,32,32,18,4],
+    [2,8,18,32,32,18,5],[2,8,18,32,32,18,6],[2,8,18,32,32,18,7],[2,8,18,32,32,18,8]
+  ];
+
+  let bohrSubMode = 'bohr-ref';
+  let bohrTarget  = null;
+  let bohrUserShells = [0,0,0,0,0,0,0];
+  let bohrScore   = { correct:0, attempts:0, streak:0 };
+  let guessTarget = null;
+  let guessAnswered = false;
+  let guessScore  = { correct:0, attempts:0, streak:0 };
+
+  function getShells(z) {
+    const s = SHELL_DATA[z];
+    if (!s) return [0,0,0,0,0,0,0];
+    return [...s, 0,0,0,0,0,0,0].slice(0,7);
+  }
+  function shellNotationStr(z) {
+    const s = SHELL_DATA[z];
+    if (!s) return '';
+    return s.map((n,i) => SHELL_NAMES[i] + ':' + n).join('  ');
+  }
+  function activeShellCount(z) { return SHELL_DATA[z] ? SHELL_DATA[z].length : 0; }
+  function getElement(z) { return elements.find(e => e.n === z) || null; }
+  function getCategory(z) {
+    if (z <= 2) return 'Noble Gas / Nonmetal';
+    if (z <= 10) return 'Period 2';
+    if (z <= 18) return 'Period 3';
+    if ((z >= 21 && z <= 30)||(z >= 39 && z <= 48)||(z >= 72 && z <= 80)||(z >= 104 && z <= 112)) return 'Transition Metal';
+    if ((z >= 57 && z <= 71)||(z >= 89 && z <= 103)) return 'Inner Transition';
+    return 'Main Group';
+  }
+
+  // Bohr atom SVG renderer
+  function drawBohrAtom(svgId, z, userShells, size) {
+    const svgEl = document.getElementById(svgId);
+    if (!svgEl) return;
+    const elObj = getElement(z);
+    if (!elObj) return;
+    size = size || 300;
+    const shells = userShells !== null ? userShells : getShells(z);
+    const cx = size / 2, cy = size / 2;
+    const nucleusR = size * 0.085;
+    const maxR     = size * 0.46;
+    const step     = (maxR - nucleusR) / 7;
+    let out = '';
+    out += `<circle cx="${cx}" cy="${cy}" r="${nucleusR}" fill="#1e293b" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>`;
+    out += `<text x="${cx}" y="${cy-4}" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="${Math.max(7,nucleusR*0.55)}" font-family="monospace">${z}</text>`;
+    out += `<text x="${cx}" y="${cy+8}" text-anchor="middle" fill="#fff" font-size="${Math.max(9,nucleusR*0.7)}" font-weight="800" font-family="sans-serif">${escapeHTML(elObj.sym)}</text>`;
+    const numShells = activeShellCount(z);
+    for (let i = 0; i < 7; i++) {
+      const r     = nucleusR + (i + 1) * step;
+      const color = SHELL_COLORS[i];
+      const count = shells[i] || 0;
+      const isActive = i < numShells;
+      const opacity = isActive ? (count > 0 ? 0.75 : 0.18) : 0.07;
+      out += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="none" stroke="${color}" stroke-width="${count>0?1.8:1}" opacity="${opacity}"/>`;
+      if (count > 0) {
+        if (count <= 18) {
+          for (let e = 0; e < count; e++) {
+            const ang = (e / count) * 2 * Math.PI - Math.PI / 2;
+            const ex  = (cx + r * Math.cos(ang)).toFixed(1);
+            const ey  = (cy + r * Math.sin(ang)).toFixed(1);
+            out += `<circle cx="${ex}" cy="${ey}" r="3.2" fill="${color}" opacity="0.92"/>`;
+          }
+        } else {
+          out += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="none" stroke="${color}" stroke-width="5" opacity="0.22"/>`;
+          const bx = (cx + r + 14).toFixed(1);
+          out += `<text x="${bx}" y="${(cy+4).toFixed(1)}" text-anchor="middle" fill="${color}" font-size="11" font-weight="800">${count}</text>`;
+        }
+      }
+      const lx = (cx - r - 9).toFixed(1);
+      out += `<text x="${lx}" y="${(cy+4).toFixed(1)}" text-anchor="middle" fill="${color}" font-size="10" font-weight="800" opacity="${Math.min(1, opacity + 0.25)}">${SHELL_NAMES[i]}</text>`;
+    }
+    svgEl.innerHTML = out;
+  }
+
+  // Sub-tab switcher
+  function switchBohrSub(sub) {
+    bohrSubMode = sub;
+    const map = { 'bohr-ref':'ref', 'bohr-fill':'fill', 'bohr-guess':'guess' };
+    document.querySelectorAll('.bohr-sub-btn').forEach(b => b.classList.toggle('active', b.id === 'bst-' + map[sub]));
+    ['bohr-ref','bohr-fill','bohr-guess'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = id === sub ? 'block' : 'none';
+    });
+    if (sub === 'bohr-ref')                         renderBohrReference();
+    if (sub === 'bohr-fill'  && !bohrTarget)        initBohrFillGame();
+    if (sub === 'bohr-guess' && !guessTarget)       initGuessGame();
+  }
+
+  // Bohr Reference view
+  function renderBohrReference() {
+    const grid = document.getElementById('bohrRefGrid');
+    if (!grid || grid.innerHTML) return; // already rendered
+    const byPeriod = {};
+    elements.forEach(e => { if (!byPeriod[e.period]) byPeriod[e.period]=[]; byPeriod[e.period].push(e); });
+    let html = '';
+    for (let p = 1; p <= 7; p++) {
+      if (!byPeriod[p]) continue;
+      html += `<div class="period-section"><h2 class="period-title"><span>Period ${p}</span></h2><div class="bohr-ref-grid">`;
+      byPeriod[p].forEach(e => {
+        const sd = SHELL_DATA[e.n] || [];
+        const chips = sd.map((n,i) => `<span class="shell-chip" style="background:${SHELL_COLORS[i]}">${SHELL_NAMES[i]}:${n}</span>`).join('');
+        const bars  = sd.map((n,i) => {
+          const pct = SHELL_PRACTICAL_MAX[i] ? Math.min(100,(n/SHELL_PRACTICAL_MAX[i])*100) : 0;
+          return `<div class="shell-bar-row"><span class="shell-bar-lbl" style="color:${SHELL_COLORS[i]}">${SHELL_NAMES[i]}</span><div class="shell-bar-track"><div class="shell-bar-fill" style="width:${pct}%;background:${SHELL_COLORS[i]}"></div></div><span class="shell-bar-num">${n}</span></div>`;
+        }).join('');
+        html += `<div class="bohr-card${e.exception?' exception':''}" onclick="openBohrModal(${e.n})">
+          <div class="bohr-card-top">
+            <div class="tile"><span class="z">${e.n}</span><span class="sym">${escapeHTML(e.sym)}</span></div>
+            <div style="text-align:right"><div class="name">${escapeHTML(e.name)}</div><div class="category" style="font-size:0.7rem;margin-top:2px">${getCategory(e.n)}</div></div>
+          </div>
+          <div style="margin-bottom:8px;line-height:2">${chips}</div>
+          <div class="shell-bars">${bars}</div>
+        </div>`;
+      });
+      html += '</div></div>';
+    }
+    grid.innerHTML = html;
+  }
+
+  function openBohrModal(n) {
+    const e = getElement(n);
+    if (!e) return;
+    const sd = SHELL_DATA[n] || [];
+    const shellStr = sd.map((c,i) => `<strong style="color:${SHELL_COLORS[i]}">${SHELL_NAMES[i]}</strong>:${c}`).join(' &nbsp; ');
+    document.getElementById('mZ').textContent    = e.n;
+    document.getElementById('mSym').textContent  = e.sym;
+    document.getElementById('mName').textContent = e.name;
+    document.getElementById('mPeriod').textContent = `Period ${e.period} · ${getCategory(e.n)}`;
+    document.getElementById('mConfig').innerHTML  = formatConfig(e.config, e.exception);
+    document.getElementById('mInfo').innerHTML    = `
+      <p><strong>Shell notation:</strong> ${shellStr}</p>
+      ${e.exception ? `<p><strong>Exception:</strong> ${escapeHTML(e.reason)}</p>` : '<p>Standard Aufbau configuration.</p>'}
+      <div class="bohr-atom-wrap"><svg id="bohrModalAtom" viewBox="0 0 240 240" width="240" height="240"></svg></div>
+      <div style="margin-top:6px"><button class="try-btn" onclick="openBohrFillGame(${n})">🎮 Fill Shells Game</button></div>
+    `;
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => drawBohrAtom('bohrModalAtom', n, null, 240), 50);
+  }
+
+  function openBohrFillGame(n) { closeModal(); switchMode('bohr'); switchBohrSub('bohr-fill'); loadBohrFillGame(n); }
+
+  // Fill-the-Shells game
+  function initBohrFillGame() { loadBohrFillGame(6); }
+
+  function loadBohrFillGame(n) {
+    const e = getElement(n);
+    if (!e) return;
+    bohrTarget = e;
+    bohrUserShells = [0,0,0,0,0,0,0];
+    document.getElementById('bgZ').textContent    = 'Z = ' + e.n;
+    document.getElementById('bgSym').textContent  = e.sym;
+    document.getElementById('bgName').textContent = e.name;
+    document.getElementById('bgHint').textContent = `Place ${e.n} electrons into ${activeShellCount(n)} shell(s) using Bohr rules.`;
+    renderShellSteppers();
+    updateBohrAtomGame();
+    hideFeedback('bohrFeedback');
+  }
+
+  function renderShellSteppers() {
+    const cont = document.getElementById('shellSteppers');
+    if (!cont) return;
+    const numS = activeShellCount(bohrTarget.n);
+    cont.innerHTML = SHELL_NAMES.map((name, i) => `
+      <div class="shell-stepper-row${i<numS?'':' inactive-row'}" id="srow-${i}">
+        <div class="shell-circle" style="background:${SHELL_COLORS[i]}">${name}</div>
+        <button class="shell-stepper-btn" onclick="changeShell(${i},-1)">−</button>
+        <div class="shell-stepper-count" id="scount-${i}" style="color:${SHELL_COLORS[i]}">${bohrUserShells[i]}</div>
+        <button class="shell-stepper-btn" onclick="changeShell(${i},+1)">+</button>
+        <span class="shell-max-info">2n²=${SHELL_MAX_2N2[i]}</span>
+      </div>`).join('');
+  }
+
+  function changeShell(i, delta) {
+    const numS = activeShellCount(bohrTarget.n);
+    if (i >= numS) return;
+    bohrUserShells[i] = Math.max(0, Math.min(SHELL_MAX_2N2[i], bohrUserShells[i] + delta));
+    const el = document.getElementById('scount-' + i);
+    if (el) el.textContent = bohrUserShells[i];
+    updateBohrAtomGame();
+    hideFeedback('bohrFeedback');
+    document.querySelectorAll('.shell-stepper-row').forEach(r => r.classList.remove('correct-row','error-row'));
+  }
+
+  function updateBohrAtomGame() {
+    drawBohrAtom('bohrAtomSvg', bohrTarget.n, bohrUserShells, 300);
+    const wrap = document.getElementById('shellBarViz');
+    if (!wrap) return;
+    const numS  = activeShellCount(bohrTarget.n);
+    const total = bohrUserShells.reduce((a,b)=>a+b, 0);
+    let html = '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px">Electron distribution:</div>';
+    for (let i = 0; i < numS; i++) {
+      const pct = SHELL_PRACTICAL_MAX[i] ? Math.min(100,(bohrUserShells[i]/SHELL_PRACTICAL_MAX[i])*100) : 0;
+      html += `<div class="shell-bar-row"><span class="shell-bar-lbl" style="color:${SHELL_COLORS[i]}">${SHELL_NAMES[i]}</span><div class="shell-bar-track"><div class="shell-bar-fill" style="width:${pct}%;background:${SHELL_COLORS[i]}"></div></div><span class="shell-bar-num">${bohrUserShells[i]}</span></div>`;
+    }
+    html += `<div style="margin-top:8px;font-size:0.82rem;color:var(--muted)">Total: <strong style="color:var(--text)">${total}</strong> / ${bohrTarget.n}</div>`;
+    wrap.innerHTML = html;
+  }
+
+  function checkBohrGame() {
+    const actual = getShells(bohrTarget.n);
+    const numS   = activeShellCount(bohrTarget.n);
+    const errors = [];
+    const total  = bohrUserShells.reduce((a,b)=>a+b,0);
+    if (total !== bohrTarget.n) errors.push(`Total must equal Z=<strong>${bohrTarget.n}</strong>, got <strong>${total}</strong>.`);
+    for (let i = 0; i < numS; i++) {
+      const row = document.getElementById('srow-' + i);
+      if (!row) continue;
+      row.classList.remove('correct-row','error-row');
+      if (bohrUserShells[i] === actual[i]) row.classList.add('correct-row');
+      else { row.classList.add('error-row'); errors.push(`Shell <strong style="color:${SHELL_COLORS[i]}">${SHELL_NAMES[i]}</strong>: expected <strong>${actual[i]}</strong>, got <strong>${bohrUserShells[i]}</strong>.`); }
+    }
+    bohrScore.attempts++;
+    const fb = document.getElementById('bohrFeedback');
+    fb.className = 'feedback show';
+    if (!errors.length) {
+      bohrScore.correct++; bohrScore.streak++;
+      fb.classList.add('success');
+      fb.innerHTML = `<strong>Correct! 🎉</strong> ${escapeHTML(bohrTarget.name)} — ${shellNotationStr(bohrTarget.n)}<br><span style="font-size:0.85rem;color:var(--muted)">${bohrTarget.exception ? escapeHTML(bohrTarget.reason) : 'Standard Aufbau configuration.'}</span>`;
+    } else {
+      bohrScore.streak = 0;
+      fb.classList.add('error');
+      fb.innerHTML = `<strong>Not quite.</strong> <ul>${errors.slice(0,4).map(e=>`<li>${e}</li>`).join('')}</ul>`;
+    }
+    document.getElementById('bohrScoreCorrect').textContent  = bohrScore.correct;
+    document.getElementById('bohrScoreAttempts').textContent = bohrScore.attempts;
+    document.getElementById('bohrScoreStreak').textContent   = bohrScore.streak;
+  }
+
+  function resetBohrGame() {
+    bohrUserShells = [0,0,0,0,0,0,0];
+    renderShellSteppers();
+    updateBohrAtomGame();
+    hideFeedback('bohrFeedback');
+    document.querySelectorAll('.shell-stepper-row').forEach(r => r.classList.remove('correct-row','error-row'));
+  }
+  function randomBohrGame() { loadBohrFillGame(Math.floor(Math.random()*118)+1); }
+  function showBohrHint() {
+    const fb = document.getElementById('bohrFeedback');
+    fb.className = 'feedback show';
+    fb.innerHTML = `<strong>Hint:</strong> ${escapeHTML(bohrTarget.name)} → ${shellNotationStr(bohrTarget.n)}`;
+  }
+
+  // Identify-Element guess game
+  function initGuessGame() { nextGuessGame(); }
+
+  function nextGuessGame() {
+    guessAnswered = false;
+    guessTarget = elements[Math.floor(Math.random() * elements.length)];
+    const wrong = [];
+    while (wrong.length < 3) {
+      const r = elements[Math.floor(Math.random() * elements.length)];
+      if (r.n !== guessTarget.n && !wrong.find(w => w.n === r.n)) wrong.push(r);
+    }
+    const opts = [guessTarget, ...wrong].sort(() => Math.random() - 0.5);
+    const notation = (SHELL_DATA[guessTarget.n] || []).map((c,i) => `${SHELL_NAMES[i]}=${c}`).join('  ');
+    document.getElementById('guessShellNotation').textContent = notation;
+    drawBohrAtom('guessAtomSvg', guessTarget.n, null, 260);
+    document.getElementById('guessOptions').innerHTML = opts.map(e => `
+      <button class="guess-opt" onclick="checkGuess(${e.n})">
+        <div class="tile" style="width:40px;height:40px;flex-shrink:0">
+          <span class="z" style="font-size:0.6rem">${e.n}</span>
+          <span class="sym" style="font-size:0.95rem">${escapeHTML(e.sym)}</span>
+        </div>
+        <span>${escapeHTML(e.name)}</span>
+      </button>`).join('');
+    hideFeedback('guessFeedback');
+    document.getElementById('guessScoreCorrect').textContent  = guessScore.correct;
+    document.getElementById('guessScoreAttempts').textContent = guessScore.attempts;
+    document.getElementById('guessScoreStreak').textContent   = guessScore.streak;
+  }
+
+  function checkGuess(n) {
+    if (guessAnswered) return;
+    guessAnswered = true;
+    guessScore.attempts++;
+    document.querySelectorAll('.guess-opt').forEach(btn => {
+      btn.disabled = true;
+      const z = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]);
+      if (z === guessTarget.n)                    btn.classList.add('correct-g');
+      else if (z === n && n !== guessTarget.n)    btn.classList.add('wrong-g');
+    });
+    const fb = document.getElementById('guessFeedback');
+    fb.className = 'feedback show';
+    if (n === guessTarget.n) {
+      guessScore.correct++; guessScore.streak++;
+      fb.classList.add('success');
+      fb.innerHTML = `<strong>Correct! 🎉</strong> ${escapeHTML(guessTarget.name)} — ${shellNotationStr(guessTarget.n)}`;
+    } else {
+      guessScore.streak = 0;
+      fb.classList.add('error');
+      fb.innerHTML = `<strong>Wrong!</strong> Answer: <strong>${escapeHTML(guessTarget.name)} (${escapeHTML(guessTarget.sym)})</strong> — ${shellNotationStr(guessTarget.n)}`;
+    }
+    document.getElementById('guessScoreCorrect').textContent  = guessScore.correct;
+    document.getElementById('guessScoreAttempts').textContent = guessScore.attempts;
+    document.getElementById('guessScoreStreak').textContent   = guessScore.streak;
   }
 
   // INIT
