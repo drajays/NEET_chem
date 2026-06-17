@@ -173,6 +173,16 @@
   }
   .big-theory ol { padding-left:20px; }
   .big-theory li { margin-bottom:6px; }
+
+  /* Chapter 1 live readout + experiment checklist */
+  .readout { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .ro { background:#f7f0de; border:1px solid #d5c5a4; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .ro-label { font-size:0.76rem; color:#7b6a54; }
+  .ro-val { font-weight:bold; color:var(--accent3); font-family:'Courier New', monospace; font-size:0.95rem; }
+  .ro-val.hot { color:var(--warn); }
+  .checklist { margin-top:12px; background:#fff9ee; border:1px solid #d5c5a4; border-radius:10px; padding:10px 12px; font-size:0.85rem; }
+  .checklist .chk { margin-top:6px; line-height:1.4; transition:0.2s; }
+  .checklist .chk.done { color:var(--accent2); font-weight:bold; }
 </style>
 </head>
 <body>
@@ -228,6 +238,20 @@
           <button class="btn ghost small" id="mixToggleBtn">Mix Mode: OFF</button>
         </div>
         <p class="muted" style="margin-top:6px;">Particles collide elastically. Watch them fill the entire container.</p>
+
+        <div class="readout" id="gasReadout">
+          <div class="ro"><span class="ro-label">Particles in box</span><span class="ro-val" id="roCount">0</span></div>
+          <div class="ro"><span class="ro-label">Gases present</span><span class="ro-val" id="roGases">—</span></div>
+          <div class="ro"><span class="ro-label">Container volume</span><span class="ro-val" id="roVol">—</span></div>
+          <div class="ro"><span class="ro-label">Empty space</span><span class="ro-val" id="roEmpty">—</span></div>
+        </div>
+
+        <div class="checklist" id="ch1Checklist">
+          <strong>🔬 Run these three experiments:</strong>
+          <div class="chk" id="chkFill">▢ ① Add a gas — does it fill the whole container?</div>
+          <div class="chk" id="chkCompress">▢ ② Raise pressure to 6+ to compress — watch the “Empty space” reading.</div>
+          <div class="chk" id="chkMix">▢ ③ Turn on Mix Mode, then add gas — do O₂ and N₂ merge into one?</div>
+        </div>
       </div>
 
       <div class="card">
@@ -249,6 +273,11 @@
         </div>
         <div class="mentor-box" id="mentor1">
           <strong>Mentor Dalton:</strong> "Add a gas, then compress it. What do you observe about how it fills space? Then try mixing two gases."
+        </div>
+
+        <div class="big-theory" id="ch1Discovery" style="display:none; margin-top:12px; padding:14px;">
+          <strong>📓 What you are discovering:</strong>
+          <ul id="ch1DiscoveryList" style="margin:8px 0 0 18px;"></ul>
         </div>
 
         <div id="ch1Quiz" style="display:none; margin-top:12px;">
@@ -435,7 +464,8 @@ let state = {
   ch1Passed:false,
   ch2Passed:false,
   ch3Passed:false,
-  evidence:{1:false,2:false,3:false}
+  evidence:{1:false,2:false,3:false},
+  experiments:{fill:false, compress:false, mix:false}
 };
 
 function saveState(){ localStorage.setItem('dalton_save_v1', JSON.stringify(state)); updateAssessment();}
@@ -443,6 +473,7 @@ function loadState(){
   try{ const s = JSON.parse(localStorage.getItem('dalton_save_v1')); if(s) Object.assign(state, s);}catch(e){}
 }
 loadState();
+if(!state.experiments) state.experiments = {fill:false, compress:false, mix:false};
 
 /* ===== UTIL ===== */
 const $ = id => document.getElementById(id);
@@ -509,7 +540,9 @@ const gasColors = {oxygen:'#d74a3a', nitrogen:'#3a7bc8', hydrogen:'#d9b92d', car
 let selectedGas='oxygen';
 let mixMode=false;
 
-function addGasParticles(gas, count){
+const gasNames = {oxygen:'O₂', nitrogen:'N₂', hydrogen:'H₂', carbon:'CO₂'};
+
+function addGasParticles(gas, count, silent){
   for(let i=0;i<count;i++){
     particles.push({
       x: Math.random()*(gasCanvas.width-40)+20,
@@ -520,11 +553,12 @@ function addGasParticles(gas, count){
       r: gas==='hydrogen' ? 5 : 7
     });
   }
+  if(silent) return; // initial seed: fill the box without completing the student's experiment
   state.gasTrials++;
-  if(state.gasTrials===1) addNote1("Gas fills all available space.");
-  if(state.gasTrials===3){ addNote1("Particles are constantly moving."); state.scores.observation+=8; updateScoreBar();}
+  if(state.gasTrials===1) addNote1("Gas spreads out instantly to fill all available space.");
+  if(state.gasTrials===3){ addNote1("Particles never stop — they are in constant random motion."); state.scores.observation+=8; updateScoreBar();}
   if(particles.length>40) addAchievement("First Gas Investigator");
-  checkCh1QuizUnlock();
+  markExperiment('fill');
   saveState();
 }
 function addNote1(text){
@@ -534,31 +568,55 @@ function addNote1(text){
   nb.appendChild(p); nb.scrollTop = nb.scrollHeight;
   if(!state.notebook1.includes(text)) state.notebook1.push(text);
 }
-function gasStep(){
+
+// Container geometry: HIGHER pressure ⇒ SMALLER box (compression). Clamped so particles still fit.
+function containerBox(){
   const pressure = parseInt($('pressureSlider').value);
+  let margin = 18 + (pressure-1)*16;          // pressure 1 → 18 (full), pressure 8 → 130 (squeezed)
+  const maxMargin = (gasCanvas.height-70)/2;  // keep at least ~70px of height
+  if(margin > maxMargin) margin = maxMargin;
+  return { left:margin, right:gasCanvas.width-margin, top:margin, bottom:gasCanvas.height-margin };
+}
+
+let readoutTick = 0;
+function updateReadout(box){
+  if(readoutTick++ % 6 !== 0) return; // throttle DOM writes
+  $('roCount').textContent = particles.length;
+  const counts = {};
+  particles.forEach(p=> counts[p.gas]=(counts[p.gas]||0)+1);
+  $('roGases').textContent = Object.keys(counts).length
+    ? Object.entries(counts).map(([g,n])=>`${gasNames[g]||g}:${n}`).join('  ') : '—';
+  const area = (box.right-box.left)*(box.bottom-box.top);
+  $('roVol').textContent = (area/1000).toFixed(0)+' u³';
+  const occupied = particles.reduce((s,p)=>s+Math.PI*p.r*p.r, 0);
+  const emptyPct = area>0 ? Math.max(0, Math.min(100, 100*(1-occupied/area))) : 0;
+  const ev = $('roEmpty');
+  ev.textContent = emptyPct.toFixed(1)+' %';
+  ev.classList.toggle('hot', emptyPct < 70 && particles.length>0);
+}
+
+function gasStep(){
   const temp = parseInt($('tempSlider').value);
   const speedFactor = 0.6 + temp*0.35;
-  const boxMargin = 18 + (8-pressure)*14;
-  const left = boxMargin, right = gasCanvas.width-boxMargin, top=boxMargin, bottom=gasCanvas.height-boxMargin;
+  const box = containerBox();
+  const {left,right,top,bottom} = box;
 
   gctx.clearRect(0,0,gasCanvas.width,gasCanvas.height);
-  // container
   gctx.strokeStyle='#b8a78a'; gctx.lineWidth=2;
   gctx.strokeRect(left, top, right-left, bottom-top);
 
+  const trackA = $('trackA').checked;
+  const trackB = $('trackB').checked;
   particles.forEach(p=>{
     p.x += p.vx * speedFactor;
     p.y += p.vy * speedFactor;
     if(p.x < left+p.r || p.x > right-p.r){ p.vx*=-1; p.x = Math.max(left+p.r, Math.min(right-p.r, p.x)); }
     if(p.y < top+p.r || p.y > bottom-p.r){ p.vy*=-1; p.y = Math.max(top+p.r, Math.min(bottom-p.r, p.y)); }
-    // draw
-    const trackA = $('trackA').checked;
-    const trackB = $('trackB').checked;
     let alpha = 1;
     if(trackA || trackB){
       if(trackA && p.gas==='oxygen') alpha=1;
       else if(trackB && p.gas==='nitrogen') alpha=1;
-      else alpha=0.18;
+      else alpha=0.16;
     }
     gctx.globalAlpha=alpha;
     gctx.beginPath();
@@ -567,6 +625,7 @@ function gasStep(){
     gctx.fill();
     gctx.globalAlpha=1;
   });
+  updateReadout(box);
   requestAnimationFrame(gasStep);
 }
 gasStep();
@@ -576,9 +635,9 @@ $('addGasBtn').onclick = ()=>{
   addGasParticles(gas, 15);
   if(mixMode){
     state.mixTrials++;
-    if(state.mixTrials===1) addNote1("Mixed gases: particles do NOT merge. Each behaves independently.");
+    if(state.mixTrials===1) addNote1("Mixed gases: O₂ and N₂ spread through each other but never merge — each keeps its own count.");
     if(state.mixTrials>=2){ state.scores.observation+=7; updateScoreBar(); addAchievement("Master of Ratios"); }
-    checkCh1QuizUnlock();
+    markExperiment('mix');
     saveState();
   }
 };
@@ -586,7 +645,7 @@ $('clearGasBtn').onclick = ()=> { particles=[]; toast("Container evacuated."); }
 $('mixToggleBtn').onclick = (e)=>{
   mixMode=!mixMode;
   e.target.textContent = 'Mix Mode: ' + (mixMode?'ON':'OFF');
-  if(mixMode) toast("Mix Mode: adding O₂ + N₂ together");
+  if(mixMode) toast("Mix Mode ON — now 'Add gas' drops O₂ + N₂ together");
 };
 document.querySelectorAll('#gasPicker .gas-dot').forEach(d=>{
   d.onclick = ()=>{
@@ -595,12 +654,55 @@ document.querySelectorAll('#gasPicker .gas-dot').forEach(d=>{
     selectedGas = d.dataset.gas;
   };
 });
-$('pressureSlider').oninput = e=>{ $('pressureVal').textContent=e.target.value; if(parseInt(e.target.value)>5) addNote1("At higher pressure, particles come closer, collisions increase."); };
+$('pressureSlider').oninput = e=>{
+  const v = parseInt(e.target.value);
+  $('pressureVal').textContent = v;
+  if(v>=6 && particles.length>0){
+    addNote1("Compressed! Particles crowd closer, yet empty space still remains — matter cannot be continuous.");
+    markExperiment('compress');
+  }
+};
 $('tempSlider').oninput = e=>{ const labels=['ice-cold','cool','warm','hot','very hot']; $('tempVal').textContent=labels[e.target.value-1]; };
 
+function markExperiment(key){
+  if(state.experiments[key]) return;
+  state.experiments[key] = true;
+  updateChecklist();
+  saveState();
+}
+
+function updateChecklist(){
+  const labels = {
+    fill:'① Added a gas — it spread to fill the WHOLE container (gases have no fixed shape or volume).',
+    compress:'② Compressed the gas — particles crowd closer but the box still shows empty space (matter is particles + gaps, not continuous).',
+    mix:'③ Mixed two gases — each kept its own count and colour; they never merged into a new single substance.'
+  };
+  ['fill','compress','mix'].forEach(k=>{
+    const el = $('chk'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(!el) return;
+    const done = !!state.experiments[k];
+    el.className = 'chk'+(done?' done':'');
+    el.textContent = (done?'☑ ':'▢ ') + labels[k];
+  });
+  const findings = [];
+  if(state.experiments.fill) findings.push('Gases expand to fill all space — they are not fixed continuous blocks.');
+  if(state.experiments.compress) findings.push('Gases can be squeezed — so there must be EMPTY SPACE between tiny separate particles.');
+  if(state.experiments.mix) findings.push('Mixed gases keep separate identities — matter is built from distinct, unchanging units.');
+  const box = $('ch1Discovery'), list = $('ch1DiscoveryList');
+  if(box && list){
+    if(findings.length){ box.style.display='block'; list.innerHTML = findings.map(f=>`<li>${f}</li>`).join(''); }
+    else box.style.display='none';
+  }
+  checkCh1QuizUnlock();
+}
+
 function checkCh1QuizUnlock(){
-  if(state.gasTrials>=2 && state.mixTrials>=1){
+  const e = state.experiments;
+  if(e.fill && e.compress && e.mix){
     $('ch1Quiz').style.display='block';
+    if(!state.ch1Passed){
+      $('mentor1').innerHTML = "<strong>Mentor:</strong> You've run all three experiments. Now decide — what single idea explains ALL of these observations?";
+    }
   }
 }
 
@@ -916,8 +1018,13 @@ updateScoreBar();
 updateAssessment();
 if(state.ch3Passed) $('finalDiscovery').style.display='block';
 
-// initial gas particles for fun
-addGasParticles('oxygen', 22);
+// initialise Chapter 1 readouts, slider labels and the experiment checklist
+$('pressureVal').textContent = $('pressureSlider').value;
+$('tempVal').textContent = ['ice-cold','cool','warm','hot','very hot'][parseInt($('tempSlider').value)-1];
+updateChecklist();
+
+// start with a little gas in the container so the simulation is alive (does not tick the checklist)
+addGasParticles('oxygen', 22, true);
 
 </script>
 </body>
