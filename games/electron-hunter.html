@@ -644,53 +644,73 @@ class ElectronHunter {
 
   renderL2(wrap) {
     const p = this.state.l2Pressure;
+    const ready = p <= 5;
     wrap.innerHTML = `<div class="stage-title">Level 2 — Evacuate & Fire</div>
       ${this.crtSVG({showBeam:this.state.l2Fired, beamCurve:0})}
       <div class="control-row">
         <div class="control">
           <label id="vacLabel">Vacuum Pump — Air remaining: ${p}%</label>
           <input type="range" id="vacSlider" min="0" max="100" value="${p}">
-          <div class="small" id="vacNote">${p < 5 ? 'High vacuum achieved!' : 'Pump out the air...'}</div>
+          <div class="small" id="vacNote">${ready ? 'High vacuum achieved!' : 'Pump the air out — slide left, or tap “Pump out air”.'}</div>
         </div>
-        <div>
-          <button class="btn primary" id="fireBtn" ${p < 5 ? '' : 'disabled'}>⚡ Apply 10,000 V</button>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn" id="pumpBtn">🔧 Pump out air</button>
+          <button class="btn primary" id="fireBtn" ${ready ? '' : 'disabled'}>⚡ Apply 10,000 V</button>
         </div>
       </div>
     `;
-    // Update in place so dragging the slider stays smooth (no full re-render mid-drag).
-    wrap.querySelector('#vacSlider').oninput = (e)=>{
-      const p2 = parseInt(e.target.value,10);
+
+    const slider = wrap.querySelector('#vacSlider');
+    const setPressure = (val)=>{
+      const p2 = Math.max(0, Math.min(100, Math.round(val)));
       this.state.l2Pressure = p2;
+      if (slider.value != p2) slider.value = p2;
       wrap.querySelector('#vacLabel').textContent = `Vacuum Pump — Air remaining: ${p2}%`;
-      wrap.querySelector('#vacNote').textContent = p2 < 5 ? 'High vacuum achieved!' : 'Pump out the air...';
+      const ok = p2 <= 5;
+      wrap.querySelector('#vacNote').textContent = ok ? 'High vacuum achieved!' : 'Pump the air out — slide left, or tap “Pump out air”.';
       const fb = wrap.querySelector('#fireBtn');
-      if (fb && !this.state.l2Fired) fb.disabled = !(p2 < 5);
+      if (fb && !this.state.l2Fired) fb.disabled = !ok;
       if (!this.state.l2Fired) {
-        this.narrate(p2 < 5
-          ? 'Vacuum is good — below 1/10000 atm. Now apply high voltage across the electrodes.'
-          : 'Crookes tubes only glow when nearly all the air is pumped out. Drag the slider left.');
+        this.narrate(ok
+          ? 'Vacuum is good — below 1/10000 atm. Now press “Apply 10,000 V”.'
+          : 'Crookes tubes only glow when nearly all the air is pumped out. Bring the air down to about 0%.');
       }
     };
-    const fireBtn = wrap.querySelector('#fireBtn');
-    if (fireBtn) fireBtn.onclick = ()=>{
-      this.state.l2Fired = true;
-      this.addEvidence('e1'); // actually e1 is straight lines, but log travel note separately? We'll still give e1 later. For now just log manually.
-      // override evidence text for l2?
-      // Keep evidence system clean: add e1 at level 3. So remove here.
-      this.evidence = this.evidence.filter(e=>e.id!=='e1');
-      this.renderEvidence();
-      this.render();
-      this.narrate('A vivid green ray shoots cathode → anode → screen. It travels in a straight line, even with no air left inside. What IS this?', `<button class="btn primary" id="nextBtn">Log: “Beam travels cathode to anode” →</button>`);
-      document.getElementById('nextBtn').onclick = ()=> { this.setLevel('l3'); };
+    slider.oninput = e => setPressure(parseInt(e.target.value,10));
+
+    // One-tap pump: animates the air down to 0 — reliable on any device.
+    wrap.querySelector('#pumpBtn').onclick = ()=>{
+      if (this._pumping) return;
+      this._pumping = true;
+      let v = this.state.l2Pressure;
+      const iv = setInterval(()=>{
+        v -= 8;
+        if (v <= 0){ v = 0; clearInterval(iv); this._pumping = false; }
+        setPressure(v);
+      }, 25);
     };
-    if (!this.state.l2Fired) {
-      this.narrate(p < 5 
-        ? 'Vacuum is good. <1/10000 atm. Now apply high voltage across the electrodes.'
-        : 'Crookes tubes only glow when nearly all the air is pumped out. Drag the slider left.');
-    } else {
-      this.narrate('A vivid green ray shoots cathode → anode → screen. It travels in a straight line, even with no air left inside. What IS this?', `<button class="btn primary" id="nextBtn">Log: “Beam travels cathode to anode” →</button>`);
+
+    const fire = ()=>{
+      if (this.state.l2Fired) return;
+      this.state.l2Fired = true;
+      this.render();
+      this.narrate('A vivid green ray shoots from cathode → anode → screen — even with no air inside. It travels in a perfectly straight line. What IS this beam?',
+        `<button class="btn primary" id="nextBtn">Investigate the beam →</button>`);
       const nb = document.getElementById('nextBtn');
       if (nb) nb.onclick = ()=> this.setLevel('l3');
+    };
+    const fireBtn = wrap.querySelector('#fireBtn');
+    if (fireBtn) fireBtn.onclick = fire;
+
+    if (this.state.l2Fired) {
+      this.narrate('A vivid green ray shoots from cathode → anode → screen — even with no air inside. It travels in a perfectly straight line. What IS this beam?',
+        `<button class="btn primary" id="nextBtn">Investigate the beam →</button>`);
+      const nb = document.getElementById('nextBtn');
+      if (nb) nb.onclick = ()=> this.setLevel('l3');
+    } else {
+      this.narrate(ready
+        ? 'Vacuum is good — below 1/10000 atm. Now press “Apply 10,000 V”.'
+        : 'Crookes tubes only glow when nearly all the air is pumped out. Bring the air down to about 0% (slide left or tap “Pump out air”).');
     }
   }
 
