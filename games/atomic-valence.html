@@ -10,7 +10,7 @@
       --text: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8;
       --success: #4ade80; --danger: #f87171; --warning: #fbbf24;
       --info: #a78bfa; --metal: #60a5fa; --nonmetal: #4ade80;
-      --noble: #c084fc; --transition: #fb923c; --lanthanide: #f472b6;
+      --noble: #c084fc; --transition: #fb923c; --lanthanide: #f472b6; --metalloid: #14b8a6;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -910,6 +910,10 @@
     const pBlock = new Set([5,6,7,8,9,10,13,14,15,16,17,18,31,32,33,34,35,36,49,50,51,52,53,54,81,82,83,84,85,86,113,114,115,116,117,118]);
     const dBlock = new Set([21,22,23,24,25,26,27,28,29,30,39,40,41,42,43,44,45,46,47,48,72,73,74,75,76,77,78,79,80,104,105,106,107,108,112]);
     const fBlock = new Set([57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103]);
+    // Modern periodic-table classification (independent of charge)
+    const nobleGases = new Set([2,10,18,36,54,86,118]);
+    const nonmetals  = new Set([1,6,7,8,15,16,34,9,17,35,53]); // H, C, N, O, P, S, Se + halogens F, Cl, Br, I
+    const metalloids = new Set([5,14,32,33,51,52,84,85]);       // B, Si, Ge, As, Sb, Te, Po, At
 
     // ===== STATE =====
     let currentMode = 'full';
@@ -1027,38 +1031,100 @@
       container.innerHTML = items.join('');
     }
 
-    function getElectronConfig(z) {
-      let rem = z; const cfg = {};
-      for (const s of subshells) { const e = Math.min(rem, s.cap); cfg[s.orb] = e; rem -= e; if (rem <= 0) break; }
+    // ===== ELECTRON CONFIGURATION ENGINE (deterministic, two-phase) =====
+    const LMAP = { s:0, p:1, d:2, f:3 };
+    // Documented ground-state anomalies (real, modern data — not a naive d⁴→d⁵ guess).
+    // Each entry overrides the strict-Aufbau occupancy of the listed sub-shells.
+    const configExceptions = {
+      24:{'4s':1,'3d':5},  29:{'4s':1,'3d':10},                         // Cr, Cu
+      41:{'5s':1,'4d':4},  42:{'5s':1,'4d':5},  44:{'5s':1,'4d':7},     // Nb, Mo, Ru
+      45:{'5s':1,'4d':8},  46:{'5s':0,'4d':10}, 47:{'5s':1,'4d':10},    // Rh, Pd, Ag
+      57:{'4f':0,'5d':1,'6s':2}, 58:{'4f':1,'5d':1,'6s':2},             // La, Ce
+      64:{'4f':7,'5d':1,'6s':2},                                        // Gd
+      78:{'5d':9,'6s':1},  79:{'5d':10,'6s':1},                         // Pt, Au
+      89:{'5f':0,'6d':1,'7s':2}, 90:{'5f':0,'6d':2,'7s':2},             // Ac, Th
+      91:{'5f':2,'6d':1,'7s':2}, 92:{'5f':3,'6d':1,'7s':2},             // Pa, U
+      93:{'5f':4,'6d':1,'7s':2}, 96:{'5f':7,'6d':1,'7s':2},             // Np, Cm
+      111:{'6d':10,'7s':1}                                              // Rg
+    };
+
+    // Fill `count` electrons by the strict Aufbau (Madelung n+ℓ) order.
+    function aufbauFill(count) {
+      let rem = count; const cfg = {};
+      for (const s of subshells) { if (rem <= 0) break; const e = Math.min(rem, s.cap); if (e>0) cfg[s.orb] = e; rem -= e; }
       return cfg;
+    }
+    // Phase 1 — neutral atom: Aufbau baseline + documented stability anomalies.
+    function neutralConfig(z) {
+      const cfg = aufbauFill(z);
+      const ex = configExceptions[z];
+      if (ex) for (const orb in ex) { if (ex[orb] === 0) delete cfg[orb]; else cfg[orb] = ex[orb]; }
+      return cfg;
+    }
+    // Phase 2 — apply charge to obtain the real configuration of the species.
+    function speciesConfig(z, charge) {
+      if (charge > 0) {
+        // Cation: build the neutral atom, then remove electrons from the HIGHEST n
+        // (ties broken by highest ℓ). This is NOT reverse-Aufbau — e.g. Fe²⁺ → [Ar]3d⁶.
+        const cfg = neutralConfig(z);
+        let toRemove = charge;
+        while (toRemove > 0) {
+          let target = null;
+          for (const orb in cfg) {
+            if (cfg[orb] <= 0) continue;
+            const n = +orb[0], l = LMAP[orb[1]];
+            if (!target || n > target.n || (n === target.n && l > target.l)) target = { orb, n, l };
+          }
+          if (!target) break;
+          if (--cfg[target.orb] === 0) delete cfg[target.orb];
+          toRemove--;
+        }
+        return cfg;
+      }
+      // Neutral or anion: an anion simply keeps filling by Aufbau (continues Rule 1.1).
+      return charge === 0 ? neutralConfig(z) : aufbauFill(z - charge);
     }
     function getShells(cfg) {
       const sh = {};
       for (const orb in cfg) { const n = parseInt(orb[0]); sh[n] = (sh[n]||0) + cfg[orb]; }
       return sh;
     }
-    function getValenceInfo(z) {
-      const cfg = getElectronConfig(z); const sh = getShells(cfg);
+    // Phase 3 — valence shell = highest principal shell n holding electrons;
+    // valence electrons = electrons in that shell (true physical state of the species).
+    function getValenceInfo(cfg) {
+      const sh = getShells(cfg);
       let vs = 0, ve = 0;
       for (const n of Object.keys(sh).map(Number).sort((a,b)=>a-b)) { if (sh[n]>0) { vs = n; ve = sh[n]; } }
-      return {vs, ve, sh, cfg};
+      return { vs, ve, sh, cfg };
     }
-    function getValency(z, ve) {
-      if (z === 2) return 0;
-      if (sBlock.has(z) || pBlock.has(z)) { if (ve <= 4) return ve; if (ve >= 8) return 0; return 8 - ve; }
+    // Configuration written in conventional shell order (1s 2s 2p 3s 3p 3d 4s …).
+    function configString(cfg) {
+      return Object.keys(cfg)
+        .sort((a,b)=> (+a[0] - +b[0]) || (LMAP[a[1]] - LMAP[b[1]]))
+        .map(orb => `${orb}${cfg[orb] > 1 ? cfg[orb] : ''}`).join(' ');
+    }
+    // ve = valence electrons of the species, vs = valence shell number.
+    function getValency(z, ve, vs) {
       if (dBlock.has(z)) return dVal[z] || 2;
       if (fBlock.has(z)) return fVal[z] || 3;
-      return 0;
+      // main group (s/p) and H
+      if (vs === 1) return ve >= 2 ? 0 : ve;   // K-shell complete at 2 e⁻ (duplet)
+      if (ve >= 8) return 0;                     // octet complete → stable
+      if (ve <= 4) return ve;                    // lose / share
+      return 8 - ve;                             // gain / share to complete octet
     }
     function getCategoryColor(z) {
-      if (z===1) return 'var(--nonmetal)';
-      if (pBlock.has(z)) { if ([8,9,16,17,34,35,52,53,85,117].includes(z)) return 'var(--nonmetal)'; if ([10,18,36,54,86,118].includes(z)) return 'var(--noble)'; return 'var(--metal)'; }
-      if (sBlock.has(z)) return 'var(--metal)'; if (dBlock.has(z)) return 'var(--transition)'; if (fBlock.has(z)) return 'var(--lanthanide)'; return 'var(--metal)';
+      if (nobleGases.has(z)) return 'var(--noble)';
+      if (nonmetals.has(z)) return 'var(--nonmetal)';
+      if (metalloids.has(z)) return 'var(--metalloid)';
+      if (dBlock.has(z)) return 'var(--transition)';
+      if (fBlock.has(z)) return 'var(--lanthanide)';
+      return 'var(--metal)';
     }
     function getCategoryName(z) {
-      if (z === 1) return 'Nonmetal';
-      if (pBlock.has(z)) { if ([8,9,16,17,34,35,52,53,85,117].includes(z)) return 'Nonmetal'; if ([10,18,36,54,86,118].includes(z)) return 'Noble Gas'; return 'Metal'; }
-      if (sBlock.has(z)) return 'Metal';
+      if (nobleGases.has(z)) return 'Noble Gas';
+      if (nonmetals.has(z)) return 'Nonmetal';
+      if (metalloids.has(z)) return 'Metalloid';
       if (dBlock.has(z)) return 'Transition Metal';
       if (fBlock.has(z)) return 'Inner Transition Metal';
       return 'Metal';
@@ -1070,7 +1136,7 @@
       if (dBlock.has(z)) { const dGroups = {21:3,22:4,23:5,24:6,25:7,26:8,27:9,28:10,29:11,30:12,39:3,40:4,41:5,42:6,43:7,44:8,45:9,46:10,47:11,48:12,72:4,73:5,74:6,75:7,76:8,77:9,78:10,79:11,80:12,104:4,105:5,106:6,107:7,108:8,112:12}; return dGroups[z] || 8; }
       return '-';
     }
-    function getPeriod(z) { const cfg = getElectronConfig(z); const sh = getShells(cfg); return Math.max(...Object.keys(sh).map(Number)); }
+    function getPeriod(z) { const sh = getShells(neutralConfig(z)); return Math.max(...Object.keys(sh).map(Number)); }
     function nearestNobleGas(z) {
       const nobleZ = [2,10,18,36,54,86,118];
       let closest = 2, minDiff = Infinity;
@@ -1327,9 +1393,14 @@
       if (chg > z) chg = z; // can't lose more electrons than the atom has
       el = { z, name: names[z-1], symbol: symbols[z-1], neutrons: neutrons[z-1], mass: z + neutrons[z-1] };
       charge = chg;
-      const {vs, ve, sh, cfg} = getValenceInfo(z);
-      const valency = getValency(z, ve);
-      answers = { protons: z, neutrons: el.neutrons, electrons: z - charge, valenceShell: vs, valenceElectrons: ve, valency, sh, cfg };
+      const electrons = z - charge;
+      // Build the REAL configuration of the displayed species via the two-phase engine
+      // (Aufbau + anomalies for the neutral atom, then proper ionization). Valence shell,
+      // valence electrons and configuration all derive from this. Block/category stay tied to Z.
+      const cfg = speciesConfig(z, charge);
+      const {vs, ve, sh} = getValenceInfo(cfg);
+      const valency = getValency(z, ve, vs);
+      answers = { protons: z, neutrons: el.neutrons, electrons, valenceShell: vs, valenceElectrons: ve, valency, sh, cfg };
 
       const hero = document.getElementById('element-hero');
       hero.style.setProperty('--category-color', getCategoryColor(z));
@@ -1351,7 +1422,7 @@
       if (currentMode === 'quick') {
         const types = ['protons','neutrons','electrons','valenceShell','valenceElectrons','valency'];
         qType = types[Math.floor(Math.random()*types.length)];
-        const labels = { protons:'How many protons does this species have?', neutrons:'How many neutrons does this nucleus have?', electrons:'How many electrons does this ion/atom have?', valenceShell:'What is the valence shell number (n)?', valenceElectrons:'How many valence electrons does the neutral atom have?', valency:'What is the valency of this element?' };
+        const labels = { protons:'How many protons does this species have?', neutrons:'How many neutrons does this nucleus have?', electrons:'How many electrons does this ion/atom have?', valenceShell:'What is the valence shell number (n) of this species?', valenceElectrons:'How many electrons are in the outermost shell of this species?', valency:'What is the valency of this species?' };
         document.getElementById('quick-question').textContent = labels[qType];
         document.getElementById('in-quick').value = '';
       }
@@ -1398,7 +1469,7 @@
     function showHint() {
       const {sh, cfg} = answers;
       const shellTxt = Object.keys(sh).sort((a,b)=>+a-+b).map(n => `Shell ${n} (${['K','L','M','N','O','P','Q'][n-1]||'n='+n}): ${sh[n]} e⁻`).join('  |  ');
-      const cfgTxt = Object.entries(cfg).map(([orb,e]) => `${orb}${e>1?e:''}`).join(' ');
+      const cfgTxt = configString(cfg);
       showFeedback('info', 'Shell Distribution', `
         <div style="font-family:monospace;font-size:0.9rem;color:#bae6fd;margin-bottom:8px;">${cfgTxt}</div>
         <div style="font-size:0.9rem;">${shellTxt}</div>
@@ -1445,7 +1516,7 @@
     function buildDetailedExplanation() {
       const {z, name, symbol, mass} = el;
       const {protons, neutrons, electrons, valenceShell, valenceElectrons, valency, sh, cfg} = answers;
-      const cfgStr = Object.entries(cfg).map(([orb,e])=>`${orb}${e>1?e:''}`).join(' ');
+      const cfgStr = configString(cfg);
       const noble = nearestNobleGas(z);
       const period = getPeriod(z);
       const group = getGroup(z);
@@ -1459,21 +1530,20 @@
       }).join('');
 
       let valencyReason = '';
-      if (z === 1) {
-        valencyReason = `Hydrogen has 1 valence electron. It can <strong>lose</strong> 1 electron to form H⁺ or <strong>gain</strong> 1 electron to complete its duplet. Valency = <strong>1</strong>.`;
-      } else if ([2,10,18,36,54,86,118].includes(z)) {
-        valencyReason = `This is a noble gas with a complete outer shell. Valency = <strong>0</strong> (already stable).`;
-      } else if (sBlock.has(z) || pBlock.has(z)) {
-        if (valenceElectrons <= 4) {
-          valencyReason = `It has ${valenceElectrons} valence electron${valenceElectrons>1?'s':''}. As a metal, it tends to <strong>lose</strong> ${valenceElectrons} electron${valenceElectrons>1?'s':''} to attain a stable octet/duplet. Valency = <strong>${valency}</strong>.`;
-        } else if (valenceElectrons < 8) {
-          const gain = 8 - valenceElectrons;
-          valencyReason = `It has ${valenceElectrons} valence electrons. As a non-metal, it tends to <strong>gain</strong> ${gain} electron${gain>1?'s':''} to complete its octet. Valency = 8 − ${valenceElectrons} = <strong>${valency}</strong>.`;
-        }
-      } else if (dBlock.has(z)) {
-        valencyReason = `Transition metals show variable valency because they can lose electrons from both the outermost s-subshell and the inner d-subshell. Common/simple valency used here = <strong>${valency}</strong>.`;
+      const octetComplete = (valenceShell === 1 && valenceElectrons >= 2) || valenceElectrons >= 8;
+      if (dBlock.has(z)) {
+        valencyReason = `Transition metals show variable valency because they can use electrons from both the outer s-subshell and the inner (n−1)d-subshell. The common school value is used here. Valency = <strong>${valency}</strong>.`;
       } else if (fBlock.has(z)) {
-        valencyReason = `f-block elements typically lose 2 electrons from the outermost s-subshell and 1 from the f-subshell. Typical valency = <strong>${valency}</strong>.`;
+        valencyReason = `f-block elements typically lose 2 electrons from the outer s-subshell and 1 from the f-subshell. Typical valency = <strong>${valency}</strong>.`;
+      } else if (octetComplete) {
+        valencyReason = `The outermost shell is complete (a ${valenceShell === 1 ? 'duplet, 2 e⁻' : 'stable octet, 8 e⁻'}) — a noble-gas configuration. It has no tendency to combine further, so valency = <strong>0</strong>.`;
+      } else if (z === 1) {
+        valencyReason = `Hydrogen has 1 valence electron. It can <strong>lose</strong> 1 (→ H⁺) or <strong>gain/share</strong> 1 to complete its duplet. Valency = <strong>1</strong>.`;
+      } else if (valenceElectrons <= 4) {
+        valencyReason = `It has ${valenceElectrons} valence electron${valenceElectrons>1?'s':''}, so it tends to <strong>lose or share</strong> ${valenceElectrons} to reach a stable configuration. Valency = <strong>${valency}</strong>.`;
+      } else {
+        const gain = 8 - valenceElectrons;
+        valencyReason = `It has ${valenceElectrons} valence electrons, so it tends to <strong>gain or share</strong> ${gain} electron${gain>1?'s':''} to complete its octet. Valency = 8 − ${valenceElectrons} = <strong>${valency}</strong>.`;
       }
 
       let ionReason = '';
@@ -1534,17 +1604,15 @@
                 : `anion, so electrons = Z + |charge| = ${z} + ${Math.abs(charge)} = ${electrons} (gained ${Math.abs(charge)} e⁻).`}</li>
             <li><strong>Valence shell:</strong> the highest principal shell (n) holding electrons → n = ${valenceShell}.</li>
             <li><strong>Valence electrons:</strong> electrons sitting in shell n=${valenceShell} → ${valenceElectrons}.</li>
-            <li><strong>Valency:</strong> ${sBlock.has(z) || pBlock.has(z)
-              ? (valenceElectrons <= 4
-                  ? `valence e⁻ ≤ 4, so valency = valence e⁻ = ${valency} (loses electrons).`
-                  : valenceElectrons >= 8
-                    ? `complete octet, so valency = 0 (stable).`
-                    : `valence e⁻ > 4, so valency = 8 − ${valenceElectrons} = ${valency} (gains electrons).`)
-              : dBlock.has(z)
-                ? `transition metal — variable valency; common value = ${valency}.`
-                : fBlock.has(z)
-                  ? `inner-transition metal — typical valency = ${valency}.`
-                  : `valency = ${valency}.`}</li>
+            <li><strong>Valency:</strong> ${dBlock.has(z)
+              ? `transition metal — variable valency; common value = ${valency}.`
+              : fBlock.has(z)
+                ? `inner-transition metal — typical valency = ${valency}.`
+                : ((valenceShell === 1 && valenceElectrons >= 2) || valenceElectrons >= 8)
+                  ? `outer shell complete (${valenceShell === 1 ? 'duplet' : 'octet'}) → stable, so valency = 0.`
+                  : valenceElectrons <= 4
+                    ? `valence e⁻ ≤ 4, so valency = valence e⁻ = ${valency} (lose or share).`
+                    : `valence e⁻ > 4, so valency = 8 − ${valenceElectrons} = ${valency} (gain or share).`}</li>
           </ul>
         </div>
 
@@ -1561,7 +1629,7 @@
     function buildFeedback(allCorrect, wrongItems) {
       const {z, name, symbol, mass} = el;
       const {valenceShell, valenceElectrons, sh} = answers;
-      const cfgStr = Object.entries(answers.cfg).map(([orb,e])=>`${orb}${e>1?e:''}`).join(' ');
+      const cfgStr = configString(answers.cfg);
       let html = '';
       if (!allCorrect && wrongItems.length) {
         html += `<div style="margin-bottom:10px;line-height:1.8;">${wrongItems.map(w=>`• ${w.label.split('(')[0].trim()}: You said <strong>${isNaN(w.user)?'blank':w.user}</strong>, correct is <strong>${w.correct}</strong>`).join('<br>')}</div>`;
