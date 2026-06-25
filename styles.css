@@ -546,6 +546,40 @@ button, input, select, textarea { font: inherit; }
   text-align: center;
 }
 
+/* reNEET 2026 / rich question rendering: images, tables, display math */
+.mcq-image {
+  margin: 10px 0;
+  text-align: center;
+}
+.mcq-image img {
+  max-width: 100%;
+  height: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px;
+}
+.mcq-display {
+  overflow-x: auto;
+  margin: 10px 0;
+  text-align: center;
+}
+.mcq-table {
+  border-collapse: collapse;
+  margin: 10px 0;
+  width: auto;
+  font-size: 0.95em;
+}
+.mcq-table th,
+.mcq-table td {
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  text-align: left;
+}
+.mcq-table th {
+  background: var(--surface-2, #f1f5f9);
+  font-weight: 700;
+}
+
 /* Buttons */
 .primary-btn, .secondary-btn, .danger-btn, .ghost-btn, .text-btn, .icon-btn {
   border-radius: 12px;

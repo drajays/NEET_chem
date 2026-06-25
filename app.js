@@ -1601,17 +1601,87 @@ function escapeHtml(value) {
  * Math segments are processed by KaTeX; plain text is HTML-escaped.
  * Falls back to escapeHtml when KaTeX is not loaded.
  */
+/**
+ * Render a markdown image token ![alt](images/..) as a safe <figure><img>.
+ * Only local paths under images/ are allowed (no arbitrary/remote URLs).
+ */
+function renderLocalImage(src) {
+  return `<figure class="mcq-image"><img src="${encodeURI(src)}" alt="figure" loading="lazy" /></figure>`;
+}
+
+/**
+ * Render a simple pipe table block. First row is treated as the header.
+ * Each cell may contain inline $...$ math.
+ */
+function renderPipeTable(body) {
+  const rows = String(body).trim().split(';;').map(r => r.trim()).filter(r => r !== '');
+  if (!rows.length) return '';
+  const html = rows.map((row, rowIndex) => {
+    const tag = rowIndex === 0 ? 'th' : 'td';
+    const cells = row.split('|').map(cell => `<${tag}>${renderMath(cell.trim())}</${tag}>`).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+  return `<table class="mcq-table">${html}</table>`;
+}
+
+/**
+ * Replace block tokens (tables, local images, $$ display math) with opaque
+ * placeholders so the inline pass leaves them untouched. Pushes rendered HTML
+ * into `blocks` and returns the text with \x00B<n>\x00 markers.
+ */
+function stashBlocks(text, blocks) {
+  let s = String(text);
+  s = s.replace(/\[\[TABLE\]\]([\s\S]*?)\[\[\/TABLE\]\]/g, (_, body) => {
+    blocks.push(renderPipeTable(body));
+    return `\x00B${blocks.length - 1}\x00`;
+  });
+  s = s.replace(/\[\[BR\]\]/g, () => {
+    blocks.push('<br>');
+    return `\x00B${blocks.length - 1}\x00`;
+  });
+  s = s.replace(/!\[[^\]]*\]\((images\/[^)\s]+)\)/g, (_, src) => {
+    blocks.push(renderLocalImage(src));
+    return `\x00B${blocks.length - 1}\x00`;
+  });
+  s = s.replace(/\$\$\s*([\s\S]+?)\s*\$\$/g, (_, tex) => {
+    let html;
+    try {
+      html = katex.renderToString(tex.trim(), { throwOnError: false, displayMode: true });
+    } catch (_e) {
+      html = escapeHtml('$$' + tex.trim() + '$$');
+    }
+    blocks.push(`<div class="mcq-display">${html}</div>`);
+    return `\x00B${blocks.length - 1}\x00`;
+  });
+  return s;
+}
+
+function restoreBlocks(html, blocks) {
+  let out = html;
+  blocks.forEach((block, n) => {
+    out = out.split(`\x00B${n}\x00`).join(block);
+  });
+  return out;
+}
+
+function escapeWithBreaks(text) {
+  return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
 function renderMath(text) {
   const str = String(text ?? '');
   if (!str) return '';
   if (typeof katex === 'undefined') return escapeHtml(str);
 
+  const blocks = [];
+  const s = stashBlocks(str, blocks);
+
   const parts = [];
   let last = 0;
-  const re = /\$\s*([\s\S]+?)\s*\$/g;
+  const re = /\$\s*([^$]+?)\s*\$/g;
   let m;
-  while ((m = re.exec(str)) !== null) {
-    if (m.index > last) parts.push(escapeHtml(str.slice(last, m.index)));
+  while ((m = re.exec(s)) !== null) {
+    if (m.index > last) parts.push(escapeWithBreaks(s.slice(last, m.index)));
     try {
       parts.push(katex.renderToString(m[1].trim(), { throwOnError: false, displayMode: false }));
     } catch (_) {
@@ -1619,8 +1689,8 @@ function renderMath(text) {
     }
     last = re.lastIndex;
   }
-  if (last < str.length) parts.push(escapeHtml(str.slice(last)));
-  return parts.join('');
+  if (last < s.length) parts.push(escapeWithBreaks(s.slice(last)));
+  return restoreBlocks(parts.join(''), blocks);
 }
 
 /**
@@ -1644,17 +1714,9 @@ function renderExplanation(text) {
     return `<div class="explanation-body">${escapeHtml(s).replace(/\n/g, '<br>')}</div>`;
   }
 
-  // 1. Lift out $$...$$ display blocks, replace with placeholders
-  const displayBlocks = [];
-  s = s.replace(/\$\$\s*([\s\S]+?)\s*\$\$/g, (_, latex) => {
-    const n = displayBlocks.length;
-    try {
-      displayBlocks.push(katex.renderToString(latex.trim(), { throwOnError: false, displayMode: true }));
-    } catch (_e) {
-      displayBlocks.push(escapeHtml('$$' + latex.trim() + '$$'));
-    }
-    return `\x00D${n}\x00`;
-  });
+  // 1. Lift out block tokens (tables, local images, $$ display math) as placeholders
+  const blocks = [];
+  s = stashBlocks(s, blocks);
 
   // 2. Process line by line
   const lines = s.split('\n');
@@ -1685,8 +1747,8 @@ function renderExplanation(text) {
 
     flushBullets();
 
-    // Display math placeholder on its own line
-    if (/^\x00D\d+\x00$/.test(line)) {
+    // Block placeholder (table / image / display math) on its own line
+    if (/^\x00B\d+\x00$/.test(line)) {
       out.push(line);
       continue;
     }
@@ -1703,11 +1765,8 @@ function renderExplanation(text) {
 
   flushBullets();
 
-  // 3. Restore display math blocks
-  let html = out.join('');
-  displayBlocks.forEach((block, n) => {
-    html = html.split(`\x00D${n}\x00`).join(`<div class="expl-display">${block}</div>`);
-  });
+  // 3. Restore block tokens
+  const html = restoreBlocks(out.join(''), blocks);
 
   return `<div class="explanation-body">${html}</div>`;
 }

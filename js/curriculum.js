@@ -93,6 +93,20 @@
           ]
         }
       ]
+    },
+    {
+      id: 'reneet2026',
+      label: 'reNEET 2026',
+      subtitle: 'NEET 2026 Re-test — Chemistry Previous Year Questions',
+      units: [
+        {
+          id: 'reneet2026-chem',
+          label: 'Chemistry',
+          chapters: [
+            'reNEET 2026'
+          ]
+        }
+      ]
     }
   ];
 
